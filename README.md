@@ -1,7 +1,7 @@
 # LastFM RecSys with Sentiment Analysis
 
 The goal of this project is to build a Recommender System using the Last.FM API and sentiment analysis tools, using the **NRC-VAD Lexicon** (NRC Valence, Arousal, and Dominance Lexicon).
-It consists of hybrid recommendation techniques (collaborative filtering and content-based) and sentiment analysis applied to recommendation.
+It consists of hybrid recommendation techniques (collaborative filtering and content-based) and sentiment analysis of textual content from different contexts (e.g Album or artist description, tracks, comments, tags, titles...) applied to recommendation.
 
 
 ## References
