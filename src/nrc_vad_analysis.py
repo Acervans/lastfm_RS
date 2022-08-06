@@ -60,7 +60,7 @@ def analyzefile(input_file, output_dir, mode):
     with open(output_file, 'w', newline='') as csvfile:
         fieldnames = ['Sentence ID', 'Sentence', 'Sentiment', 'Sentiment Label', 'Arousal', 'Dominance',
                       '# Words Found', 'Found Words', 'All Words']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
         # analyze each sentence for sentiment
@@ -101,7 +101,7 @@ def analyzefile(input_file, output_dir, mode):
 
                 # search for lemmatized word in NRC-VAD
                 with open(nrc, encoding="utf-8-sig") as csvfile:
-                    reader = csv.DictReader(csvfile, delimiter=';')
+                    reader = csv.DictReader(csvfile)
                     for row in reader:
                         if row['Word'].casefold() == lemma.casefold():
                             if neg:
