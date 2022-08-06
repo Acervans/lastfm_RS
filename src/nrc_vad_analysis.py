@@ -21,13 +21,13 @@ import statistics
 import time
 import argparse
 from stanfordcorenlp import StanfordCoreNLP
-nlp = StanfordCoreNLP('./lib/stanford-corenlp-4.5.0')
+nlp = StanfordCoreNLP('../lib/stanford-corenlp-4.5.0')
 
 from nltk import tokenize
 from nltk.corpus import stopwords
 
 stops = set(stopwords.words("english"))
-nrc = "./data/NRC-VAD-Lexicon.csv"
+nrc = "../data/NRC-VAD-Lexicon.csv"
 
 
 # performs sentiment analysis on inputFile using the NRC-VAD database, outputting results to a new CSV file in outputDir
@@ -40,7 +40,7 @@ def analyzefile(input_file, output_dir, mode):
     :param mode: determines how sentiment values for a sentence are computed (median or mean)
     :return:
     """
-    output_file = os.path.join(output_dir, "Output NRC-VAD Sentiment " + os.path.basename(input_file).rstrip('.txt') + ".csv")
+    output_file = os.path.join(output_dir, "Output NRC-VAD Sentiment " + os.path.splitext(os.path.basename(input_file))[0] + ".csv")
 
     # read file into string
     with open(input_file, 'r') as myfile:
@@ -60,7 +60,7 @@ def analyzefile(input_file, output_dir, mode):
     with open(output_file, 'w', newline='') as csvfile:
         fieldnames = ['Sentence ID', 'Sentence', 'Sentiment', 'Sentiment Label', 'Arousal', 'Dominance',
                       '# Words Found', 'Found Words', 'All Words']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
 
         # analyze each sentence for sentiment
@@ -100,17 +100,17 @@ def analyzefile(input_file, output_dir, mode):
                 all_words.append(lemma)
 
                 # search for lemmatized word in NRC-VAD
-                with open(nrc) as csvfile:
-                    reader = csv.DictReader(csvfile)
+                with open(nrc, encoding="utf-8-sig") as csvfile:
+                    reader = csv.DictReader(csvfile, delimiter=';')
                     for row in reader:
                         if row['Word'].casefold() == lemma.casefold():
                             if neg:
                                 found_words.append("neg-"+lemma)
                             else:
                                 found_words.append(lemma)
-                            v = float(row['valence'])
-                            a = float(row['arousal'])
-                            d = float(row['dominance'])
+                            v = float(row['Valence'])
+                            a = float(row['Arousal'])
+                            d = float(row['Dominance'])
 
                             if neg:
                                 # reverse polarity for this word
