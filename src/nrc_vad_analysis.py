@@ -148,9 +148,9 @@ def analyzefile(input_file, output_dir, mode):
 
                 # set sentiment label
                 label = 'neutral'
-                if sentiment > .5:
+                if sentiment > .55:
                     label = 'positive'
-                elif sentiment < .5:
+                elif sentiment < .45:
                     label = 'negative'
 
                 writer.writerow({'Sentence ID': i,
