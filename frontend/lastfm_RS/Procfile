@@ -1,0 +1,1 @@
+web: gunicorn lastfm_RS.wsgi --log-file -

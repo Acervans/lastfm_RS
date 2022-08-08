@@ -1,0 +1,42 @@
+{% extends "base_generic.html" %}
+{% block content %}
+    <h1>LastFM RecSys</h1>
+    <p>
+        Welcome to <em>LastFM RecSys</em>, a webpage to showcase the hybrid and mood-analysing recommender system developed as my Bachelor's Degree Final Project (TFG).
+    </p>
+    <h2>UML Models</h2>
+    <p>An UML diagram of the site's Django Model-View-Template structure is shown below.</p>
+    <div>
+        {% load static %}
+        <img src="{% static "img/Django.png" %}"
+             alt="Django MVC Model"
+             width=""
+             height=""/>
+    </div>
+    <hr/>
+    <p>An UML diagram of the LastFM database model is shown below.</p>
+    <div>
+        {% load static %}
+        <img src="{% static "img/LastFM_DB.png" %}"
+             alt="LastFM ER Diagram"
+             width=""
+             height=""/>
+    </div>
+    {% comment %} <h2>Dynamic content</h2>
+    <p>The database has the following record counts:</p>
+    <ul>
+        <li>
+            <strong>Tracks:</strong> {{ num_tracks }}
+        </li>
+        <li>
+            <strong>Artists:</strong> {{ num_artists }}
+        </li>
+        <li>
+            <strong>Tags:</strong> {{ num_tags }}
+        </li>
+        <li>
+            <strong>Users:</strong> {{ num_users }}
+        </li>
+    </ul> {% endcomment %}
+    <p>You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.</p>
+{% endblock content %}
