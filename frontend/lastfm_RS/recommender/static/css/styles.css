@@ -3,3 +3,19 @@
     padding: 0;
     list-style: none;
 }
+
+.logo {
+    top: 0;
+    left: 0;
+    padding: 20px;
+    margin-bottom: -10px;
+}
+
+.uam-logo, .eps-logo {
+    margin-left: 50px;
+    vertical-align: bottom;
+}
+
+th, td {
+    padding: 5px;
+}

@@ -1,0 +1,23 @@
+{% extends "base_generic.html" %}
+{% block title %}
+    LastFM Track Previewer
+{% endblock title %}
+{% block content %}
+    {% if found %}
+        <h1>{{ title }}</h1>
+        <div class="yt-preview">
+            {% if yt_id %}
+                <h3>By {{ artist }} (mbid: {{ id }})</h3>
+                <br/>
+                <iframe width="500"
+                        height="375"
+                        src="https://www.youtube.com/embed/{{ yt_id }}">
+                </iframe>
+            {% else %}
+                <h3>No YouTube preview available for "{{ title }}" by {{ artist }} (mbid: {{ id }})</h3>
+            {% endif %}
+        </div>
+    {% else %}
+        <h1>Invalid artist "{{ artist }}" or title "{{ title }}"</h1>
+    {% endif %}
+{% endblock content %}

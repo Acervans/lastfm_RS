@@ -20,6 +20,23 @@
         <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
     </head>
     <body>
+        <div class="logo">
+            <img src="{% static 'img/Lastfm-logo.png' %}"
+                 height="45pt"
+                 width=""
+                 alt="LastFM"/>
+            <img class="eps-logo"
+                 src="{% static 'img/EPS.png' %}"
+                 height="90pt"
+                 width=""
+                 alt="EPS"/>
+            <img class="uam-logo"
+                 src="{% static 'img/UAM-Logo.png' %}"
+                 height="60pt"
+                 width=""
+                 alt="UAM"/>
+        </div>
+        <hr/>
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-2">
@@ -28,12 +45,9 @@
                             <li>
                                 <a href="{% url 'index' %}">Home</a>
                             </li>
-                            {% comment %} <li>
-                                <a href="{% url 'books' %}">All books</a>
-                            </li>
                             <li>
-                                <a href="{% url 'authors' %}">All authors</a>
-                            </li> {% endcomment %}
+                                <a href="{% url 'lastfm_preview' %}">LastFM Previewer</a>
+                            </li>
                         </ul>
                         <ul class="sidebar-nav">
                             {% if user.is_authenticated %}

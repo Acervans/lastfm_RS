@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+{% block title %}
+    LastFM Track Previewer
+{% endblock title %}
+{% block content %}
+    <h2>Preview a track from LastFM</h2>
+    <br/>
+    <form method="get" class="form-group">
+        <table>
+            {{ form.as_table }}
+        </table>
+        <br/>
+        <button type="submit" class="btn btn-success">Search</button>
+    </form>
+{% endblock content %}
