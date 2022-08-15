@@ -61,6 +61,8 @@ def register(request):
     )
 
 # Mejor idea sería que se recomiende una playlist, y al lado un botón de Preview solo cuando tenga link de youtube (o como pagina aparte)
+
+
 def lastfm_preview(request):
 
     if request.method == 'GET' and 'artist' in request.GET:
@@ -91,8 +93,8 @@ def get_track_context(artist, title):
 
     if track:
         found = True
-        title = track.get_title()
-        artist = track.get_artist().get_name()
+        title = track.get_correction()
+        artist = track.get_artist().get_correction()
         soup = BeautifulSoup(requests.get(
             track.get_url()).content, "html.parser")
         yt_tag = soup.find('a', {'id': 'track-page-video-playlink'})
