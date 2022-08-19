@@ -98,6 +98,8 @@ def get_track_context(artist, title):
         artist = track.get_artist().get_correction()
         soup = BeautifulSoup(requests.get(
             track_url).content, "html.parser")
+        artist_url = 'https://www.last.fm' + \
+            soup.find('a', {'class': 'header-new-crumb'}).get('href')
         plinks = soup.find('ul', {'class': 'play-this-track-playlinks'})
 
         if plinks:
@@ -116,6 +118,7 @@ def get_track_context(artist, title):
         'title': title,
         'track_url': track_url,
         'artist': artist,
+        'artist_url': artist_url,
         'id': mbid,
         'yt_id': yt_id,
         'sp_id': sp_id,
