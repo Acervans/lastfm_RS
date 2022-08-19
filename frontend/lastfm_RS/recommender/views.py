@@ -13,7 +13,7 @@ network = pylast.LastFMNetwork(
 def index(request):
     """View function for home page of site."""
 
-    """
+    """ EJEMPLOS DE locallibrary
     # Generate counts of some of the main objects
     num_books = Book.objects.all().count()
     num_instances = BookInstance.objects.all().count()
@@ -84,7 +84,7 @@ def lastfm_preview(request):
 def get_track_context(artist, title):
     track = pylast.Track(artist, title, network)
 
-    yt_id = mbid = None
+    yt_id = sp_id = mbid = None
     found = False
     try:
         mbid = track.get_mbid()
@@ -97,15 +97,25 @@ def get_track_context(artist, title):
         artist = track.get_artist().get_correction()
         soup = BeautifulSoup(requests.get(
             track.get_url()).content, "html.parser")
-        yt_tag = soup.find('a', {'id': 'track-page-video-playlink'})
-        if yt_tag:
-            yt_id = yt_tag.get('data-youtube-id')
+        plinks = soup.find('ul', {'class': 'play-this-track-playlinks'})
+
+        if plinks:
+            yt_tag = plinks.find(
+                'a', {'class': 'play-this-track-playlink--youtube'})
+            if yt_tag:
+                yt_id = yt_tag.get('data-youtube-id')
+
+            sp_tag = plinks.find(
+                'a', {'class': 'play-this-track-playlink--spotify'})
+            if sp_tag:
+                sp_id = sp_tag.get('href').rsplit('track/')[1]
 
     context = {
         'found': found,
         'title': title,
-        'id': mbid,
         'artist': artist,
+        'id': mbid,
         'yt_id': yt_id,
+        'sp_id': sp_id,
     }
     return context
