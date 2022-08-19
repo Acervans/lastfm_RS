@@ -5,14 +5,20 @@
 {% block content %}
     {% if found %}
         {% load static %}
-        <h2>{{ title }}</h2>
-        <h4>By {{ artist }} (mbid: {{ id }})</h4>
+        <h2>
+            <a href="{{ track_url }}" target="_blank">{{ title }}</a>
+        </h2>
+        <h4>
+            By <a href="{{ artist_url }}" target="_blank">{{ artist }}</a> (mbid: {{ id }})
+        </h4>
         <div class="yt-preview">
             <hr/>
-            <img src="{% static 'img/Youtube.png' %}"
-                 height="30pt"
-                 width=""
-                 alt="Youtube"/>
+            <a href="https://www.youtube.com/" target="_blank">
+                <img src="{% static 'img/Youtube.png' %}"
+                     height="30pt"
+                     width=""
+                     alt="Youtube"/>
+            </a>
             <br/>
             <br/>
             {% if yt_id %}
@@ -28,10 +34,12 @@
         </div>
         <div class="sp-preview">
             <hr/>
-            <img src="{% static 'img/Spotify.png' %}"
-                 height="40pt"
-                 width=""
-                 alt="Spotify"/>
+            <a href="https://open.spotify.com/" target="_blank">
+                <img src="{% static 'img/Spotify.png' %}"
+                     height="40pt"
+                     width=""
+                     alt="Spotify"/>
+            </a>
             <br/>
             <br/>
             {% if sp_id %}

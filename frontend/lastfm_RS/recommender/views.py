@@ -84,7 +84,7 @@ def lastfm_preview(request):
 def get_track_context(artist, title):
     track = pylast.Track(artist, title, network)
 
-    yt_id = sp_id = mbid = None
+    yt_id = sp_id = mbid = track_url = artist_url = None
     found = False
     try:
         mbid = track.get_mbid()
@@ -94,9 +94,11 @@ def get_track_context(artist, title):
     if track:
         found = True
         title = track.get_correction()
-        artist = track.get_artist().get_correction()
+        track_url = track.get_url()
+        artist = track.get_artist()
+        artist_url = artist.get_url()
         soup = BeautifulSoup(requests.get(
-            track.get_url()).content, "html.parser")
+            track_url).content, "html.parser")
         plinks = soup.find('ul', {'class': 'play-this-track-playlinks'})
 
         if plinks:
@@ -113,7 +115,9 @@ def get_track_context(artist, title):
     context = {
         'found': found,
         'title': title,
-        'artist': artist,
+        'track_url': track_url,
+        'artist': artist.get_correction(),
+        'artist_url': artist_url,
         'id': mbid,
         'yt_id': yt_id,
         'sp_id': sp_id,
