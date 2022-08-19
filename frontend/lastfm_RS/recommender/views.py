@@ -97,6 +97,7 @@ def get_track_context(artist, title):
         track_url = track.get_url()
         artist = track.get_artist()
         artist_url = artist.get_url()
+        artist = artist.get_correction()
         soup = BeautifulSoup(requests.get(
             track_url).content, "html.parser")
         plinks = soup.find('ul', {'class': 'play-this-track-playlinks'})
@@ -116,7 +117,7 @@ def get_track_context(artist, title):
         'found': found,
         'title': title,
         'track_url': track_url,
-        'artist': artist.get_correction(),
+        'artist': artist,
         'artist_url': artist_url,
         'id': mbid,
         'yt_id': yt_id,
