@@ -1,7 +1,70 @@
+th,
+td {
+    padding: 5px;
+}
+
+body {
+    background: rgb(231, 255, 247);
+    background: linear-gradient(90deg, rgba(231, 255, 247, 1) 0%, rgba(231, 255, 247, 0.85) 75%, rgba(255, 137, 137, 0.204) 100%);
+}
+
+/* Style page content */
+#main {
+    transition: 0.5s;
+}
+
+#sidebar-btn-row {
+    margin-bottom: 15px;
+}
+
+/* The sidebar menu */
+#sidebar {
+    max-width: none;
+    z-index: 1;
+    overflow-x: hidden;
+    /* Disable horizontal scroll */
+    flex: 1 1 14%;
+}
+
+/* The sidebar links */
+#sidebar a {
+    text-decoration: none;
+    font-size: 16pt;
+    color: #1e5a52;
+    transition: 0.3s;
+}
+
+/* When you mouse over the navigation links, change their color */
+#sidebar a:hover {
+    color: #ecbaa5;
+}
+
+#sidebar,
+.sidebar-btn {
+    transition: 0.5s;
+    /* 0.5 second transition effect to slide in the sidebar */
+}
+
 .sidebar-nav {
-    margin-top: 20px;
     padding: 0;
     list-style: none;
+}
+
+.sidebar-btn {
+    top: 0;
+    margin-left: 15px;
+    padding: 0px 4px 2px 4px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.sidebar-btn:hover {
+    background-color: rgb(187, 228, 220);
+}
+
+.col-sm-10 {
+    max-width: none;
+    flex: 1 1 86%;
 }
 
 .logo {
@@ -9,15 +72,11 @@
     left: 0;
     padding: 20px;
     margin-bottom: -10px;
+    z-index: 1;
 }
 
 .uam-logo,
 .eps-logo {
     margin-left: 50px;
     vertical-align: bottom;
-}
-
-th,
-td {
-    padding: 5px;
 }

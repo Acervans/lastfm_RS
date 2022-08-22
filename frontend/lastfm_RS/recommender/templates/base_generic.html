@@ -18,34 +18,43 @@
         <!-- Add additional CSS in static file -->
         {% load static %}
         <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
+        <script type="text/javascript" src="{% static 'js/base_script.js' %}"></script>
     </head>
     <body>
         <div class="logo">
             <a href="https://www.last.fm" target="_blank">
                 <img src="{% static 'img/Lastfm-logo.png' %}"
-                     height="40pt"
+                     height="35pt"
                      width=""
                      alt="LastFM"/>
             </a>
             <a href="https://www.uam.es/EPS/Home.htm" target="_blank">
                 <img class="eps-logo"
                      src="{% static 'img/EPS.png' %}"
-                     height="85pt"
+                     height="80pt"
                      width=""
                      alt="EPS"/>
             </a>
             <a href="https://www.uam.es" target="_blank">
                 <img class="uam-logo"
                      src="{% static 'img/UAM-logo.png' %}"
-                     height="55pt"
+                     height="50pt"
                      width=""
                      alt="UAM"/>
             </a>
         </div>
         <hr/>
         <div class="container-fluid">
+            <div id="sidebar-btn-row" class="row">
+                <a href="#" class="sidebar-btn" onclick="toggleNav()">
+                    <img src="{% static 'img/Sidebar-btn.png' %}"
+                         height="19px"
+                         width=""
+                         alt="Sidebar button"/>
+                </a>
+            </div>
             <div class="row">
-                <div class="col-sm-2">
+                <div class="col-sm-2" id="sidebar">
                     {% block sidebar %}
                         <ul class="sidebar-nav">
                             <li>
@@ -86,7 +95,7 @@
                         {% endif %}
                     {% endblock sidebar %}
                 </div>
-                <div class="col-sm-10 ">
+                <div class="col-sm-10" id="main">
                     {% block content %}
                     {% endblock content %}
                     {% block pagination %}
