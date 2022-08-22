@@ -8,14 +8,14 @@ function toggleNav() {
         navW = nav.scrollWidth;
     if (isToggled) {
         btn.style.transform = "rotate(180deg)";
-        nav.style.marginLeft = `-${navW + 1}px`;
+        nav.style.marginLeft = `-${navW + 2}px`;
         content.style.flexBasis = "100%";
         isToggled = false;
     }
     else if (!isToggled) {
         btn.style.transform = "";
         nav.style.marginLeft = 0;
-        content.style.flexBasis = "86%";
+        content.style.flexBasis = "88%";
         isToggled = true;
     }
 

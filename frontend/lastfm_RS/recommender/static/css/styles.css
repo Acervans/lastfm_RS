@@ -20,11 +20,12 @@ body {
 /* The sidebar menu */
 #sidebar {
     max-width: none;
-    font-size: min(16pt, 2vw);
+    border-right: 1px rgb(165, 209, 195) solid;
+    font-size: min(16pt, 1.8vw);
     z-index: 1;
     overflow-x: hidden;
     /* Disable horizontal scroll */
-    flex: 1 1 14%;
+    flex: 1 1 12%;
 }
 
 /* The sidebar links */
@@ -64,13 +65,11 @@ body {
 
 .col-sm-10 {
     max-width: none;
-    flex: 1 1 86%;
+    flex: 1 1 88%;
     overflow-x: scroll;
 }
 
 .logo {
-    top: 0;
-    left: 0;
     padding: 20px;
     margin-bottom: -20px;
     display: flex;
