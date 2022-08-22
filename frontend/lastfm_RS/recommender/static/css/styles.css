@@ -20,7 +20,7 @@ body {
 /* The sidebar menu */
 #sidebar {
     max-width: none;
-    font-size: 16pt;
+    font-size: min(16pt, 2vw);
     z-index: 1;
     overflow-x: hidden;
     /* Disable horizontal scroll */
@@ -65,6 +65,7 @@ body {
 .col-sm-10 {
     max-width: none;
     flex: 1 1 86%;
+    overflow-x: scroll;
 }
 
 .logo {
