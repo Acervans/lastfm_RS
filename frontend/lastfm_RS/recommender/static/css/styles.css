@@ -73,11 +73,12 @@ body {
     left: 0;
     padding: 20px;
     margin-bottom: -20px;
-    z-index: 1;
+    display: flex;
+    overflow-x: scroll;
+    align-items: flex-end;
 }
 
 .uam-logo,
 .eps-logo {
     margin-left: 50px;
-    vertical-align: bottom;
 }
