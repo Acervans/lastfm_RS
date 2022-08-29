@@ -14,6 +14,8 @@ Parameters:
 """
 # add parameter to exclude duplicates? also mean or median analysis
 
+from nltk.corpus import stopwords
+from nltk import tokenize
 import csv
 import sys
 import os
@@ -23,12 +25,13 @@ import argparse
 from stanfordcorenlp import StanfordCoreNLP
 nlp = StanfordCoreNLP('../lib/stanford-corenlp-4.5.0')
 
-from nltk import tokenize
-from nltk.corpus import stopwords
 
 stops = set(stopwords.words("english"))
 nrc = "../data/NRC-VAD-Lexicon.csv"
 
+# Open NRC-VAD and store as list of dictionaries
+with open(nrc, encoding="utf-8-sig") as csvfile:
+    reader = list(csv.DictReader(csvfile))
 
 # performs sentiment analysis on inputFile using the NRC-VAD database, outputting results to a new CSV file in outputDir
 def analyzefile(input_file, output_dir, mode):
@@ -40,7 +43,8 @@ def analyzefile(input_file, output_dir, mode):
     :param mode: determines how sentiment values for a sentence are computed (median or mean)
     :return:
     """
-    output_file = os.path.join(output_dir, "Output NRC-VAD Sentiment " + os.path.splitext(os.path.basename(input_file))[0] + ".csv")
+    output_file = os.path.join(output_dir, "Output NRC-VAD Sentiment " +
+                               os.path.splitext(os.path.basename(input_file))[0] + ".csv")
 
     # read file into string
     with open(input_file, 'r') as myfile:
@@ -50,12 +54,6 @@ def analyzefile(input_file, output_dir, mode):
         print('Empty file.')
         return
 
-    from nltk.stem.wordnet import WordNetLemmatizer
-    lmtzr = WordNetLemmatizer()
-
-    # otherwise, split into sentences
-    sentences = tokenize.sent_tokenize(fulltext)
-    i = 1 # to store sentence index
     # check each word in sentence for sentiment and write to output_file
     with open(output_file, 'w', newline='') as csvfile:
         fieldnames = ['Sentence ID', 'Sentence', 'Sentiment', 'Sentiment Label', 'Arousal', 'Dominance',
@@ -63,66 +61,79 @@ def analyzefile(input_file, output_dir, mode):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
-        # analyze each sentence for sentiment
-        for s in sentences:
-            # print("S" + str(i) +": " + s)
-            all_words = []
-            found_words = []
-            total_words = 0
-            v_list = []  # holds valence scores
-            a_list = []  # holds arousal scores
-            d_list = []  # holds dominance scores
+        analyzetext(fulltext, mode, True,  writer)
 
-            # search for each valid word's sentiment in NRC-VAD
-            words = nlp.pos_tag(s.lower())
-            for index, p in enumerate(words):
-                # don't process stops or words w/ punctuation
-                w = p[0]
-                pos = p[1]
-                if w in stops or not w.isalpha():
-                    continue
 
-                # check for negation in 3 words before current word
-                j = index-1
-                neg = False
-                while j >= 0 and j >= index-3:
-                    if words[j][0] == 'not' or words[j][0] == 'no' or words[j][0] == 'n\'t':
-                        neg = True
-                        break
-                    j -= 1
+def analyzetext(fulltext, mode, split_in_senteces=False, writer=None):
+    from nltk.stem.wordnet import WordNetLemmatizer
+    lmtzr = WordNetLemmatizer()
 
-                # lemmatize word based on pos
-                if pos[0] == 'N' or pos[0] == 'V':
-                    lemma = lmtzr.lemmatize(w, pos=pos[0].lower())
-                else:
-                    lemma = w
+    if split_in_senteces:
+        # split into sentences
+        sentences = tokenize.sent_tokenize(fulltext)
+    else:
+        sentences = [fulltext]
 
-                all_words.append(lemma)
+    i = 1  # to store sentence index
+    # analyze each sentence for sentiment
+    for s in sentences:
+        # print("S" + str(i) +": " + s)
+        all_words = []
+        found_words = []
+        total_words = 0
+        v_list = []  # holds valence scores
+        a_list = []  # holds arousal scores
+        d_list = []  # holds dominance scores
 
-                # search for lemmatized word in NRC-VAD
-                with open(nrc, encoding="utf-8-sig") as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    for row in reader:
-                        if row['Word'].casefold() == lemma.casefold():
-                            if neg:
-                                found_words.append("neg-"+lemma)
-                            else:
-                                found_words.append(lemma)
-                            v = float(row['Valence'])
-                            a = float(row['Arousal'])
-                            d = float(row['Dominance'])
+        # search for each valid word's sentiment in NRC-VAD
+        words = nlp.pos_tag(s.lower())
+        for index, p in enumerate(words):
+            # don't process stops or words w/ punctuation
+            w = p[0]
+            pos = p[1]
+            if w in stops or not w.isalpha():
+                continue
 
-                            if neg:
-                                # reverse polarity for this word
-                                v = .5 - (v - .5)
-                                a = .5 - (a - .5)
-                                d = .5 - (d - .5)
+            # check for negation in 3 words before current word
+            j = index-1
+            neg = False
+            while j >= 0 and j >= index-3:
+                if words[j][0] == 'not' or words[j][0] == 'no' or words[j][0] == 'n\'t':
+                    neg = True
+                    break
+                j -= 1
 
-                            v_list.append(v)
-                            a_list.append(a)
-                            d_list.append(d)
+            # lemmatize word based on pos
+            if pos[0] == 'N' or pos[0] == 'V':
+                lemma = lmtzr.lemmatize(w, pos=pos[0].lower())
+            else:
+                lemma = w
 
-            if len(found_words) == 0:  # no words found in NRC-VAD for this sentence
+            all_words.append(lemma)
+
+            # search for lemmatized word in NRC-VAD
+            for row in reader:
+                if row['Word'].casefold() == lemma.casefold():
+                    if neg:
+                        found_words.append("neg-"+lemma)
+                    else:
+                        found_words.append(lemma)
+                    v = float(row['Valence'])
+                    a = float(row['Arousal'])
+                    d = float(row['Dominance'])
+
+                    if neg:
+                        # reverse polarity for this word
+                        v = .5 - (v - .5)
+                        a = .5 - (a - .5)
+                        d = .5 - (d - .5)
+
+                    v_list.append(v)
+                    a_list.append(a)
+                    d_list.append(d)
+
+        if len(found_words) == 0:  # no words found in NRC-VAD for this sentence
+            if writer:
                 writer.writerow({'Sentence ID': i,
                                  'Sentence': s,
                                  'Sentiment': 'N/A',
@@ -133,26 +144,27 @@ def analyzefile(input_file, output_dir, mode):
                                  'Found Words': 'N/A',
                                  'All Words': all_words
                                  })
-                i += 1
-            else:  # output sentiment info for this sentence
+            i += 1
+        else:  # output sentiment info for this sentence
 
-                # get values
-                if mode == 'median':
-                    sentiment = statistics.median(v_list)
-                    arousal = statistics.median(a_list)
-                    dominance = statistics.median(d_list)
-                else:
-                    sentiment = statistics.mean(v_list)
-                    arousal = statistics.mean(a_list)
-                    dominance = statistics.mean(d_list)
+            # get values
+            if mode == 'median':
+                sentiment = statistics.median(v_list)
+                arousal = statistics.median(a_list)
+                dominance = statistics.median(d_list)
+            else:
+                sentiment = statistics.mean(v_list)
+                arousal = statistics.mean(a_list)
+                dominance = statistics.mean(d_list)
 
-                # set sentiment label
-                label = 'neutral'
-                if sentiment > .55:
-                    label = 'positive'
-                elif sentiment < .45:
-                    label = 'negative'
+            # set sentiment label
+            label = 'neutral'
+            if sentiment > .55:
+                label = 'positive'
+            elif sentiment < .45:
+                label = 'negative'
 
+            if writer:
                 writer.writerow({'Sentence ID': i,
                                  'Sentence': s,
                                  'Sentiment': sentiment,
@@ -163,7 +175,9 @@ def analyzefile(input_file, output_dir, mode):
                                  'Found Words': found_words,
                                  'All Words': all_words
                                  })
-                i += 1
+            i += 1
+
+    return (sentiment, arousal, dominance, label)
 
 
 def main(input_file, input_dir, output_dir, mode):
@@ -179,7 +193,7 @@ def main(input_file, input_dir, output_dir, mode):
     if len(output_dir) < 0 or not os.path.exists(output_dir):  # empty output
         print('No output directory specified, or path does not exist')
         sys.exit(0)
-    elif len(input_file) == 0 and len(input_dir)  == 0:  # empty input
+    elif len(input_file) == 0 and len(input_dir) == 0:  # empty input
         print('No input specified. Please give either a single file or a directory of files to analyze.')
         sys.exit(1)
     elif len(input_file) > 0:  # handle single file
@@ -197,7 +211,8 @@ def main(input_file, input_dir, output_dir, mode):
                     start_time = time.time()
                     print("Starting sentiment analysis of " + filename + "...")
                     analyzefile(filename, output_dir, mode)
-                    print("Finished analyzing " + filename + " in " + str((time.time() - start_time)) + " seconds")
+                    print("Finished analyzing " + filename + " in " +
+                          str((time.time() - start_time)) + " seconds")
         else:
             print('Input directory "' + input_dir + '" is invalid.')
             sys.exit(0)
@@ -205,7 +220,8 @@ def main(input_file, input_dir, output_dir, mode):
 
 if __name__ == '__main__':
     # get arguments from command line
-    parser = argparse.ArgumentParser(description='Sentiment analysis with NRC-VAD.')
+    parser = argparse.ArgumentParser(
+        description='Sentiment analysis with NRC-VAD.')
     parser.add_argument('--file', type=str, dest='input_file', default='',
                         help='a string to hold the path of one file to process')
     parser.add_argument('--dir', type=str, dest='input_dir', default='',
