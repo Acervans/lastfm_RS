@@ -16,24 +16,57 @@ Parameters:
 
 from nltk.corpus import stopwords
 from nltk import tokenize
+from nltk.stem.wordnet import WordNetLemmatizer
+from stanfordcorenlp import StanfordCoreNLP
+from dataclasses import dataclass, field
 import csv
 import sys
 import os
 import statistics
 import time
 import argparse
-from stanfordcorenlp import StanfordCoreNLP
+
 nlp = StanfordCoreNLP('../lib/stanford-corenlp-4.5.0')
-
-
 stops = set(stopwords.words("english"))
 nrc = "../data/NRC-VAD-Lexicon.csv"
+lmtzr = WordNetLemmatizer()
 
 # Open NRC-VAD and store as list of dictionaries
 with open(nrc, encoding="utf-8-sig") as csvfile:
     reader = list(csv.DictReader(csvfile))
 
-# performs sentiment analysis on inputFile using the NRC-VAD database, outputting results to a new CSV file in outputDir
+
+@dataclass
+class TextVAD:
+    """ Class containing data for VAD values
+    """
+    valence: float = -1
+    arousal: float = -1
+    dominance: float = -1
+    label: str = field(init=False)
+
+    # # optional
+    # # maybe use lastfm ID as last_id, although the object should be
+    # # linked to the song/album/artist in the first place
+    # last_id: int = None
+    # sentence: Optional[str] = None
+    # found_words: list(str) = None
+    # all_words: list(str) = None
+
+    def __post_init__(self):
+        # set sentiment label
+        self.label = 'neutral'
+        if self.valence > .55:
+            self.label = 'positive'
+        elif self.valence < .45:
+            self.label = 'negative'
+        elif self.valence == -1:
+            self.label = 'n/a'
+
+    def __str__(self):
+        return f'TextVAD(Label: {self.label}, Valence: {self.valence}, Arousal: {self.arousal}, Dominance: {self.dominance})'
+
+
 def analyzefile(input_file, output_dir, mode):
     """
     Performs sentiment analysis on the text file given as input using the NRC-VAD database.
@@ -64,23 +97,29 @@ def analyzefile(input_file, output_dir, mode):
         analyzetext(fulltext, mode, True,  writer)
 
 
-def analyzetext(fulltext, mode, split_in_senteces=False, writer=None):
-    from nltk.stem.wordnet import WordNetLemmatizer
-    lmtzr = WordNetLemmatizer()
-
+def analyzetext(fulltext, mode='mean', split_in_senteces=False, writer=None):
+    """
+    Performs sentiment analysis on the text given as input using the NRC-VAD database.
+    :param fulltext: text to analyze
+    :param mode: determines how sentiment values for a sentence are computed (median or mean)
+    :param split_in_sentences: determines whether the analysis should split the text in sentences
+    :param writer: DictWriter of csv file to which analysis results will be stored
+    :return vad: object containing the VAD values of the analyzed text or None
+    """
+    vad = None
     if split_in_senteces:
         # split into sentences
         sentences = tokenize.sent_tokenize(fulltext)
+        vad = []  # list of vad values
     else:
         sentences = [fulltext]
 
-    i = 1  # to store sentence index
+    i = 0  # to store sentence index
     # analyze each sentence for sentiment
     for s in sentences:
         # print("S" + str(i) +": " + s)
         all_words = []
         found_words = []
-        total_words = 0
         v_list = []  # holds valence scores
         a_list = []  # holds arousal scores
         d_list = []  # holds dominance scores
@@ -133,6 +172,7 @@ def analyzetext(fulltext, mode, split_in_senteces=False, writer=None):
                     d_list.append(d)
 
         if len(found_words) == 0:  # no words found in NRC-VAD for this sentence
+            tvad = TextVAD()
             if writer:
                 writer.writerow({'Sentence ID': i,
                                  'Sentence': s,
@@ -158,17 +198,12 @@ def analyzetext(fulltext, mode, split_in_senteces=False, writer=None):
                 dominance = statistics.mean(d_list)
 
             # set sentiment label
-            label = 'neutral'
-            if sentiment > .55:
-                label = 'positive'
-            elif sentiment < .45:
-                label = 'negative'
-
+            tvad = TextVAD(sentiment, arousal, dominance)
             if writer:
                 writer.writerow({'Sentence ID': i,
                                  'Sentence': s,
                                  'Sentiment': sentiment,
-                                 'Sentiment Label': label,
+                                 'Sentiment Label': tvad.label,
                                  'Arousal': arousal,
                                  'Dominance': dominance,
                                  '# Words Found': ("%d out of %d" % (len(found_words), len(all_words))),
@@ -177,7 +212,12 @@ def analyzetext(fulltext, mode, split_in_senteces=False, writer=None):
                                  })
             i += 1
 
-    return (sentiment, arousal, dominance, label)
+        if split_in_senteces:
+            vad.append(tvad)
+        else:
+            vad = tvad
+
+    return vad
 
 
 def main(input_file, input_dir, output_dir, mode):
