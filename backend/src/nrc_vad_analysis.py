@@ -27,7 +27,7 @@ import time
 import argparse
 import atexit
 
-nlp = StanfordCoreNLP('../lib/stanford-corenlp-4.5.0')
+nlp = StanfordCoreNLP('../lib/stanford-corenlp-4.5.1')
 stops = set(stopwords.words("english"))
 nrc = "../data/NRC-VAD-Lexicon.csv"
 lmtzr = WordNetLemmatizer()
@@ -41,7 +41,7 @@ fieldnames = ['Sentence ID', 'Sentence', 'Sentiment', 'Sentiment Label', 'Arousa
 
 
 @dataclass
-class TextVAD:
+class VAD:
     """
     Class containing data for VAD values
     """
@@ -95,32 +95,37 @@ def analyze_file(input_file, output_dir, mode):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
-        analyze_text(fulltext, mode, writer)
+        analyze_text(fulltext, mode, True, writer)
 
 
-def analyze_text(fulltext, mode, writer):
+def analyze_text(fulltext, mode, detailed=False, writer=None,):
     """
     Performs sentiment analysis on the sentences of a text given as input using the NRC-VAD database.
     :param fulltext: string to analyze
     :param mode: determines how sentiment values for a sentence are computed (median or mean)
+    :param detailed: determines whether the detailed values of the analysis should be returned
     :param writer: DictWriter of csv file to which analysis results will be stored
-    :return vad: object containing list of the VAD values of the analyzed text
+    :return either:
+        - list of objects with VAD values of the analyzed text
+        - list of lists of values that map to fieldnames, but without an index
     """
 
     # split into sentences
     sentences = tokenize.sent_tokenize(fulltext)
-    vad = []  # list of vad values
+    vad = []  # list of vad analysis values
 
     i = 0  # to store sentence index
     # analyze each sentence for sentiment
     for s in sentences:
-        tvad, values = analyze_string(s, mode, True)
-        values[0] = i
+        values = analyze_string(s, mode, detailed)
+        if detailed:
+            values[0] = i
 
-        # output sentiment info for this sentence
-        writer.writerow(dict(zip(fieldnames, values)))
+            # output sentiment info for this sentence
+            if writer:
+                writer.writerow(dict(zip(fieldnames, values)))
 
-        vad.append(tvad)
+        vad.append(values)
         i += 1
 
     return vad
@@ -132,9 +137,9 @@ def analyze_string(string, mode='mean', detailed=False):
     :param string: string to analyze
     :param mode: determines how sentiment values for a sentence are computed (median or mean)
     :param detailed: determines whether the detailed values of the analysis should be returned
-    :return tuple of
-        - vad: object containing the VAD values of the string; or None if no words were analysed
-        - det_values: list of values that map to fieldnames, but without an index; or None
+    :return either:
+        - VAD object containing the VAD values of the string; or None if no words were analysed
+        - list of values that map to fieldnames, but without an index
     """
 
     all_words = []
@@ -243,13 +248,13 @@ def analyze_string(string, mode='mean', detailed=False):
                 if s == len(syns):
                     break
 
-    det_values = None  # detailed values if detail is True
-
     if len(found_words) == 0:  # no words found in NRC-VAD for this sentence
-        vad = None
         if detailed:
-            det_values = [None, string, 'N/A', 'N/A',
-                          'N/A', 'N/A', 0, 'N/A', all_words]
+            vad = [None, string, 'N/A', 'N/A',
+                   'N/A', 'N/A', 0, 'N/A', all_words]
+        else:
+            vad = None
+
     else:
         # get vad values
         if mode == 'median':
@@ -262,21 +267,21 @@ def analyze_string(string, mode='mean', detailed=False):
             dominance = statistics.mean(d_list)
 
         # set sentiment label
-        vad = TextVAD(sentiment, arousal, dominance)
+        vad = VAD(sentiment, arousal, dominance)
         if detailed:
-            det_values = [None, string, sentiment, vad.label, arousal, dominance, ("%d out of %d" % (
+            vad = [None, string, sentiment, vad.label, arousal, dominance, ("%d out of %d" % (
                 len(found_words), len(all_words))), found_words, all_words]
 
-    return vad, det_values
+    return vad
 
 
 @atexit.register
 def exit_handler():
     """
-    Handler function to close the CoreNLP server
+    Handler function to close the CoreNLP pipeline
     """
     nlp.close()
-    print('StanfordCoreNLP Server Closed')
+    print('Closed StanfordCoreNLP Pipeline')
 
 
 def main(input_file, input_dir, output_dir, mode):
