@@ -123,7 +123,7 @@ def analyze_text(fulltext, mode, detailed=False, writer=None,):
 
             # output sentiment info for this sentence
             if writer:
-                writer.writerow(dict(zip(fieldnames, values)))
+                writer.writerow(dict(zip(writer.fieldnames, values)))
 
         vad.append(values)
         i += 1
