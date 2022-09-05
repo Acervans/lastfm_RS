@@ -36,7 +36,7 @@ lmtzr = WordNetLemmatizer()
 with open(nrc, encoding="utf-8-sig") as csvfile:
     reader = list(csv.DictReader(csvfile))
 
-fieldnames = ['Sentence ID', 'Sentence', 'Sentiment', 'Sentiment Label', 'Arousal', 'Dominance',
+fieldnames = ['Sentence ID', 'Sentence', 'Valence', 'Sentiment Label', 'Arousal', 'Dominance',
               '# Words Found', 'Found Words', 'All Words']
 
 
@@ -69,6 +69,9 @@ class VAD:
     def __str__(self):
         return f'TextVAD(Label: {self.label}, V: {self.valence}, A: {self.arousal}, D: {self.dominance})'
 
+    def __iter__(self):
+        return iter([self.label, self.valence, self.arousal, self.dominance])
+
 
 def analyze_file(input_file, output_dir, mode):
     """
@@ -92,8 +95,8 @@ def analyze_file(input_file, output_dir, mode):
 
     # check each word in sentence for sentiment and write to output_file
     with open(output_file, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
+        writer = csv.writer(csvfile)
+        writer.writerow(fieldnames)  # write header
 
         analyze_text(fulltext, mode, True, writer)
 
@@ -104,7 +107,7 @@ def analyze_text(fulltext, mode, detailed=False, writer=None,):
     :param fulltext: string to analyze
     :param mode: determines how sentiment values for a sentence are computed (median or mean)
     :param detailed: determines whether the detailed values of the analysis should be returned
-    :param writer: DictWriter of csv file to which analysis results will be stored
+    :param writer: csv.writer of csv file to which analysis results will be stored
     :return either:
         - list of objects with VAD values of the analyzed text
         - list of lists of values that map to fieldnames, but without an index
@@ -121,9 +124,9 @@ def analyze_text(fulltext, mode, detailed=False, writer=None,):
         if detailed:
             values[0] = i
 
-            # output sentiment info for this sentence
-            if writer:
-                writer.writerow(dict(zip(writer.fieldnames, values)))
+        # output sentiment info for this sentence
+        if writer:
+            writer.writerow(values)
 
         vad.append(values)
         i += 1
