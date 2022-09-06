@@ -14,25 +14,23 @@ Parameters:
 """
 # add parameter to exclude duplicates? also mean or median analysis
 
-from nltk.corpus import stopwords, wordnet
-from nltk import tokenize
-from nltk.stem import WordNetLemmatizer
-from stanfordcorenlp import StanfordCoreNLP
+from nltk.tokenize import sent_tokenize
+from nltk.corpus import wordnet as wn
 from dataclasses import dataclass, field
 from collections import deque
+import spacy
 import csv
 import sys
 import os
 import statistics
 import time
 import argparse
-import atexit
 
 dirname = os.path.dirname(__file__)
-nlp = StanfordCoreNLP(os.path.join(dirname, '../lib/stanford-corenlp-4.5.1'))
+# CSV file with lexicon and VAD values
 nrc = os.path.join(dirname, "../data/NRC-VAD-Lexicon.csv")
-stops = set(stopwords.words("english"))
-lmtzr = WordNetLemmatizer()
+# Use spaCy as Natural Language Processor
+nlp = spacy.load('en_core_web_lg', disable=['parser', 'ner'])
 
 # Open NRC-VAD and store as list of dictionaries
 with open(nrc, encoding="utf-8-sig") as csvfile:
@@ -116,7 +114,7 @@ def analyze_text(fulltext, mode, detailed=False, writer=None):
     """
 
     # split into sentences
-    sentences = tokenize.sent_tokenize(fulltext)
+    sentences = sent_tokenize(fulltext)
     vad = []  # list of vad analysis values
 
     i = 0  # to store sentence index
@@ -154,28 +152,31 @@ def analyze_string(string, mode='mean', detailed=False):
     d_list = []  # holds dominance scores
 
     # search for each valid word's sentiment in NRC-VAD
-    words = nlp.pos_tag(string.lower())
-    for index, p in enumerate(words):
+    words = nlp(string.lower())
+    for index, token in enumerate(words):
         # don't process stops or words w/ punctuation
-        w = p[0]
-        pos = p[1][0].lower()
-        if w in stops or not w.isalpha():
+        w = token.text
+        if token.is_stop or not w.isalpha():
             continue
 
         # check for negation in 3 words before current word
-        j = index-1
+        j = index - 1
         neg = False
-        while j >= 0 and j >= index-3:
-            if words[j][0] == 'not' or words[j][0] == 'no' or words[j][0] == 'n\'t':
+        while j >= 0 and j >= index - 3:
+            prior = words[j].text
+            if prior == 'not' or prior == 'no' or prior == 'n\'t':
                 neg = True
                 break
             j -= 1
 
-        # lemmatize word based on part of speech
+        # get pos fine-grained tag
+        pos = token.tag_[0].lower()
+
+        # lemmatize word based on part-of-speech
         lemma = w
         if pos in ('n', 'v', 'r', 'j'):
             if pos == 'n' or pos == 'v':
-                lemma = lmtzr.lemmatize(w, pos=pos)
+                lemma = token.lemma_
 
             # adapt to wordnet ADJ pos
             if pos == 'j':
@@ -233,8 +234,8 @@ def analyze_string(string, mode='mean', detailed=False):
                 # check for synonyms
                 if not syns:
                     syns = dict()
-                    # look for synonyms as same pos
-                    for syn in wordnet.synsets(lemma, pos=pos):
+                    # look for synonyms in synsets
+                    for syn in wn.synsets(lemma, pos=pos):
                         for l in syn.lemmas():
                             name = l.name()
                             # avoid compounds
@@ -278,15 +279,6 @@ def analyze_string(string, mode='mean', detailed=False):
                 len(found_words), len(all_words))), found_words, all_words])
 
     return vad
-
-
-@atexit.register
-def exit_handler():
-    """
-    Handler function to close the CoreNLP pipeline
-    """
-    nlp.close()
-    print('Closed StanfordCoreNLP Pipeline')
 
 
 def main(input_file, input_dir, output_dir, mode):
