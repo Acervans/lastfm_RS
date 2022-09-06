@@ -159,9 +159,8 @@ def analyze_string(string, mode='mean', detailed=False):
         pos = token.tag_[0].lower()
 
         # don't process stops or words w/ punctuation
-        if token.is_stop or not w.isalpha():
-            if pos != 'n':
-                continue
+        if (token.is_stop or not w.isalpha()) and pos != 'n':
+            continue
 
         # check for negation in 3 words before current word
         j = index - 1
