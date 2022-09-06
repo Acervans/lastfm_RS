@@ -1,6 +1,7 @@
 th,
 td {
     padding: 5px;
+    min-width: 200px;
 }
 
 body {
@@ -80,4 +81,16 @@ body {
 .uam-logo,
 .eps-logo {
     margin-left: 50px;
+}
+
+.vad-results {
+    overflow-x: scroll;
+}
+
+.vad-results th {
+    background-color: rgb(219, 213, 255);
+}
+
+.vad-form-table ul {
+    list-style-type: none;
 }

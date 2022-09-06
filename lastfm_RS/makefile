@@ -4,8 +4,9 @@ export PGPASSWORD := alumnodb
 export PGCLIENTENCODING := LATIN9
 export PGHOST := localhost
 export DJANGOPORT = 8001
-# you must update the value of HEROKUHOST
-export HEROKUHOST := git:remote quiet-anchorage-37484 # cambiar a nueva app
+export HEROKUHOST = quiet-anchorage-37484
+# must update the value of HEROKUHOST
+export HEROKUREPO := git:remote $(HEROKUHOST) # cambiar a nueva app
 PSQL = psql
 CMD = python3 manage.py
 HEROKU = heroku run export SQLITE=1 &
@@ -80,7 +81,7 @@ coverage:
 #
 #config_heroku:
 #	heroku login
-#	heroku $HEROKUHOST
+#	heroku $HEROKUREPO
 #
 
 # PRIMERO GIT INIT, LUEGO HEROKU DYNO:SCALE UP LUEGO ESTO
@@ -105,7 +106,7 @@ dump_db:
 	pg_dump -h localhost -p 5432 -U alumnodb $(PGDATABASE) --no-owner --no-acl -f $(PGDATABASE).dump
 # restore database in heroku
 heroku_restore_db:
-	heroku psql DATABASE_URL --app quiet-anchorage-37484 < $(PGDATABASE).dump
+	heroku psql DATABASE_URL --app $(HEROKUHOST) < $(PGDATABASE).dump
 
 connect_db:
 	$(PSQL) -U alumnodb -d $(PGDATABASE)

@@ -1,0 +1,26 @@
+{% extends "base_generic.html" %}
+{% block title %}
+    Text Sentiment Analyzer
+{% endblock title %}
+{% block content %}
+    <h2>Text Sentiment Analysis Results</h2>
+    <br/>
+    <div class="vad-results">
+        <table>
+            <tr>
+                {% for f in fieldnames %}<th>{{ f }}</th>{% endfor %}
+            </tr>
+            {% for row in results %}
+                <tr>
+                    {% if method == 'text' %}
+                        {% for val in row|slice:"1:" %}
+                            <td>{{ val }}</td>
+                        {% endfor %}
+                    {% else %}
+                        {% for val in row %}<td>{{ val }}</td>{% endfor %}
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock content %}

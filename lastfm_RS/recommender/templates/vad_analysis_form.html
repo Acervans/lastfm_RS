@@ -1,0 +1,21 @@
+{% extends "base_generic.html" %}
+{% block title %}
+    Text Sentiment Analyzer
+{% endblock title %}
+{% block content %}
+    <h2>Text Sentiment Analyzer (Valence-Arousal-Dominance)</h2>
+    <br/>
+    <p>
+        Tool to analyze VAD values of an input text (as a whole or divided by sentences), using the NRC-VAD Lexicon by Dr. Saif M. Mohammad.
+    </p>
+    <p>Values can be computed using mean or median of the individual value for each word found in the lexicon.</p>
+    <br/>
+    <form method="post" class="form-group">
+        <table class="vad-form-table">
+            {% csrf_token %}
+            {{ form.as_table }}
+        </table>
+        <br/>
+        <button type="submit" class="btn btn-success">Analyze</button>
+    </form>
+{% endblock content %}

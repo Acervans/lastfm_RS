@@ -27,9 +27,10 @@ import time
 import argparse
 import atexit
 
-nlp = StanfordCoreNLP('../lib/stanford-corenlp-4.5.1')
+dirname = os.path.dirname(__file__)
+nlp = StanfordCoreNLP(os.path.join(dirname, '../lib/stanford-corenlp-4.5.1'))
 stops = set(stopwords.words("english"))
-nrc = "../data/NRC-VAD-Lexicon.csv"
+nrc = os.path.join(dirname, "../data/NRC-VAD-Lexicon.csv")
 lmtzr = WordNetLemmatizer()
 
 # Open NRC-VAD and store as list of dictionaries
@@ -101,7 +102,7 @@ def analyze_file(input_file, output_dir, mode):
         analyze_text(fulltext, mode, True, writer)
 
 
-def analyze_text(fulltext, mode, detailed=False, writer=None,):
+def analyze_text(fulltext, mode, detailed=False, writer=None):
     """
     Performs sentiment analysis on the sentences of a text given as input using the NRC-VAD database.
     :param fulltext: string to analyze
@@ -141,7 +142,7 @@ def analyze_string(string, mode='mean', detailed=False):
     :param mode: determines how sentiment values for a sentence are computed (median or mean)
     :param detailed: determines whether the detailed values of the analysis should be returned
     :return either:
-        - VAD object containing the VAD values of the string; or None if no words were analysed
+        - VAD object containing the VAD values of the string; or None if no words were analyzed
         - list of values that map to fieldnames, but without an index
     """
 

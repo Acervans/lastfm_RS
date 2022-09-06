@@ -46,7 +46,7 @@
         <hr/>
         <div class="container-fluid">
             <div id="sidebar-btn-row" class="row">
-                <a href="#" class="sidebar-btn" onclick="toggleNav()">
+                <a href="javascript:void(0)" class="sidebar-btn" onclick="toggleNav()">
                     <img src="{% static 'img/Sidebar-btn.png' %}"
                          height="18px"
                          width=""
@@ -62,6 +62,9 @@
                             </li>
                             <li>
                                 <a href="{% url 'lastfm_preview' %}">LastFM Previewer</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'vad_analysis' %}">Text VAD Analyzer</a>
                             </li>
                         </ul>
                         <ul class="sidebar-nav">

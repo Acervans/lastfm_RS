@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate
-from .forms import PreviewTrackForm, RegisterForm
+from .forms import PreviewTrackForm, RegisterForm, VADAnalysisForm
 from bs4 import BeautifulSoup
+from backend.src.nrc_vad_analysis import fieldnames as fn, analyze_string, analyze_text
 import requests
 import pylast
 # Create your views here.
@@ -124,3 +125,32 @@ def get_track_context(artist, title):
         'sp_id': sp_id,
     }
     return context
+
+
+def vad_analysis(request):
+    if request.method == 'POST':
+        form = VADAnalysisForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data.get('text')
+            mode = form.cleaned_data.get('mode')
+            method = form.cleaned_data.get('method')
+
+            if method == 'text':
+                results = [analyze_string(text, mode, True)]
+                fieldnames = fn[1:]
+                fieldnames[0] = 'Text'
+            else:
+                results = analyze_text(text, mode, True)
+                fieldnames = fn
+
+            return render(
+                request,
+                'vad_analysis.html',
+                {'fieldnames': fieldnames,
+                 'results': results,
+                 'method': method},
+            )
+    else:
+        form = VADAnalysisForm()
+
+    return render(request, 'vad_analysis_form.html', context={'form': form})
