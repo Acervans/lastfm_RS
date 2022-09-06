@@ -154,10 +154,14 @@ def analyze_string(string, mode='mean', detailed=False):
     # search for each valid word's sentiment in NRC-VAD
     words = nlp(string.lower())
     for index, token in enumerate(words):
-        # don't process stops or words w/ punctuation
         w = token.text
+        # get pos fine-grained tag
+        pos = token.tag_[0].lower()
+
+        # don't process stops or words w/ punctuation
         if token.is_stop or not w.isalpha():
-            continue
+            if pos != 'n':
+                continue
 
         # check for negation in 3 words before current word
         j = index - 1
@@ -168,9 +172,6 @@ def analyze_string(string, mode='mean', detailed=False):
                 neg = True
                 break
             j -= 1
-
-        # get pos fine-grained tag
-        pos = token.tag_[0].lower()
 
         # lemmatize word based on part-of-speech
         lemma = w
