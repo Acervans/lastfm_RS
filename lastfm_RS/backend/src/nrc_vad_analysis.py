@@ -179,7 +179,7 @@ def analyze_string(string, mode='mean', detailed=False):
                 lemma = token.lemma_
 
             # adapt to wordnet ADJ pos
-            if pos == 'j':
+            elif pos == 'j':
                 pos = 'a'
         else:
             pos = None
