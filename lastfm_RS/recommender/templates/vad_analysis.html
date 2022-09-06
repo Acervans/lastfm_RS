@@ -12,9 +12,7 @@
             </tr>
             {% if method == 'text' %}
                 <tr>
-                    {% for val in results|slice:"1:" %}
-                        <td>{{ val }}</td>
-                    {% endfor %}
+                    {% for val in results %}<td>{{ val }}</td>{% endfor %}
                 </tr>
             {% else %}
                 {% for row in results %}

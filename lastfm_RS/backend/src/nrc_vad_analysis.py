@@ -16,9 +16,10 @@ Parameters:
 
 from nltk.corpus import stopwords, wordnet
 from nltk import tokenize
-from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.stem import WordNetLemmatizer
 from stanfordcorenlp import StanfordCoreNLP
 from dataclasses import dataclass, field
+from collections import deque
 import csv
 import sys
 import os
@@ -29,8 +30,8 @@ import atexit
 
 dirname = os.path.dirname(__file__)
 nlp = StanfordCoreNLP(os.path.join(dirname, '../lib/stanford-corenlp-4.5.1'))
-stops = set(stopwords.words("english"))
 nrc = os.path.join(dirname, "../data/NRC-VAD-Lexicon.csv")
+stops = set(stopwords.words("english"))
 lmtzr = WordNetLemmatizer()
 
 # Open NRC-VAD and store as list of dictionaries
@@ -123,7 +124,7 @@ def analyze_text(fulltext, mode, detailed=False, writer=None):
     for s in sentences:
         values = analyze_string(s, mode, detailed)
         if detailed:
-            values[0] = i
+            values.appendleft(i)
 
         # output sentiment info for this sentence
         if writer:
@@ -254,8 +255,8 @@ def analyze_string(string, mode='mean', detailed=False):
 
     if len(found_words) == 0:  # no words found in NRC-VAD for this sentence
         if detailed:
-            vad = [None, string, 'N/A', 'N/A',
-                   'N/A', 'N/A', 0, 'N/A', all_words]
+            vad = deque([string, 'N/A', 'N/A',
+                        'N/A', 'N/A', 0, 'N/A', all_words])
         else:
             vad = None
 
@@ -273,8 +274,8 @@ def analyze_string(string, mode='mean', detailed=False):
         # set sentiment label
         vad = VAD(sentiment, arousal, dominance)
         if detailed:
-            vad = [None, string, sentiment, vad.label, arousal, dominance, ("%d out of %d" % (
-                len(found_words), len(all_words))), found_words, all_words]
+            vad = deque([string, sentiment, vad.label, arousal, dominance, ("%d out of %d" % (
+                len(found_words), len(all_words))), found_words, all_words])
 
     return vad
 
