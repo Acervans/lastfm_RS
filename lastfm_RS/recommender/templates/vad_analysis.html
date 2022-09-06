@@ -10,17 +10,19 @@
             <tr>
                 {% for f in fieldnames %}<th>{{ f }}</th>{% endfor %}
             </tr>
-            {% for row in results %}
+            {% if method == 'text' %}
                 <tr>
-                    {% if method == 'text' %}
-                        {% for val in row|slice:"1:" %}
-                            <td>{{ val }}</td>
-                        {% endfor %}
-                    {% else %}
-                        {% for val in row %}<td>{{ val }}</td>{% endfor %}
-                    {% endif %}
+                    {% for val in results|slice:"1:" %}
+                        <td>{{ val }}</td>
+                    {% endfor %}
                 </tr>
-            {% endfor %}
+            {% else %}
+                {% for row in results %}
+                    <tr>
+                        {% for val in row %}<td>{{ val }}</td>{% endfor %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
         </table>
     </div>
 {% endblock content %}

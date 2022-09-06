@@ -136,18 +136,18 @@ def vad_analysis(request):
             method = form.cleaned_data.get('method')
 
             if method == 'text':
-                results = [analyze_string(text, mode, True)]
+                fun = analyze_string
                 fieldnames = fn[1:]
                 fieldnames[0] = 'Text'
             else:
-                results = analyze_text(text, mode, True)
+                fun = analyze_text
                 fieldnames = fn
 
             return render(
                 request,
                 'vad_analysis.html',
                 {'fieldnames': fieldnames,
-                 'results': results,
+                 'results': fun(text, mode, True),
                  'method': method},
             )
     else:
