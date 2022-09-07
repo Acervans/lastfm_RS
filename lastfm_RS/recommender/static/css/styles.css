@@ -1,7 +1,10 @@
 th,
 td {
     padding: 5px;
-    min-width: 200px;
+}
+
+th {
+    white-space: nowrap;
 }
 
 body {
