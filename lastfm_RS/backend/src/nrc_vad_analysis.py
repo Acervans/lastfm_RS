@@ -36,8 +36,11 @@ nlp = spacy.load('en_core_web_lg', disable=['parser', 'ner'])
 with open(nrc, encoding="utf-8-sig") as csvfile:
     reader = list(csv.DictReader(csvfile))
 
-fieldnames = ['Sentence ID', 'Sentence', 'Valence', 'Sentiment Label', 'Arousal', 'Dominance',
+FIELDNAMES = ['Sentence ID', 'Sentence', 'Valence', 'Sentiment Label', 'Arousal', 'Dominance',
               '# Words Found', 'Found Words', 'All Words']
+
+NEGATE = ["neither", "never", "none", "nope", "nor", "n\'t", "no", "not",
+          "nothing", "nowhere", "without", "rarely", "seldom", "despite"]
 
 
 @dataclass
@@ -96,7 +99,7 @@ def analyze_file(input_file, output_dir, mode):
     # check each word in sentence for sentiment and write to output_file
     with open(output_file, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(fieldnames)  # write header
+        writer.writerow(FIELDNAMES)  # write header
 
         analyze_text(fulltext, mode, True, writer)
 
@@ -167,7 +170,7 @@ def analyze_string(string, mode='mean', detailed=False):
         neg = False
         while j >= 0 and j >= index - 3:
             prior = words[j].text
-            if prior == 'not' or prior == 'no' or prior == 'n\'t':
+            if prior in NEGATE:
                 neg = True
                 break
             j -= 1

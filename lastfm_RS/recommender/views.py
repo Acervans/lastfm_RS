@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate
 from .forms import PreviewTrackForm, RegisterForm, VADAnalysisForm
 from bs4 import BeautifulSoup
-from backend.src.nrc_vad_analysis import fieldnames as fn, analyze_string, analyze_text
+from backend.src.nrc_vad_analysis import FIELDNAMES, analyze_string, analyze_text
 import requests
 import pylast
 # Create your views here.
@@ -137,11 +137,11 @@ def vad_analysis(request):
 
             if method == 'text':
                 fun = analyze_string
-                fieldnames = fn[1:]
+                fieldnames = FIELDNAMES[1:]
                 fieldnames[0] = 'Text'
             else:
                 fun = analyze_text
-                fieldnames = fn
+                fieldnames = FIELDNAMES
 
             return render(
                 request,
