@@ -40,8 +40,8 @@ FIELDNAMES = ['Sentence ID', 'Sentence', 'Valence', 'Sentiment Label', 'Arousal'
               '# Words Found', 'Found Words', 'All Words']
 
 NEGATE = ["neither", "never", "none", "nope", "nor", "n\'t", "no", "not",
-          "nowhere", "without", "rarely", "seldom", "hardly", "scarcely",
-          "barely", "despite"]
+          "nothing", "nobody", "nowhere", "without", "rarely", "seldom",
+          "hardly", "scarcely", "barely", "despite"]
 
 
 @dataclass
