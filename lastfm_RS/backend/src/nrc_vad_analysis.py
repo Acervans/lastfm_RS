@@ -170,10 +170,13 @@ def analyze_string(string, mode='mean', detailed=False):
         j = index - 1
         neg = False
         while j >= 0 and j >= index - 3:
-            prior = words[j].text
-            if prior in NEGATE:
+            if words[j].text in NEGATE:
                 neg = True
                 break
+
+            # do not count stop words
+            if words[j].is_stop:
+                index -= 1
             j -= 1
 
         # lemmatize word based on part-of-speech
