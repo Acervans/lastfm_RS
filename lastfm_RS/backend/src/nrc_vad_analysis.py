@@ -169,13 +169,18 @@ def analyze_string(string, mode='mean', detailed=False):
         # check for negation in 3 words before current word
         j = index - 1
         neg = False
-        while j >= 0 and j >= index - 3 and not words[j+1].is_sent_start:
-            if words[j].text in NEGATE:
+        while j >= 0 and j >= index - 3:
+            prior_tok = words[j]
+            if prior_tok.text in NEGATE:
                 neg = True
                 break
 
+            # stop at start of current sentence
+            if prior_tok.is_sent_start:
+                break
+
             # do not count stop words
-            if words[j].is_stop:
+            if prior_tok.is_stop:
                 index -= 1
             j -= 1
 
