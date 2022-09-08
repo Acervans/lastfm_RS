@@ -30,7 +30,7 @@ dirname = os.path.dirname(__file__)
 # CSV file with lexicon and VAD values
 nrc = os.path.join(dirname, "../data/NRC-VAD-Lexicon.csv")
 # Use spaCy as Natural Language Processor
-nlp = spacy.load('en_core_web_lg', disable=['parser', 'ner'])
+nlp = spacy.load('en_core_web_lg', disable=['ner'])
 
 # Open NRC-VAD and store as list of dictionaries
 with open(nrc, encoding="utf-8-sig") as csvfile:
@@ -169,7 +169,7 @@ def analyze_string(string, mode='mean', detailed=False):
         # check for negation in 3 words before current word
         j = index - 1
         neg = False
-        while j >= 0 and j >= index - 3:
+        while j >= 0 and j >= index - 3 and not words[j+1].is_sent_start:
             if words[j].text in NEGATE:
                 neg = True
                 break
