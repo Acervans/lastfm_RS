@@ -157,7 +157,8 @@ def analyze_string(string, mode='mean', detailed=False):
 
     # search for each valid word's sentiment in NRC-VAD
     words = nlp(string.lower())
-    for index, token in enumerate(words):
+    for token in words:
+        index = token.i
         w = token.text
         # get pos fine-grained tag
         pos = token.tag_[0].lower()
