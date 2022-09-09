@@ -14,7 +14,6 @@ Parameters:
 """
 # add parameter to exclude duplicates? also mean or median analysis
 
-from nltk.tokenize import sent_tokenize
 from nltk.corpus import wordnet as wn
 from dataclasses import dataclass, field
 from collections import deque
@@ -30,7 +29,8 @@ dirname = os.path.dirname(__file__)
 # CSV file with lexicon and VAD values
 nrc = os.path.join(dirname, "../data/NRC-VAD-Lexicon.csv")
 # Use spaCy as Natural Language Processor
-nlp = spacy.load('en_core_web_lg', disable=['ner'])
+nlp = spacy.load('en_core_web_lg', disable=['parser', 'ner'])
+nlp.enable_pipe('senter')
 
 # Open NRC-VAD and store as list of dictionaries
 with open(nrc, encoding="utf-8-sig") as csvfile:
@@ -118,14 +118,14 @@ def analyze_text(fulltext, mode, detailed=False, writer=None):
     """
 
     # split into sentences
-    sentences = sent_tokenize(fulltext)
+    sentences = nlp(fulltext).sents
     vad = []  # list of vad analysis values
 
-    i = 0  # to store sentence index
     # analyze each sentence for sentiment
-    for s in sentences:
+    for i, s in enumerate(sentences):
         values = analyze_string(s, mode, detailed)
         if detailed:
+            # append sentence index
             values.appendleft(i)
 
         # output sentiment info for this sentence
@@ -133,15 +133,14 @@ def analyze_text(fulltext, mode, detailed=False, writer=None):
             writer.writerow(values)
 
         vad.append(values)
-        i += 1
 
     return vad
 
 
-def analyze_string(string, mode='mean', detailed=False):
+def analyze_string(string_doc, mode='mean', detailed=False):
     """
     Performs sentiment analysis on a string given as input using the NRC-VAD database.
-    :param string: string to analyze
+    :param string: string to analyze or Doc/Span object from parsed string
     :param mode: determines how sentiment values for a sentence are computed (median or mean)
     :param detailed: determines whether the detailed values of the analysis should be returned
     :return either:
@@ -155,11 +154,17 @@ def analyze_string(string, mode='mean', detailed=False):
     a_list = []  # holds arousal scores
     d_list = []  # holds dominance scores
 
+    # parse if input is string
+    if isinstance(string_doc, str):
+        words = nlp(string_doc)
+        text = string_doc
+    else:
+        words = string_doc
+        text = string_doc.text
+
     # search for each valid word's sentiment in NRC-VAD
-    words = nlp(string.lower())
-    for token in words:
-        index = token.i
-        w = token.text
+    for index, token in enumerate(words):
+        w = token.lower_
         # get pos fine-grained tag
         pos = token.tag_[0].lower()
 
@@ -172,7 +177,7 @@ def analyze_string(string, mode='mean', detailed=False):
         neg = False
         while j >= 0 and j >= index - 3:
             prior_tok = words[j]
-            if prior_tok.text in NEGATE:
+            if prior_tok.lower_ in NEGATE:
                 neg = True
                 break
 
@@ -189,7 +194,7 @@ def analyze_string(string, mode='mean', detailed=False):
         lemma = w
         if pos in ('n', 'v', 'r', 'j'):
             if pos == 'n' or pos == 'v':
-                lemma = token.lemma_
+                lemma = token.lemma_.lower()
 
             # adapt to wordnet ADJ pos
             elif pos == 'j':
@@ -269,7 +274,7 @@ def analyze_string(string, mode='mean', detailed=False):
 
     if len(found_words) == 0:  # no words found in NRC-VAD for this sentence
         if detailed:
-            vad = deque([string, 'N/A', 'N/A',
+            vad = deque([text, 'N/A', 'N/A',
                         'N/A', 'N/A', 0, 'N/A', all_words])
         else:
             vad = None
@@ -288,7 +293,7 @@ def analyze_string(string, mode='mean', detailed=False):
         # set sentiment label
         vad = VAD(sentiment, arousal, dominance)
         if detailed:
-            vad = deque([string, sentiment, vad.label, arousal, dominance, ("%d out of %d" % (
+            vad = deque([text, sentiment, vad.label, arousal, dominance, ("%d out of %d" % (
                 len(found_words), len(all_words))), found_words, all_words])
 
     return vad
