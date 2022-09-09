@@ -107,8 +107,8 @@ def analyze_file(input_file, output_dir, mode):
 
 def analyze_text(fulltext, mode, detailed=False, writer=None):
     """
-    Performs sentiment analysis on the sentences of a text given as input using the NRC-VAD database.
-    :param fulltext: string to analyze
+    Performs sentiment analysis on the sentences of a text using the NRC-VAD database.
+    :param fulltext: string of the text to split into sentences and analyze
     :param mode: determines how sentiment values for a sentence are computed (median or mean)
     :param detailed: determines whether the detailed values of the analysis should be returned
     :param writer: csv.writer of csv file to which analysis results will be stored
@@ -123,7 +123,7 @@ def analyze_text(fulltext, mode, detailed=False, writer=None):
 
     # analyze each sentence for sentiment
     for i, s in enumerate(sentences):
-        values = analyze_string(s, mode, detailed)
+        values = analyze_parsed_string(s, mode, detailed)
         if detailed:
             # append sentence index
             values.appendleft(i)
@@ -137,11 +137,25 @@ def analyze_text(fulltext, mode, detailed=False, writer=None):
     return vad
 
 
-def analyze_string(string_doc, mode='mean', detailed=False):
+def analyze_string(string, mode, detailed=False):
     """
-    Performs sentiment analysis on a string given as input using the NRC-VAD database.
-    :param string: string to analyze or Doc/Span object from parsed string
-    :param mode: determines how sentiment values for a sentence are computed (median or mean)
+    Performs sentiment analysis on a string using the NRC-VAD database.
+    :param string: string to be analyzed
+    :param mode: determines how sentiment values are computed (median or mean)
+    :param detailed: determines whether the detailed values of the analysis should be returned
+    :return either:
+        - VAD object containing the VAD values of the string; or None if no words were analyzed
+        - list of values that map to fieldnames, but without an index
+    """
+    return analyze_parsed_string(nlp(string), mode, detailed)
+
+
+def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
+    """
+    Performs sentiment analysis on a Doc/Span object from a parsed string using
+    the NRC-VAD database.
+    :param parsed_str: Doc/Span object from a string parsed with spaCy NLP
+    :param mode: determines how sentiment values are computed (median or mean)
     :param detailed: determines whether the detailed values of the analysis should be returned
     :return either:
         - VAD object containing the VAD values of the string; or None if no words were analyzed
@@ -154,13 +168,9 @@ def analyze_string(string_doc, mode='mean', detailed=False):
     a_list = []  # holds arousal scores
     d_list = []  # holds dominance scores
 
-    # parse if input is string
-    if isinstance(string_doc, str):
-        words = nlp(string_doc)
-        text = string_doc
-    else:
-        words = string_doc
-        text = string_doc.text
+    # input Doc/Span object and raw string
+    words = parsed_str
+    text = parsed_str.text
 
     # search for each valid word's sentiment in NRC-VAD
     for index, token in enumerate(words):
@@ -287,9 +297,9 @@ def analyze_string(string_doc, mode='mean', detailed=False):
             arousal = statistics.median(a_list)
             dominance = statistics.median(d_list)
         else:
-            sentiment = statistics.mean(v_list)
-            arousal = statistics.mean(a_list)
-            dominance = statistics.mean(d_list)
+            sentiment = statistics.fmean(v_list)
+            arousal = statistics.fmean(a_list)
+            dominance = statistics.fmean(d_list)
 
         # set sentiment label
         vad = VAD(sentiment, arousal, dominance)
