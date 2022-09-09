@@ -169,26 +169,27 @@ def analyze_string(string_doc, mode='mean', detailed=False):
         pos = token.tag_[0].lower()
 
         # don't process stops or words w/ punctuation
-        if (token.is_stop and pos != 'n') or not w.isalpha():
+        if (token.is_stop and pos != 'n') or not token.is_alpha:
             continue
 
         # check for negation in 3 words before current word
-        j = index - 1
         neg = False
-        while j >= 0 and j >= index - 3:
-            prior_tok = words[j]
-            if prior_tok.lower_ in NEGATE:
-                neg = True
-                break
+        if not token.is_sent_start:
+            j = index - 1
+            while j >= 0 and j >= index - 3:
+                prior_tok = words[j]
+                if prior_tok.lower_ in NEGATE:
+                    neg = True
+                    break
 
-            # stop at start of current sentence
-            if prior_tok.is_sent_start:
-                break
+                # stop at start of current sentence
+                if prior_tok.is_sent_start:
+                    break
 
-            # do not count stop words
-            if prior_tok.is_stop:
-                index -= 1
-            j -= 1
+                # do not count stop words
+                if prior_tok.is_stop or not prior_tok.is_alpha:
+                    index -= 1
+                j -= 1
 
         # lemmatize word based on part-of-speech
         lemma = w
