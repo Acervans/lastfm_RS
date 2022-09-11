@@ -36,7 +36,6 @@ function setContentHeight() {
         winH = window.innerHeight;
 
     document.getElementById('main').style.maxHeight = (winH - hrH - logoH - 2).toString() + 'px';
-    console.log(document.getElementById('main').style.maxHeight);
 }
 
 window.onload = setContentHeight;
