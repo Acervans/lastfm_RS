@@ -5,8 +5,12 @@ from bs4 import BeautifulSoup
 from backend.src.nrc_vad_analysis import FIELDNAMES, analyze_string, analyze_text
 import requests
 import pylast
+import lyricsgenius
+
 # Create your views here.
 
+genius = lyricsgenius.Genius(
+    'wub8JMLwasqRZWGFM-JwSDrfT1YCFLah7T1tDvC6km3BhadU1D4vT1IsOfHNuOIq', verbose=False)
 network = pylast.LastFMNetwork(
     '23ff8e4c454cbb8ae4a13440bc0fa745', 'a5efd0d4bbeed8c37b0c4bd7672edf58')
 
@@ -31,9 +35,6 @@ def index(request):
     return render(
         request,
         'index.html',
-        # context={'num_books': num_books, 'num_instances': num_instances,
-        #          'num_instances_available': num_instances_available, 'num_authors': num_authors,
-        #          'num_visits': num_visits},
         context={'num_visits': num_visits},
     )
 
@@ -71,21 +72,29 @@ def lastfm_preview(request):
         if form.is_valid():
             artist = form.cleaned_data.get('artist')
             title = form.cleaned_data.get('title')
+            do_lyrics = form.cleaned_data.get('lyrics')
 
             return render(
                 request,
                 'lastfm_preview.html',
-                get_track_context(artist, title),
+                get_track_context(artist, title, do_lyrics),
             )
     else:
         form = PreviewTrackForm()
         return render(request, 'lastfm_preview_form.html', context={'form': form})
 
 
-def get_track_context(artist, title):
+def get_track_context(artist, title, do_lyrics):
+    """
+    Gets the information from a track required for the lastFM Previewer.
+    :param artist: string with artist of the track
+    :param title: string with title of the track
+    :param do_lyrics: determines whether the lyrics should be searched using the Genius API
+    :return context: dict with context of the track
+    """
     track = pylast.Track(artist, title, network)
 
-    yt_id = sp_id = mbid = track_url = artist_url = None
+    yt_id = sp_id = mbid = track_url = artist_url = lyrics = None
     found = False
     try:
         mbid = track.get_mbid()
@@ -103,6 +112,7 @@ def get_track_context(artist, title):
             soup.find('a', {'class': 'header-new-crumb'}).get('href')
         plinks = soup.find('ul', {'class': 'play-this-track-playlinks'})
 
+        # get playlinks for youtube and spotify embeds
         if plinks:
             yt_tag = plinks.find(
                 'a', {'class': 'play-this-track-playlink--youtube'})
@@ -114,6 +124,12 @@ def get_track_context(artist, title):
             if sp_tag:
                 sp_id = sp_tag.get('href').rsplit('track/')[1]
 
+        # get lyrics from Genius API
+        if do_lyrics:
+            gsong = genius.search_song(title, artist, get_full_info=False)
+            if gsong:
+                lyrics = gsong.lyrics[gsong.lyrics.find('['):-5]
+
     context = {
         'found': found,
         'title': title,
@@ -123,6 +139,8 @@ def get_track_context(artist, title):
         'id': mbid,
         'yt_id': yt_id,
         'sp_id': sp_id,
+        'do_lyrics': do_lyrics,
+        'lyrics': lyrics,
     }
     return context
 

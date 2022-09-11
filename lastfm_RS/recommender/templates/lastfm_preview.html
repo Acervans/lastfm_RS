@@ -11,44 +11,65 @@
         <h4>
             By <a href="{{ artist_url }}" target="_blank">{{ artist }}</a> (mbid: {{ id }})
         </h4>
-        <div class="yt-preview">
-            <hr/>
-            <a href="https://www.youtube.com/" target="_blank">
-                <img src="{% static 'img/Youtube.png' %}"
-                     height="30pt"
-                     width=""
-                     alt="Youtube"/>
-            </a>
-            <br/>
-            <br/>
-            {% if yt_id %}
-                <iframe width="480"
-                        height="270"
-                        src="https://www.youtube.com/embed/{{ yt_id }}"
-                        frameborder="0"
-                        allowfullscreen>
-                </iframe>
-            {% else %}
-                <h4>No YouTube preview available for "{{ title }}"</h4>
-            {% endif %}
-        </div>
-        <div class="sp-preview">
-            <hr/>
-            <a href="https://open.spotify.com/" target="_blank">
-                <img src="{% static 'img/Spotify.png' %}"
-                     height="40pt"
-                     width=""
-                     alt="Spotify"/>
-            </a>
-            <br/>
-            <br/>
-            {% if sp_id %}
-                <iframe height="80"
-                        src="https://open.spotify.com/embed/track/{{ sp_id }}"
-                        frameborder="0">
-                </iframe>
-            {% else %}
-                <h4>No Spotify preview available for "{{ title }}"</h4>
+        <hr/>
+        <div class="{% if do_lyrics %}grid-container{% endif %}">
+            <div>
+                <div class="yt-preview">
+                    <a href="https://www.youtube.com/" target="_blank">
+                        <img src="{% static 'img/Youtube.png' %}"
+                             height="30pt"
+                             width=""
+                             alt="Youtube"/>
+                    </a>
+                    <br/>
+                    <br/>
+                    {% if yt_id %}
+                        <iframe width="480"
+                                height="270"
+                                src="https://www.youtube.com/embed/{{ yt_id }}"
+                                frameborder="0"
+                                allowfullscreen>
+                        </iframe>
+                    {% else %}
+                        <h4>No YouTube preview available for "{{ title }}"</h4>
+                    {% endif %}
+                </div>
+                <hr/>
+                <div class="sp-preview">
+                    <a href="https://open.spotify.com/" target="_blank">
+                        <img src="{% static 'img/Spotify.png' %}"
+                             height="40pt"
+                             width=""
+                             alt="Spotify"/>
+                    </a>
+                    <br/>
+                    <br/>
+                    {% if sp_id %}
+                        <iframe height="80"
+                                src="https://open.spotify.com/embed/track/{{ sp_id }}"
+                                frameborder="0">
+                        </iframe>
+                    {% else %}
+                        <h4>No Spotify preview available for "{{ title }}"</h4>
+                    {% endif %}
+                </div>
+            </div>
+            {% if do_lyrics %}
+                <div class="genius-lyrics">
+                    <a href="https://genius.com/" target="_blank">
+                        <img src="{% static 'img/Genius.png' %}"
+                             height="25pt"
+                             width=""
+                             alt="Genius"/>
+                    </a>
+                    <br/>
+                    <br/>
+                    {% if lyrics %}
+                        <span>{{ lyrics }}</span>
+                    {% else %}
+                        <h4>No lyrics available</h4>
+                    {% endif %}
+                </div>
             {% endif %}
         </div>
     {% else %}

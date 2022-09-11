@@ -12,6 +12,7 @@ class RegisterForm(UserCreationForm):
 class PreviewTrackForm(forms.Form):
     artist = forms.CharField(max_length=100)
     title = forms.CharField(max_length=100)
+    lyrics = forms.BooleanField(required=False, label='Lyrics from Genius')
 
 
 class VADAnalysisForm(forms.Form):

@@ -7,14 +7,38 @@ th {
     white-space: nowrap;
 }
 
+hr {
+    color: #6f9199;
+}
+
+a {
+    text-decoration: none;
+}
+
 body {
     background: rgb(231, 255, 247);
     background: linear-gradient(90deg, rgba(231, 255, 247, 1) 0%, rgba(231, 255, 247, 0.85) 75%, rgba(255, 137, 137, 0.204) 100%);
+    overflow: hidden
+}
+
+form tr {
+    vertical-align: baseline;
+}
+
+#logo {
+    padding: 20px;
+    margin-bottom: -20px;
+    display: flex;
+    overflow-x: scroll;
+    align-items: flex-end;
 }
 
 /* Style page content */
 #main {
     transition: 0.5s;
+    max-width: none;
+    flex: 1 1 88%;
+    overflow: scroll;
 }
 
 #sidebar-btn-row {
@@ -34,9 +58,12 @@ body {
 
 /* The sidebar links */
 #sidebar a {
-    text-decoration: none;
     color: #1e5a52;
     transition: 0.3s;
+}
+
+#sidebar li {
+    margin-bottom: 6px;
 }
 
 /* When you mouse over the navigation links, change their color */
@@ -58,6 +85,7 @@ body {
 .sidebar-btn {
     top: 0;
     margin-left: 15px;
+    width: fit-content;
     padding: 0px 4px 2px 4px;
     border-radius: 4px;
     position: relative;
@@ -65,20 +93,6 @@ body {
 
 .sidebar-btn:hover {
     background-color: rgb(187, 228, 220);
-}
-
-.col-sm-10 {
-    max-width: none;
-    flex: 1 1 88%;
-    overflow-x: scroll;
-}
-
-.logo {
-    padding: 20px;
-    margin-bottom: -20px;
-    display: flex;
-    overflow-x: scroll;
-    align-items: flex-end;
 }
 
 .uam-logo,
@@ -96,4 +110,14 @@ body {
 
 .vad-form-table ul {
     list-style-type: none;
+}
+
+.genius-lyrics span {
+    white-space: pre-wrap;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 40px;
 }

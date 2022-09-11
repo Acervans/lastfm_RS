@@ -20,3 +20,24 @@ function toggleNav() {
     }
 
 }
+
+/* Get height with padding and margin */
+function getAbsoluteHeight(elem) {
+    let styles = window.getComputedStyle(elem),
+        margin = Math.abs(parseFloat(styles['marginTop'])) + Math.abs(parseFloat(styles['marginBottom']));
+
+    return Math.ceil(elem.offsetHeight + margin);
+}
+
+/* Set content height using window and prior elements' heights */
+function setContentHeight() {
+    let logoH = getAbsoluteHeight(document.getElementById('logo')),
+        hrH = getAbsoluteHeight(document.getElementById('content-separator')),
+        winH = window.innerHeight;
+
+    document.getElementById('main').style.maxHeight = (winH - hrH - logoH - 2).toString() + 'px';
+    console.log(document.getElementById('main').style.maxHeight);
+}
+
+window.onload = setContentHeight;
+window.addEventListener('resize', setContentHeight);

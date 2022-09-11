@@ -71,7 +71,7 @@ class VAD:
             self.label = 'negative'
 
     def __str__(self):
-        return f'TextVAD(Label: {self.label}, V: {self.valence}, A: {self.arousal}, D: {self.dominance})'
+        return f'VAD(Label: {self.label}, V: {self.valence}, A: {self.arousal}, D: {self.dominance})'
 
     def __iter__(self):
         return iter([self.label, self.valence, self.arousal, self.dominance])
