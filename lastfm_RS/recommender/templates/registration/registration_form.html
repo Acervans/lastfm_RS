@@ -6,8 +6,10 @@
     <h2>Register a new account</h2>
     <br/>
     <form method="post" class="form-group">
-        {% csrf_token %}
-        {{ form.as_p }}
+        <table>
+            {% csrf_token %}
+            {{ form.as_table }}
+        </table>
         <button type="submit" class="btn btn-success">Register</button>
     </form>
 {% endblock content %}

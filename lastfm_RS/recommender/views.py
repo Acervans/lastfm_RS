@@ -128,7 +128,7 @@ def get_track_context(artist, title, do_lyrics):
         if do_lyrics:
             gsong = genius.search_song(title, artist, get_full_info=False)
             if gsong:
-                lyrics = gsong.lyrics[gsong.lyrics.find('['):-5]
+                lyrics = gsong.lyrics
 
     context = {
         'found': found,
