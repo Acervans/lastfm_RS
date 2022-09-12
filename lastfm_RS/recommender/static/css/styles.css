@@ -41,6 +41,16 @@ form tr {
     overflow: scroll;
 }
 
+#copy-lyrics {
+    background-color: #414196;
+    border-width: 0;
+    margin-left: 2vw;
+}
+
+#copy-lyrics:hover {
+    background-color: #59b4a8;
+}
+
 #sidebar-btn-row {
     margin-bottom: 14px;
 }

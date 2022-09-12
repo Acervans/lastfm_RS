@@ -62,11 +62,16 @@
                              width=""
                              alt="Genius"/>
                     </a>
-                    <br/>
-                    <br/>
                     {% if lyrics %}
-                        <span>{{ lyrics }}</span>
+                        <button id="copy-lyrics"
+                                class="btn btn-success"
+                                onclick="copyEvent('lyrics')">Copy lyrics</button>
+                        <br/>
+                        <br/>
+                        <span id="lyrics">{{ lyrics }}</span>
                     {% else %}
+                        <br/>
+                        <br/>
                         <h4>No lyrics available</h4>
                     {% endif %}
                 </div>

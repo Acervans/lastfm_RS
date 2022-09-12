@@ -21,6 +21,32 @@ function toggleNav() {
 
 }
 
+/* Copies an element's content */
+function copyEvent(id) {
+    var copyText = document.getElementById(id);
+    selectText(copyText);
+
+    // Copy the text inside the element
+    navigator.clipboard.writeText(copyText.textContent);
+}
+
+/* Select an element's content */
+function selectText(node) {
+    if (document.body.createTextRange) {
+        const range = document.body.createTextRange();
+        range.moveToElementText(node);
+        range.select();
+    } else if (window.getSelection) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    } else {
+        console.warn("Could not select text in node: Unsupported browser.");
+    }
+}
+
 /* Get height with padding and margin */
 function getAbsoluteHeight(elem) {
     let styles = window.getComputedStyle(elem),
