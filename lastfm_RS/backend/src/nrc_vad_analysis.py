@@ -36,7 +36,7 @@ nlp.enable_pipe('senter')
 with open(nrc, encoding="utf-8-sig") as csvfile:
     reader = list(csv.DictReader(csvfile))
 
-FIELDNAMES = ['Sentence ID', 'Sentence', 'Valence', 'Sentiment Label', 'Arousal', 'Dominance',
+FIELDNAMES = ['Sentence ID', 'Sentence', 'Valence', 'Sentiment Label', 'Sentiment Score', 'Arousal', 'Dominance',
               '# Words Found', 'Found Words', 'All Words']
 
 NEGATE = ["neither", "never", "none", "nope", "nor", "n\'t", "no", "not",
@@ -167,6 +167,7 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
     v_list = []  # holds valence scores
     a_list = []  # holds arousal scores
     d_list = []  # holds dominance scores
+    pos_words = neg_words = 0  # counts words for each label
 
     # input Doc/Span object and raw string
     words = parsed_str
@@ -251,6 +252,12 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
                     a_list.append(a)
                     d_list.append(d)
 
+                    l = VAD(v, a, d).label
+                    if l[0] == 'p':  # positive
+                        pos_words += 1
+                    elif l[2] == 'g':  # negative
+                        neg_words += 1
+
                     found = True
                     break
 
@@ -285,7 +292,7 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
 
     if len(found_words) == 0:  # no words found in NRC-VAD for this sentence
         if detailed:
-            vad = deque([text, 'N/A', 'N/A',
+            vad = deque([text, 'N/A', 'N/A', 'N/A'
                         'N/A', 'N/A', 0, 'N/A', all_words])
         else:
             vad = None
@@ -304,8 +311,10 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
         # set sentiment label
         vad = VAD(sentiment, arousal, dominance)
         if detailed:
-            vad = deque([text, sentiment, vad.label, arousal, dominance, ("%d out of %d" % (
-                len(found_words), len(all_words))), found_words, all_words])
+            num_found = len(found_words)
+            stsc = (pos_words - neg_words) / num_found
+            vad = deque([text, sentiment, vad.label, stsc, arousal, dominance, ("%d out of %d" % (
+                num_found, len(all_words))), found_words, all_words])
 
     return vad
 

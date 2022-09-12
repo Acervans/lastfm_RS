@@ -72,13 +72,14 @@ form tr {
     transition: 0.3s;
 }
 
-#sidebar li {
-    margin-bottom: 6px;
-}
-
 /* When you mouse over the navigation links, change their color */
 #sidebar a:hover {
     color: #ecbaa5;
+}
+
+#sidebar li,
+.vad-analysis-desc p {
+    margin-bottom: 6px;
 }
 
 #sidebar,
