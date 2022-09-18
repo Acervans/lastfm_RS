@@ -1,6 +1,7 @@
 """
-Author: Doris Zhou, adapted to NRC-VAD by Javier Wang
-Date: September 29, 2017
+Author: Doris Zhou
+    Adapted to NRC-VAD and optimized with spaCy by Javier Wang
+Date: August 6, 2022
 Performs sentiment analysis on a text file using NRC-VAD.
 Parameters:
     --dir [path of directory]
@@ -40,8 +41,30 @@ FIELDNAMES = ['Sentence ID', 'Sentence', 'Valence', 'Sentiment Label', 'Sentimen
               '# Words Found', 'Found Words', 'All Words']
 
 NEGATE = ["neither", "never", "none", "nope", "nor", "n\'t", "no", "not",
-          "nothing", "nobody", "nowhere", "without", "rarely", "seldom",
-          "hardly", "scarcely", "barely", "despite"]
+          "nothing", "nobody", "nowhere", "without", "despite", "rarely",
+          "scarcely", "seldom", "hardly"]
+
+INCREASE = \
+    ["abnormally", "aboundingly", "absolutely", "absurdly", "abundantly", "accursedly", "admirably",
+     "alarmingly", "amazingly", "astronomically", "astoundingly", "awfully", "bally", "bloody",
+     "bleeping", "breathtakingly", "clearly", "completely", "considerably", "certainly", "crazy",
+     "crazily", "damn", "damned", "darn", "darned", "dead", "decidedly", "deeply", "definitely",
+     "doubtlessly", "downright", "dreadfully", "easily", "effing", "embarrassingly", "enormously",
+     "entirely", "epically", "especially", "everloving", "exceedingly", "exceptionally", "excessively",
+     "extensively", "extra", "extremely", "fabulously", "fantastically", "far", "flipping", "freaking",
+     "fricking", "frigging", "fucking", "fully", "genuinely", "greatly", "hella", "highly", "honkingly",
+     "horribly", "hugely", "immensely", "impossibly", "incredibly", "indeed", "infinitely", "insanely",
+     "intensely", "largely", "literally", "madly", "majorly", "mighty", "more", "most", "motherfreaking",
+     "motherfucking", "much", "noticeably", "observably", "obviously", "outright", "particularly",
+     "peculiarly", "perfectly", "positively", "purely", "pretty", "profoundly", "quite", "rather", "real",
+     "really", "remarkably", "shockingly", "so", "staggeringly", "strikingly", "substantially",
+     "supremely", "surely", "terribly", "thoroughly", "totally", "tremendously", "truly", "uberly",
+     "unbelievably", "undeniably", "undoubtedly", "unequivocally", "unimaginably", "unquestionably",
+     "unusually", "utterly", "very", "virtually", "way", "whoopingly", "wickedly", "wonderfully"]
+
+DECREASE = \
+    ["almost", "barely", "kinda", "less", "little", "marginally",
+     "occasionally", "partly", "slightly", "somewhat", "sorta"]
 
 
 @dataclass
@@ -177,40 +200,22 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
     for index, token in enumerate(words):
         w = token.lower_
         # get pos fine-grained tag
-        pos = token.tag_[0].lower()
+        pos = token.tag_[0]
 
         # don't process stops or words w/ punctuation
-        if (token.is_stop and pos != 'n') or not token.is_alpha:
+        if (token.is_stop and pos != 'N') or not token.is_alpha:
             continue
-
-        # check for negation in 3 words before current word
-        neg = False
-        if not token.is_sent_start:
-            j = index - 1
-            while j >= 0 and j >= index - 3:
-                prior_tok = words[j]
-                if prior_tok.lower_ in NEGATE:
-                    neg = True
-                    break
-
-                # stop at start of current sentence
-                if prior_tok.is_sent_start:
-                    break
-
-                # do not count stop words
-                if prior_tok.is_stop or not prior_tok.is_alpha:
-                    index -= 1
-                j -= 1
 
         # lemmatize word based on part-of-speech
         lemma = w
-        if pos in ('n', 'v', 'r', 'j'):
-            if pos == 'n' or pos == 'v':
+        pos_tags = ('N', 'V', 'R', 'J')
+        if pos in pos_tags:
+            if pos == 'N' or pos == 'V':
                 lemma = token.lemma_.lower()
 
             # adapt to wordnet ADJ pos
-            elif pos == 'j':
-                pos = 'a'
+            elif pos == 'J':
+                pos = 'A'
         else:
             pos = None
 
@@ -221,6 +226,8 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
         syns = []  # holds synonyms
         s = 0  # synonyms index
         orig_lemma = lemma  # original lemma
+        # accepted tags following a modifier
+        modif_pos_tags = pos_tags + ('D',)
         while not found:
             if syns:
                 # search for next synonym
@@ -229,10 +236,50 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
 
             for row in reader:
                 if row['Word'].casefold() == lemma.casefold():
-                    if neg:
-                        append_str = "neg-" + orig_lemma
-                    else:
-                        append_str = orig_lemma
+
+                    # check for negation and degree adverbs in 3 words before current word
+                    neg = None  # negation
+                    first_neg = False  # negation detected first
+                    inc = None  # increase or decrease
+                    if not token.is_sent_start:
+                        j = index - 1
+                        while j >= 0 and j >= index - 3:
+                            prior_tok = words[j]
+                            if neg is None and prior_tok.lower_ in NEGATE:
+                                neg = True
+                                first_neg = inc is not None
+
+                            is_adverb = prior_tok.tag_[0] == 'R'
+                            if inc is None and is_adverb and words[j + 1].tag_[0] in modif_pos_tags:
+                                if prior_tok.lower_ in INCREASE:
+                                    inc = True
+                                elif prior_tok.lower_ in DECREASE:
+                                    inc = False
+
+                            # stop at start of current sentence or if both modifiers are active
+                            if prior_tok.is_sent_start or (neg is not None and inc is not None):
+                                break
+
+                            # do not count adverbs or non-alphanumerics
+                            if is_adverb or not prior_tok.is_alpha:
+                                index -= 1
+                            j -= 1
+
+                    append_str = orig_lemma
+                    if inc is not None:
+                        # neg before modifier
+                        if first_neg:
+                            neg = False
+                            inc = not inc  # reverse booster polarity
+
+                        if inc:
+                            append_str = "inc-" + append_str
+                        else:
+                            append_str = "dec-" + append_str
+
+                    if neg and not first_neg:
+                        append_str = "neg-" + append_str
+
                     if syns:
                         append_str = "syn(" + lemma + ")-" + append_str
 
@@ -248,15 +295,28 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
                         a = 1 - a
                         d = 1 - d
 
+                    l = VAD(v, a, d).label
+
+                    # apply modifiers
+                    if l[0] == 'p':  # positive
+                        pos_words += 1
+
+                        if inc is True:
+                            v *= 1.25  # increase positive valence
+                        if inc is False:
+                            v *= 0.75  # decrease positive valence
+
+                    elif l[2] == 'g':  # negative
+                        neg_words += 1
+
+                        if inc is True:
+                            v = 1 - 1.25*(1-v)  # decrease negative valence
+                        if inc is False:
+                            v = 1 - 0.75*(1-v)  # increase negative valence
+
                     v_list.append(v)
                     a_list.append(a)
                     d_list.append(d)
-
-                    l = VAD(v, a, d).label
-                    if l[0] == 'p':  # positive
-                        pos_words += 1
-                    elif l[2] == 'g':  # negative
-                        neg_words += 1
 
                     found = True
                     break
@@ -271,7 +331,7 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
                 if not syns:
                     syns = dict()
                     # look for synonyms in synsets
-                    for syn in wn.synsets(lemma, pos=pos):
+                    for syn in wn.synsets(lemma, pos=pos.lower()):
                         for l in syn.lemmas():
                             name = l.name()
                             # avoid compounds
@@ -300,11 +360,11 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
     else:
         # get vad values
         if mode == 'median':
-            sentiment = statistics.median(v_list)
+            sentiment = max(min(1, statistics.median(v_list)), 0)
             arousal = statistics.median(a_list)
             dominance = statistics.median(d_list)
         else:
-            sentiment = statistics.fmean(v_list)
+            sentiment = max(min(1, statistics.fmean(v_list)), 0)
             arousal = statistics.fmean(a_list)
             dominance = statistics.fmean(d_list)
 
