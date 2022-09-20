@@ -227,7 +227,7 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
         s = 0  # synonyms index
         orig_lemma = lemma  # original lemma
         # accepted tags following a modifier
-        modif_pos_tags = pos_tags + ('D',)
+        modif_pos_tags = pos_tags + tuple('D')
         while not found:
             if syns:
                 # search for next synonym

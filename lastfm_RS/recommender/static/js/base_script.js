@@ -50,7 +50,7 @@ function selectText(node) {
 /* Get height with padding and margin */
 function getAbsoluteHeight(elem) {
     let styles = window.getComputedStyle(elem),
-        margin = Math.abs(parseFloat(styles['marginTop'])) + Math.abs(parseFloat(styles['marginBottom']));
+        margin = parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
 
     return Math.ceil(elem.offsetHeight + margin);
 }
@@ -59,9 +59,10 @@ function getAbsoluteHeight(elem) {
 function setContentHeight() {
     let logoH = getAbsoluteHeight(document.getElementById('logo')),
         hrH = getAbsoluteHeight(document.getElementById('content-separator')),
+        sbH = getAbsoluteHeight(document.getElementById('sidebar-btn-row')),
         winH = window.innerHeight;
 
-    document.getElementById('main').style.maxHeight = (winH - hrH - logoH - 2).toString() + 'px';
+    document.getElementById('main').style.maxHeight = (winH - hrH - sbH - logoH - 2).toString() + 'px';
 }
 
 window.onload = setContentHeight;

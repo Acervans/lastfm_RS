@@ -18,29 +18,37 @@
         <!-- Add additional CSS in static file -->
         {% load static %}
         <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
+        <link rel="shortcut icon"
+              type="image/png"
+              href="{% static 'img/favicon.ico' %}"/>
     </head>
     <body>
         <div id="logo">
-            <a href="https://www.last.fm" target="_blank">
-                <img src="{% static 'img/Lastfm-logo.png' %}"
-                     height="35pt"
-                     width=""
-                     alt="LastFM"/>
+            <a href="{% url 'index' %}">
+                <h1>LastFM RecSys</h1>
             </a>
-            <a href="https://www.uam.es/EPS/Home.htm" target="_blank">
-                <img class="eps-logo"
-                     src="{% static 'img/EPS.png' %}"
-                     height="80pt"
-                     width=""
-                     alt="EPS"/>
-            </a>
-            <a href="https://www.uam.es" target="_blank">
-                <img class="uam-logo"
-                     src="{% static 'img/UAM-logo.png' %}"
-                     height="50pt"
-                     width=""
-                     alt="UAM"/>
-            </a>
+            <div id="logo-imgs">
+                <a href="https://www.last.fm" target="_blank">
+                    <img src="{% static 'img/Lastfm-logo.png' %}"
+                         height="35pt"
+                         width=""
+                         alt="LastFM"/>
+                </a>
+                <a href="https://www.uam.es/EPS/Home.htm" target="_blank">
+                    <img class="eps-logo"
+                         src="{% static 'img/EPS.png' %}"
+                         height="80pt"
+                         width=""
+                         alt="EPS"/>
+                </a>
+                <a href="https://www.uam.es" target="_blank">
+                    <img class="uam-logo"
+                         src="{% static 'img/UAM-logo.png' %}"
+                         height="50pt"
+                         width=""
+                         alt="UAM"/>
+                </a>
+            </div>
         </div>
         <hr id="content-separator"/>
         <div class="container-fluid">
