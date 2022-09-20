@@ -43,14 +43,19 @@ form tr {
 }
 
 #logo h1 {
-    color: #135a51;
-    font-size: 36pt;
-    margin: 0 80px -8px 5px
+    font-size: 35pt;
+    margin: 0 20px -8px 5px;
+    background: linear-gradient(90deg, #29726a 25%, #6bc4afd9 75%);
 }
 
 #logo h1:hover {
-    color: #3dd3bf;
-    transition: 0.3s;
+    background: linear-gradient(90deg, #722929 25%, #c48f6bd9 75%);
+}
+
+#logo h1,
+#logo h1:hover {
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 /* Style page content */
