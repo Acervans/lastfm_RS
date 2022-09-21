@@ -47,20 +47,23 @@ NEGATE = ["neither", "never", "none", "nope", "nor", "n\'t", "no", "not",
 INCREASE = \
     ["abnormally", "aboundingly", "absolutely", "absurdly", "abundantly", "accursedly", "admirably",
      "alarmingly", "amazingly", "astronomically", "astoundingly", "awfully", "bally", "bloody",
-     "bleeping", "breathtakingly", "clearly", "completely", "considerably", "certainly", "crazy",
+     "breathtakingly", "clearly", "completely", "considerably", "certainly", "crazy",
      "crazily", "damn", "damned", "darn", "darned", "dead", "decidedly", "deeply", "definitely",
-     "doubtlessly", "downright", "dreadfully", "easily", "effing", "embarrassingly", "enormously",
-     "entirely", "epically", "especially", "everloving", "exceedingly", "exceptionally", "excessively",
-     "extensively", "extra", "extremely", "fabulously", "fantastically", "far", "flipping", "freaking",
-     "fricking", "frigging", "fucking", "fully", "genuinely", "greatly", "hella", "highly", "honkingly",
-     "horribly", "hugely", "immensely", "impossibly", "incredibly", "indeed", "infinitely", "insanely",
-     "intensely", "largely", "literally", "madly", "majorly", "mighty", "more", "most", "motherfreaking",
-     "motherfucking", "much", "noticeably", "observably", "obviously", "outright", "particularly",
-     "peculiarly", "perfectly", "positively", "purely", "pretty", "profoundly", "quite", "rather", "real",
-     "really", "remarkably", "shockingly", "so", "staggeringly", "strikingly", "substantially",
-     "supremely", "surely", "terribly", "thoroughly", "totally", "tremendously", "truly", "uberly",
-     "unbelievably", "undeniably", "undoubtedly", "unequivocally", "unimaginably", "unquestionably",
+     "doubtlessly", "downright", "dreadfully", "easily", "embarrassingly", "enormously",
+     "entirely", "epically", "especially", "everlovingly", "exceedingly", "exceptionally", "excessively",
+     "extensively", "extra", "extremely", "fabulously", "fantastically", "far", "fully", "genuinely",
+     "greatly", "hella", "highly", "honkingly", "horribly", "hugely", "immensely", "impossibly",
+     "incredibly", "indeed", "infinitely", "insanely", "intensely", "largely", "literally", "madly",
+     "majorly", "mighty", "more", "most", "much", "noticeably", "observably", "obviously", "outright",
+     "particularly", "peculiarly", "perfectly", "positively", "purely", "pretty", "profoundly", "quite",
+     "rather", "real", "really", "remarkably", "shockingly", "so", "staggeringly", "strikingly",
+     "substantially", "supremely", "surely", "terribly", "thoroughly", "totally", "tremendously", "truly",
+     "uberly", "unbelievably", "undeniably", "undoubtedly", "unequivocally", "unimaginably", "unquestionably",
      "unusually", "utterly", "very", "virtually", "way", "whoopingly", "wickedly", "wonderfully"]
+
+INCREASE_EXTRA = \
+    ["bleeping", "effing", "flipping", "freaking", "fricking",
+        "frigging", "fucking", "motherfreaking", "motherfucking"]
 
 DECREASE = \
     ["almost", "barely", "kinda", "less", "little", "marginally",
@@ -250,11 +253,17 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
                                 first_neg = inc is not None
 
                             is_adverb = prior_tok.tag_[0] == 'R'
-                            if inc is None and is_adverb and words[j + 1].tag_[0] in modif_pos_tags:
-                                if prior_tok.lower_ in INCREASE:
+                            is_other_boost = prior_tok.tag_ in (
+                                'UH', 'VBG', 'VBP')
+                            # check next word pos (only for adverbs)
+                            if inc is None and (is_other_boost or words[j + 1].tag_[0] in modif_pos_tags):
+                                if is_adverb:
+                                    if prior_tok.lower_ in INCREASE:
+                                        inc = True
+                                    elif prior_tok.lower_ in DECREASE:
+                                        inc = False
+                                elif is_other_boost and prior_tok.lower_ in INCREASE_EXTRA:
                                     inc = True
-                                elif prior_tok.lower_ in DECREASE:
-                                    inc = False
 
                             # stop at start of current sentence or if both modifiers are active
                             if prior_tok.is_sent_start or (neg is not None and inc is not None):
