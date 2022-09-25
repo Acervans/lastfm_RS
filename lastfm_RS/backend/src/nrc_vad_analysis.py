@@ -283,8 +283,9 @@ def search_and_evaluate(token, pos, current_index, words):
     :param pos: unprocessed word's part-of-speech tag
     :param current_index: index of current token/word
     :param words: Doc/Span containing all words of the analysis
-    :return: tuple with lemma, prefixed string, VAD values and whether sentiment is positive; 
-             or tuple with lemma and None
+    :return: 
+        tuple with token's lemma, prefixed string, VAD values and whether sentiment is positive; 
+        or tuple with token's lemma and None
     """
 
     # -------------- AUXILIARY FUNCTIONS --------------
@@ -489,7 +490,7 @@ def search_and_evaluate(token, pos, current_index, words):
                 d = float(row['Dominance'])
 
                 results = (append_str,) + _apply_modifiers(v, a, d, neg, inc)
-                return lemma, results
+                return orig_lemma, results
 
         # pos not suitable for synonyms
         if not wn_pos:
@@ -506,7 +507,7 @@ def search_and_evaluate(token, pos, current_index, words):
         if s == len(syns):
             break
 
-    return lemma, None
+    return orig_lemma, None
 
 
 def main(input_file, input_dir, output_dir, mode):
