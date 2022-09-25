@@ -46,7 +46,7 @@ NEGATE = ["neither", "never", "none", "nope", "nor", "n\'t", "no", "not",
 
 INCREASE = \
     ["abnormally", "aboundingly", "absolutely", "absurdly", "abundantly", "accursedly", "admirably",
-     "alarmingly", "amazingly", "astronomically", "astoundingly", "awfully", "bally", "bloody",
+     "alarmingly", "amazingly", "astronomically", "astoundingly", "awfully", "bally", "best", "bloody",
      "breathtakingly", "clearly", "completely", "considerably", "certainly", "crazy",
      "crazily", "damn", "damned", "darn", "darned", "dead", "decidedly", "deeply", "definitely",
      "doubtlessly", "downright", "dreadfully", "easily", "embarrassingly", "enormously",
@@ -69,6 +69,16 @@ DECREASE = \
     ["almost", "barely", "kinda", "less", "little", "marginally",
      "occasionally", "partly", "slightly", "somewhat", "sorta"]
 
+# booster multiplers
+INC_MUL = 1.25
+DEC_MUL = 0.75
+
+# wordnet part-of-speech tags
+POS_TAGS = ('N', 'V', 'R', 'J')
+
+# accepted tags following a modifier
+MODIF_POS_TAGS = POS_TAGS + tuple('D')
+
 
 @dataclass
 class VAD:
@@ -90,11 +100,16 @@ class VAD:
 
     def __post_init__(self):
         # set sentiment label
-        self.label = 'neutral'
-        if self.valence > .55:
-            self.label = 'positive'
-        elif self.valence < .45:
-            self.label = 'negative'
+        self.label = self.sentiment_label(self.valence)
+
+    @staticmethod
+    def sentiment_label(valence):
+        if valence > .55:
+            return 'positive'
+        elif valence < .45:
+            return 'negative'
+        else:
+            return 'neutral'
 
     def __str__(self):
         return f'VAD(Label: {self.label}, V: {self.valence}, A: {self.arousal}, D: {self.dominance})'
@@ -201,7 +216,6 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
 
     # search for each valid word's sentiment in NRC-VAD
     for index, token in enumerate(words):
-        w = token.lower_
         # get pos fine-grained tag
         pos = token.tag_[0]
 
@@ -209,155 +223,27 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
         if (token.is_stop and pos != 'N') or not token.is_alpha:
             continue
 
-        # lemmatize word based on part-of-speech
-        lemma = w
-        pos_tags = ('N', 'V', 'R', 'J')
-        if pos in pos_tags:
-            if pos == 'N' or pos == 'V':
-                lemma = token.lemma_.lower()
-
-            # adapt to wordnet ADJ pos
-            elif pos == 'J':
-                pos = 'A'
-        else:
-            pos = None
+        # search for lemmatized word in NRC-VAD
+        # and evaluate its VAD values
+        lemma, results = search_and_evaluate(
+            token, pos, index, words)
 
         all_words.append(lemma)
 
-        # search for lemmatized word in NRC-VAD
-        found = False
-        syns = []  # holds synonyms
-        s = 0  # synonyms index
-        orig_lemma = lemma  # original lemma
-        # accepted tags following a modifier
-        modif_pos_tags = pos_tags + tuple('D')
-        while not found:
-            if syns:
-                # search for next synonym
-                lemma = syns[s]
-                s += 1
+        # word was found
+        if results:
+            # prefixed string, VAD values and whether sentiment is positive
+            append_str, v, a, d, positive = results
 
-            for row in reader:
-                if row['Word'].casefold() == lemma.casefold():
+            found_words.append(append_str)
+            v_list.append(v)
+            a_list.append(a)
+            d_list.append(d)
 
-                    # check for negation and degree adverbs in 3 words before current word
-                    neg = None  # negation
-                    first_neg = False  # negation detected first
-                    inc = None  # increase or decrease
-                    if not token.is_sent_start:
-                        j = index - 1
-                        while j >= 0 and j >= index - 3:
-                            prior_tok = words[j]
-                            if neg is None and prior_tok.lower_ in NEGATE:
-                                neg = True
-                                first_neg = inc is not None
-
-                            is_adverb = prior_tok.tag_[0] == 'R'
-                            is_other_boost = prior_tok.tag_ in (
-                                'UH', 'VBG', 'VBP')
-                            # check next word pos (only for adverbs)
-                            if inc is None and (is_other_boost or words[j + 1].tag_[0] in modif_pos_tags):
-                                if is_adverb:
-                                    if prior_tok.lower_ in INCREASE:
-                                        inc = True
-                                    elif prior_tok.lower_ in DECREASE:
-                                        inc = False
-                                elif is_other_boost and prior_tok.lower_ in INCREASE_EXTRA:
-                                    inc = True
-
-                            # stop at start of current sentence or if both modifiers are active
-                            if prior_tok.is_sent_start or (neg is not None and inc is not None):
-                                break
-
-                            # do not count adverbs or non-alphanumerics
-                            if is_adverb or not prior_tok.is_alpha:
-                                index -= 1
-                            j -= 1
-
-                    append_str = orig_lemma
-                    if inc is not None:
-                        # neg before modifier
-                        if first_neg:
-                            neg = False
-                            inc = not inc  # reverse booster polarity
-
-                        if inc:
-                            append_str = "inc-" + append_str
-                        else:
-                            append_str = "dec-" + append_str
-
-                    if neg and not first_neg:
-                        append_str = "neg-" + append_str
-
-                    if syns:
-                        append_str = "syn(" + lemma + ")-" + append_str
-
-                    found_words.append(append_str)
-
-                    v = float(row['Valence'])
-                    a = float(row['Arousal'])
-                    d = float(row['Dominance'])
-
-                    if neg:
-                        # reverse polarity for this word
-                        v = 1 - v
-                        a = 1 - a
-                        d = 1 - d
-
-                    l = VAD(v, a, d).label
-
-                    # apply modifiers
-                    if l[0] == 'p':  # positive
-                        pos_words += 1
-
-                        if inc is True:
-                            v *= 1.25  # increase positive valence
-                        if inc is False:
-                            v *= 0.75  # decrease positive valence
-
-                    elif l[2] == 'g':  # negative
-                        neg_words += 1
-
-                        if inc is True:
-                            v = 1 - 1.25*(1-v)  # decrease negative valence
-                        if inc is False:
-                            v = 1 - 0.75*(1-v)  # increase negative valence
-
-                    v_list.append(v)
-                    a_list.append(a)
-                    d_list.append(d)
-
-                    found = True
-                    break
-
-            # pos not suitable for synonyms
-            if not pos:
-                break
-
-            # lemma not found in nrc-vad
-            if not found:
-                # check for synonyms
-                if not syns:
-                    syns = dict()
-                    # look for synonyms in synsets
-                    for syn in wn.synsets(lemma, pos=pos.lower()):
-                        for l in syn.lemmas():
-                            name = l.name()
-                            # avoid compounds
-                            if '_' not in name:
-                                syns[name] = None
-
-                    # no synonyms found
-                    if not syns:
-                        break
-
-                    # remove original lemma if present
-                    if syns.get(orig_lemma):
-                        del syns[orig_lemma]
-                    syns = list(syns.keys())
-
-                if s == len(syns):
-                    break
+            if positive:
+                pos_words += 1
+            elif positive is False:
+                neg_words += 1
 
     if len(found_words) == 0:  # no words found in NRC-VAD for this sentence
         if detailed:
@@ -386,6 +272,241 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
                 num_found, len(all_words))), found_words, all_words])
 
     return vad
+
+
+def search_and_evaluate(token, pos, current_index, words):
+    """
+    Search for the current word in NRC-VAD lexicon while
+    analyzing modifiers and obtaining its VAD values.
+
+    :param token: token containing current lemma
+    :param pos: unprocessed word's part-of-speech tag
+    :param current_index: index of current token/word
+    :param words: Doc/Span containing all words of the analysis
+    :return: tuple with lemma, prefixed string, VAD values and whether sentiment is positive; 
+             or tuple with lemma and None
+    """
+
+    # -------------- AUXILIARY FUNCTIONS --------------
+
+    def _lemmatize_by_pos(token, pos):
+        """
+        Lemmatize word depending on tag in POS_TAGS 
+        and adapt tag to wordnet if necessary.
+
+        :param token: token containing lemma
+        :param pos: unprocessed word's part-of-speech tag
+        :return: tuple with lemma and wordnet pos tag
+        """
+
+        lemma = token.lower_
+        if pos in POS_TAGS:
+            if pos == 'N' or pos == 'V':
+                lemma = token.lemma_.lower()
+
+            # adapt to wordnet ADJ pos
+            elif pos == 'J':
+                pos = 'A'
+        else:
+            pos = None
+        return lemma, pos
+
+    def _check_modifiers(current_index, words):
+        """
+        Check for sentiment modifiers in three words before
+        the current one. Skips non-alphanumerics and adverbs.
+
+        :param current_index: index of current token/word
+        :param words: Doc/Span containing all words of the analysis
+        :return: tuple with modifier flags (neg, first_neg and inc)
+        """
+        neg = inc = None
+        first_neg = False
+
+        j = current_index - 1
+        while j >= 0 and j >= current_index - 3:
+            prior_tok = words[j]
+            if neg is None and prior_tok.lower_ in NEGATE:
+                neg = True
+                first_neg = inc is not None
+
+            is_adverb = prior_tok.tag_[0] == 'R'
+            is_other_boost = prior_tok.tag_ in (
+                'UH', 'VBG', 'VBP')
+            # check next word pos (only for adverbs)
+            if inc is None and (is_other_boost or words[j + 1].tag_[0] in MODIF_POS_TAGS):
+                if is_adverb:
+                    if prior_tok.lower_ in INCREASE:
+                        inc = True
+                    elif prior_tok.lower_ in DECREASE:
+                        inc = False
+                elif is_other_boost and prior_tok.lower_ in INCREASE_EXTRA:
+                    inc = True
+
+            # stop at start of current sentence or if both modifiers are active
+            if prior_tok.is_sent_start or (neg is not None and inc is not None):
+                break
+
+            # do not count adverbs or non-alphanumerics
+            if is_adverb or not prior_tok.is_alpha:
+                current_index -= 1
+            j -= 1
+
+        return neg, first_neg, inc
+
+    def _append_prefix_modifiers(orig_lemma, syn_lemma, neg, first_neg, inc):
+        """
+        Construct a string with the original lemma and an indication
+        of all modifiers, including synonym lemma, as prefixes.
+
+        :param orig_lemma: original lemma (not a synonym)
+        :param syn_lemma: synonym of original lemma if found, else None
+        :param neg: whether the sentiment was negated
+        :param first_neg: whether the negating word came first
+        :param inc: whether the sentiment was increased or decreased
+        :return: prefixed string
+        """
+        append_str = orig_lemma
+        if inc is not None:
+            # neg before modifier
+            if first_neg:
+                neg = False
+                inc = not inc  # reverse booster polarity
+
+            if inc:
+                append_str = "inc-" + append_str
+            else:
+                append_str = "dec-" + append_str
+
+        if neg and not first_neg:
+            append_str = "neg-" + append_str
+
+        if syn_lemma:
+            append_str = "syn(" + syn_lemma + ")-" + append_str
+
+        return append_str
+
+    def _apply_modifiers(v, a, d, neg, inc):
+        """
+        Apply modifiers obtained in _check_modifiers()
+        to the original VAD values.
+
+        :param v: original valence
+        :param a: original arousal
+        :param d: original dominance
+        :param neg: whether the sentiment was negated
+        :param inc: whether the sentiment was increased or decreased
+        :return: tuple with modified VAD values and whether sentiment is positive
+        """
+        if neg:
+            # reverse polarity for this word
+            v = 1 - v
+            a = 1 - a
+            d = 1 - d
+
+        l = VAD.sentiment_label(v)
+
+        positive = None
+
+        # apply modifiers
+        if l[0] == 'p':  # positive
+            positive = True
+
+            if inc is True:
+                v *= INC_MUL  # increase positive valence
+            if inc is False:
+                v *= DEC_MUL  # decrease positive valence
+
+        elif l[2] == 'g':  # negative
+            positive = False
+
+            if inc is True:
+                v = 1 - INC_MUL*(1-v)  # decrease negative valence
+            if inc is False:
+                v = 1 - DEC_MUL*(1-v)  # increase negative valence
+
+        return v, a, d, positive
+
+    def _get_synonyms(orig_lemma, wn_pos):
+        """
+        Obtain synonyms for a lemma keeping its POS.
+
+        :param orig_lemma: lemma to search synonyms for
+        :param wn_pos: word's Wordnet part-of-speech tag
+        :return: list of synonyms or None
+        """
+        syns = dict()
+
+        # look for synonyms in synsets
+        for syn in wn.synsets(lemma, pos=wn_pos.lower()):
+            for l in syn.lemmas():
+                name = l.name()
+                # avoid compounds
+                if '_' not in name:
+                    syns[name] = None
+
+        if syns:
+            # remove original lemma if present
+            syns.pop(orig_lemma, None)
+            return list(syns.keys())
+        else:
+            return None
+
+    # -------------- END AUXILIARY FUNCTIONS --------------
+
+    # lemmatize word based on part-of-speech
+    lemma, wn_pos = _lemmatize_by_pos(token, pos)
+
+    syns = []  # holds synonyms
+    s = 0  # synonyms index
+    orig_lemma = lemma  # original lemma
+
+    # search until found or break
+    while True:
+        if syns:
+            # search for next synonym
+            lemma = syns[s]
+            s += 1
+
+        # search word in nrc-vad
+        for row in reader:
+            if row['Word'].casefold() == lemma.casefold():
+
+                # check for negation and degree adverbs in 3 words before current word
+                if token.is_sent_start:
+                    neg = None  # negation
+                    first_neg = False  # negation detected first
+                    inc = None  # increase or decrease
+                else:
+                    neg, first_neg, inc = _check_modifiers(
+                        current_index, words)
+
+                append_str = _append_prefix_modifiers(
+                    orig_lemma, lemma if syns else None, neg, first_neg, inc)
+
+                v = float(row['Valence'])
+                a = float(row['Arousal'])
+                d = float(row['Dominance'])
+
+                results = (append_str,) + _apply_modifiers(v, a, d, neg, inc)
+                return lemma, results
+
+        # pos not suitable for synonyms
+        if not wn_pos:
+            break
+
+        # lemma not found in nrc-vad, check for synonyms
+        if not syns:
+            syns = _get_synonyms(orig_lemma, wn_pos)
+
+            # no synonyms found
+            if not syns:
+                break
+
+        if s == len(syns):
+            break
+
+    return lemma, None
 
 
 def main(input_file, input_dir, output_dir, mode):
