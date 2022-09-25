@@ -353,6 +353,11 @@ def search_and_evaluate(token, pos, current_index, words):
                 current_index -= 1
             j -= 1
 
+        if inc is not None and first_neg:
+            # neg before modifier
+            neg = False
+            inc = not inc  # reverse booster polarity
+
         return neg, first_neg, inc
 
     def _append_prefix_modifiers(orig_lemma, syn_lemma, neg, first_neg, inc):
@@ -369,11 +374,6 @@ def search_and_evaluate(token, pos, current_index, words):
         """
         append_str = orig_lemma
         if inc is not None:
-            # neg before modifier
-            if first_neg:
-                neg = False
-                inc = not inc  # reverse booster polarity
-
             if inc:
                 append_str = "inc-" + append_str
             else:
