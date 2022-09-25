@@ -353,7 +353,7 @@ def search_and_evaluate(token, pos, current_index, words):
                 current_index -= 1
             j -= 1
 
-        if inc is not None and first_neg:
+        if first_neg:
             # neg before modifier
             neg = False
             inc = not inc  # reverse booster polarity
