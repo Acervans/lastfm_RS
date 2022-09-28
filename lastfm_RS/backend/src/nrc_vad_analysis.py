@@ -1,6 +1,6 @@
 """
-Author: Doris Zhou
-    Adapted to NRC-VAD and optimized with spaCy by Javier Wang
+Authors:    Doris Zhou, original implementation using NLTK and StanfordNLP
+            Javier Wang, adapted to NRC-VAD, extended and optimized with spaCy
 Date: August 6, 2022
 Performs sentiment analysis on a text file using NRC-VAD.
 Parameters:
