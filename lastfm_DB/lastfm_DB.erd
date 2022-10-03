@@ -1,0 +1,76 @@
+erdiagram Model
+
+notation=crowsfoot
+generate=off
+
+entity Artist {
+   id: integer key
+   name: char
+}
+entity Track {
+   id: integer key
+   name: char
+   artist_name: char
+}
+entity Tag {
+   id: integer key
+   name: char
+}
+entity User {
+   username: char key
+   recent_tracks
+   loved_tracks
+   most_listened_tracks
+   most_listened_artists
+   most_listened_albums
+   most_listened_tags
+}
+entity Album {
+   id: integer key
+   name: char
+}
+
+relationship Records {
+   Artist[1] -> Track[1+]
+}
+relationship Contains {
+   Album[1] -> Track[1+]
+}
+relationship Compiles {
+   Artist[1] -> Album[0+]
+}
+
+relationship ListensTo {
+   User[1] -> Track[1+]
+}
+relationship ListensTo2 {
+   User[1] -> Artist[1+]
+}
+relationship ListensTo3 {
+   User[1] -> Album[1+]
+}
+relationship ListensTo4 {
+   User[1] -> Tag[1+]
+}
+
+relationship Loves {
+   User[1] -> Track[0+]
+}
+
+relationship RecentlyListened {
+   User[1] -> Track[0+]
+
+}
+
+relationship TaggedAs {
+   Tag[0+] -> Track[1+]
+}
+relationship TaggedAs2 {
+   Tag[0+] -> Artist[1+]
+}
+relationship TaggedAs3 {
+   Tag[0+] -> Album[1+]
+}
+relationship TaggedAs4 {
+   Tag[0+] -> User[1+]
+}
