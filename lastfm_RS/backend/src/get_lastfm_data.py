@@ -11,7 +11,7 @@ network = pylast.LastFMNetwork(
     "23ff8e4c454cbb8ae4a13440bc0fa745", "a5efd0d4bbeed8c37b0c4bd7672edf58"
 )
 
-payload = {"username_or_email": "Acervans", "password": "computer1A."}
+payload = {"username_or_email": "Test_EPS", "password": "Tfg.EPS2022"}
 
 LOGIN_URL = "https://www.last.fm/login"
 
@@ -65,12 +65,12 @@ def get_top_tags(limit):
 
 
 def get_tag_top_artists(tags):
-    top_tag_artists = set()
+    tag_top_artists = set()
     for tag in tags:
-        top_tag_artists.update(
+        tag_top_artists.update(
             [artist[0].get_name() for artist in tag.get_top_artists()]
         )
-    return top_tag_artists
+    return tag_top_artists
 
 
 if __name__ == "__main__":
@@ -110,14 +110,16 @@ if __name__ == "__main__":
         print(f'# All listeners: {all_listeners_count}')
 
         # Save listeners by artist
+        artist_listeners = dict(sorted(artist_listeners.items()))
         with open('top_listeners_by_artist.json', 'w') as f:
-            f.write(json.dumps(artist_listeners, indent=4))
+            f.write(json.dumps(artist_listeners, indent=4, ensure_ascii=False))
 
         # Save all unique listeners
+        unique_listeners = sorted(unique_listeners)
         with open('all_unique_listeners.dat', 'w') as f:
             for l in unique_listeners:
                 f.write(f"{l}\n")
 
-        for artist, listeners in artist_listeners.items():
-            # Get loved/recent/top songs, top tags, top artists
-            pass
+        # for artist, listeners in artist_listeners.items():
+        #     # Get loved/recent/top tracks, top tags, top artists, top albums
+        #     pass
