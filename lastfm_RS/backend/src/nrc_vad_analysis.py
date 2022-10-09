@@ -13,7 +13,6 @@ Parameters:
     --mode [mode]
         takes either "median" or "mean"; determines which is used to calculate sentence sentiment values
 """
-# add parameter to exclude duplicates? also mean or median analysis
 
 from nltk.corpus import wordnet as wn
 from dataclasses import dataclass, field
@@ -89,14 +88,6 @@ class VAD:
     arousal: float
     dominance: float
     label: str = field(init=False)
-
-    # # optional
-    # # maybe use lastfm ID as last_id, although the object should be
-    # # linked to the song/album/artist in the first place
-    # last_id: int = None
-    # sentence: Optional[str] = None
-    # found_words: list(str) = None
-    # all_words: list(str) = None
 
     def __post_init__(self):
         # set sentiment label
