@@ -1,6 +1,5 @@
 from lyricsgenius import Genius
 from bs4 import BeautifulSoup
-from requests.auth import HTTPDigestAuth
 import pylast
 import requests
 import time
@@ -22,7 +21,6 @@ LOGIN_URL = "https://www.last.fm/login"
 # print(kb.get_bio_summary())
 
 # # Maybe use some tags + bio summary to evaluate VAD of an artist
-
 # print(genius.search_song('lone digger', 'caravan palace').lyrics)
 
 
@@ -111,9 +109,15 @@ if __name__ == "__main__":
         print(f'# Unique listeners: {len(unique_listeners)}')
         print(f'# All listeners: {all_listeners_count}')
 
+        # Save listeners by artist
         with open('top_listeners_by_artist.json', 'w') as f:
             f.write(json.dumps(artist_listeners, indent=4))
 
+        # Save all unique listeners
         with open('all_unique_listeners.dat', 'w') as f:
             for l in unique_listeners:
                 f.write(f"{l}\n")
+
+        for artist, listeners in artist_listeners.items():
+            # Get loved/recent/top songs, top tags, top artists
+            pass
