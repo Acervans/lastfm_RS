@@ -4,6 +4,7 @@ import pylast
 import requests
 import time
 import json
+import sys
 
 genius = Genius(
     "wub8JMLwasqRZWGFM-JwSDrfT1YCFLah7T1tDvC6km3BhadU1D4vT1IsOfHNuOIq")
@@ -13,6 +14,7 @@ network = pylast.LastFMNetwork(
 
 payload = {"username_or_email": "Test_EPS", "password": "Tfg.EPS2022"}
 
+DATA_FOLDER = '../data'
 LOGIN_URL = "https://www.last.fm/login"
 
 # kb = pylast.Artist('Kudasaibeats', network)
@@ -75,51 +77,71 @@ def get_tag_top_artists(tags):
 
 if __name__ == "__main__":
 
-    with requests.Session() as s:
+    available_opts = ('-l', '-d', '-a')
 
-        print('Logging in...')
-        login_lastfm(s)
+    if len(sys.argv) != 2 or sys.argv[1] not in available_opts:
+        print(f'Usage: python3 {sys.argv[0]} [Option]')
+        print('Options:')
+        print('\t-l => Scrapes listeners from top listeners, obtained from top tags')
+        print('\t-d => Obtains data from listeners saved with -l')
+        print('\t-a => Scrapes listeners and obtains data directly')
+        sys.exit()
 
-        print('Getting top 10 tags...')
-        # Get top 10 tags
-        chart_tags = get_top_tags(limit=10)
-        print(f"Tags: {[tag.name for tag in chart_tags]}", end='\n\n')
+    if sys.argv[1] in ('-l', '-a'):
+        with requests.Session() as s:
 
-        print('Getting top artists...')
-        # Get unique top artists for each tag
-        tag_top_artists = get_tag_top_artists(chart_tags)
-        print(f"{len(tag_top_artists)} artists in total", end='\n\n')
+            print('Logging in...')
+            login_lastfm(s)
 
-        unique_listeners = set()
+            print('Getting top 10 tags...')
+            # Get top 10 tags
+            chart_tags = get_top_tags(limit=10)
+            print(f"Tags: {[tag.name for tag in chart_tags]}", end='\n\n')
 
-        print('Getting top listeners for each artist...')
-        # Get top 30 listeners for each artist
-        artist_listeners = dict()  # Key:Item = Artist:Listeners
-        all_listeners_count = 0
-        for i, artist in enumerate(tag_top_artists):
-            print(f"\t[{i+1}] {artist}")
-            top_listeners = get_top_listeners(s, artist)
-            unique_listeners.update(top_listeners)
+            print('Getting top artists...')
+            # Get unique top artists for each tag
+            tag_top_artists = get_tag_top_artists(chart_tags)
+            print(f"{len(tag_top_artists)} artists in total", end='\n\n')
 
-            artist_listeners[artist] = top_listeners
-            all_listeners_count += len(top_listeners)
+            unique_listeners = set()
 
-            time.sleep(1)
+            print('Getting top listeners for each artist...')
+            # Get top 30 listeners for each artist
+            artist_listeners = dict()  # Key:Item = Artist:Listeners
+            all_listeners_count = 0
+            for i, artist in enumerate(tag_top_artists):
+                print(f"\t[{i+1}] {artist}")
+                top_listeners = get_top_listeners(s, artist)
+                unique_listeners.update(top_listeners)
 
-        print(f'# Unique listeners: {len(unique_listeners)}')
-        print(f'# All listeners: {all_listeners_count}')
+                artist_listeners[artist] = top_listeners
+                all_listeners_count += len(top_listeners)
 
-        # Save listeners by artist
-        artist_listeners = dict(sorted(artist_listeners.items()))
-        with open('top_listeners_by_artist.json', 'w') as f:
-            f.write(json.dumps(artist_listeners, indent=4, ensure_ascii=False))
+                time.sleep(1)
 
-        # Save all unique listeners
-        unique_listeners = sorted(unique_listeners)
-        with open('all_unique_listeners.dat', 'w') as f:
-            for l in unique_listeners:
-                f.write(f"{l}\n")
+            print(f'# Unique listeners: {len(unique_listeners)}')
+            print(f'# All listeners: {all_listeners_count}')
 
-        # for artist, listeners in artist_listeners.items():
-        #     # Get loved/recent/top tracks, top tags, top artists, top albums
-        #     pass
+            # Save listeners by artist
+            artist_listeners = dict(sorted(artist_listeners.items()))
+            with open(f'{DATA_FOLDER}/top_listeners_by_artist.json', 'w') as f:
+                f.write(json.dumps(artist_listeners,
+                        indent=4, ensure_ascii=False))
+
+            # Save all unique listeners
+            unique_listeners = sorted(unique_listeners)
+            with open(f'{DATA_FOLDER}/all_unique_listeners.dat', 'w') as f:
+                for l in unique_listeners:
+                    f.write(f"{l}\n")
+
+    if sys.argv[1] in ('-d', '-a'):
+        # Get loved/recent/top tracks, top tags, top artists, top albums
+        unique_artists = set()
+        unique_albums = set()
+        unique_tracks = set()
+        with open(f'{DATA_FOLDER}/all_unique_listeners.dat', 'r') as f:
+            print('Getting data from all unique listeners...')
+            for i, listener in enumerate(f.readlines()):
+                # user = network.get_user(listener)
+                print(f'[{i}] {listener[:-1]}')
+                pass
