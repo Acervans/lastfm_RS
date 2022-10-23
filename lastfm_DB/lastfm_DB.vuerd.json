@@ -3,8 +3,8 @@
     "version": "2.2.11",
     "width": 2500,
     "height": 2500,
-    "scrollTop": -236,
-    "scrollLeft": -454,
+    "scrollTop": -326,
+    "scrollLeft": -409,
     "zoomLevel": 1,
     "show": {
       "tableComment": true,
@@ -78,7 +78,7 @@
               "autoIncrement": false,
               "primaryKey": false,
               "unique": true,
-              "notNull": false
+              "notNull": true
             },
             "ui": {
               "active": false,
@@ -120,7 +120,7 @@
           "active": false,
           "left": 869.3673,
           "top": 1098.0938,
-          "zIndex": 227,
+          "zIndex": 13,
           "widthName": 60,
           "widthComment": 60
         },
@@ -163,7 +163,7 @@
               "autoIncrement": false,
               "primaryKey": false,
               "unique": true,
-              "notNull": false
+              "notNull": true
             },
             "ui": {
               "active": false,
@@ -209,7 +209,7 @@
               "autoIncrement": false,
               "primaryKey": false,
               "unique": false,
-              "notNull": true
+              "notNull": false
             },
             "ui": {
               "active": false,
@@ -251,7 +251,7 @@
           "active": false,
           "left": 869.337,
           "top": 814.5479,
-          "zIndex": 234,
+          "zIndex": 12,
           "widthName": 60,
           "widthComment": 60
         },
@@ -294,7 +294,7 @@
               "autoIncrement": false,
               "primaryKey": false,
               "unique": true,
-              "notNull": false
+              "notNull": true
             },
             "ui": {
               "active": false,
@@ -359,7 +359,7 @@
           "active": false,
           "left": 439.4814,
           "top": 862.7454,
-          "zIndex": 233,
+          "zIndex": 11,
           "widthName": 60,
           "widthComment": 60
         },
@@ -402,7 +402,7 @@
               "autoIncrement": false,
               "primaryKey": false,
               "unique": true,
-              "notNull": false
+              "notNull": true
             },
             "ui": {
               "active": false,
@@ -421,7 +421,7 @@
           "active": false,
           "left": 1815.8038,
           "top": 1243.9167,
-          "zIndex": 250,
+          "zIndex": 14,
           "widthName": 60,
           "widthComment": 60
         },
@@ -464,7 +464,7 @@
               "autoIncrement": false,
               "primaryKey": false,
               "unique": true,
-              "notNull": false
+              "notNull": true
             },
             "ui": {
               "active": false,
@@ -506,7 +506,7 @@
           "active": false,
           "left": 869.9342,
           "top": 338.6562,
-          "zIndex": 221,
+          "zIndex": 10,
           "widthName": 60,
           "widthComment": 60
         },
@@ -562,13 +562,36 @@
               "widthDefault": 60
             },
             "id": "98a1fbd9-ff41-4821-b380-198aec2fe1b9"
+          },
+          {
+            "name": "love_at",
+            "comment": "",
+            "dataType": "timestamp",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 67.89706420898438,
+              "widthDefault": 60
+            },
+            "id": "c704b899-9911-4946-9375-659e45c0ce3d"
           }
         ],
         "ui": {
           "active": false,
-          "left": 1387.1934,
-          "top": 920.3664,
-          "zIndex": 257,
+          "left": 1378.1934,
+          "top": 921.3664,
+          "zIndex": 7,
           "widthName": 105.1680908203125,
           "widthComment": 60
         },
@@ -624,13 +647,36 @@
               "widthDefault": 60
             },
             "id": "e09dd599-3335-4367-8f55-dfbb82081714"
+          },
+          {
+            "name": "listen_at",
+            "comment": "",
+            "dataType": "timestamp",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 67.89706420898438,
+              "widthDefault": 60
+            },
+            "id": "0dfcbe93-3275-42d9-bd77-947567292f20"
           }
         ],
         "ui": {
           "active": false,
-          "left": 1387.8595,
-          "top": 788.5316,
-          "zIndex": 256,
+          "left": 1378.8595,
+          "top": 778.5316,
+          "zIndex": 6,
           "widthName": 110.53709411621094,
           "widthComment": 60
         },
@@ -691,8 +737,8 @@
         "ui": {
           "active": false,
           "left": 1386.5232,
-          "top": 1050.4196,
-          "zIndex": 260,
+          "top": 1065.4196,
+          "zIndex": 9,
           "widthName": 90.99807739257812,
           "widthComment": 60
         },
@@ -754,7 +800,7 @@
           "active": false,
           "left": 868.8175,
           "top": 1456.1941,
-          "zIndex": 253,
+          "zIndex": 4,
           "widthName": 98.68109130859375,
           "widthComment": 60
         },
@@ -816,7 +862,7 @@
           "active": false,
           "left": 869.5315,
           "top": 1329.216,
-          "zIndex": 254,
+          "zIndex": 5,
           "widthName": 91.47908020019531,
           "widthComment": 60
         },
@@ -876,9 +922,9 @@
         ],
         "ui": {
           "active": false,
-          "left": 1812.6407,
-          "top": 381.2723,
-          "zIndex": 251,
+          "left": 1815.9741,
+          "top": 381.6057,
+          "zIndex": 8,
           "widthName": 80.31207275390625,
           "widthComment": 60
         },
@@ -940,7 +986,7 @@
           "active": false,
           "left": 1390.4285,
           "top": 581.4376,
-          "zIndex": 252,
+          "zIndex": 3,
           "widthName": 84.52409362792969,
           "widthComment": 60
         },
@@ -1002,7 +1048,7 @@
           "active": false,
           "left": 869.6427,
           "top": 596.5241,
-          "zIndex": 222,
+          "zIndex": 1,
           "widthName": 84.0430908203125,
           "widthComment": 60
         },
@@ -1064,7 +1110,7 @@
           "active": false,
           "left": 441.5497,
           "top": 348.906,
-          "zIndex": 224,
+          "zIndex": 2,
           "widthName": 91.72610473632812,
           "widthComment": 60
         },
@@ -1097,8 +1143,8 @@
           "columnIds": [
             "2ea27c0f-84b0-4864-bb7c-7fd4157589ff"
           ],
-          "x": 1716.1934,
-          "y": 975.3664,
+          "x": 1715.0904642089845,
+          "y": 986.6164,
           "direction": "right"
         },
         "constraintName": "fk_user_to_userlovedtracks",
@@ -1175,8 +1221,8 @@
           "columnIds": [
             "8b1522b8-d4b3-43de-b706-16790e234a0c"
           ],
-          "x": 1977.1407,
-          "y": 491.2723,
+          "x": 1980.4741,
+          "y": 491.6057,
           "direction": "bottom"
         },
         "constraintName": "fk_user_to_usertoptags",
@@ -1201,8 +1247,8 @@
           "columnIds": [
             "5da37ea2-536a-42fe-b855-9363199da4f4"
           ],
-          "x": 1716.8595,
-          "y": 843.5316,
+          "x": 1715.7565642089844,
+          "y": 843.7816,
           "direction": "right"
         },
         "constraintName": "fk_user_to_userrecenttracks",
@@ -1228,7 +1274,7 @@
             "b8424d77-b467-4cb0-a813-1b6799f57b87"
           ],
           "x": 1715.5232,
-          "y": 1105.4196,
+          "y": 1120.4196,
           "direction": "right"
         },
         "constraintName": "fk_user_to_usertoptracks",
@@ -1253,8 +1299,8 @@
           "columnIds": [
             "98a1fbd9-ff41-4821-b380-198aec2fe1b9"
           ],
-          "x": 1387.1934,
-          "y": 975.3664,
+          "x": 1378.1934,
+          "y": 986.6164,
           "direction": "left"
         },
         "constraintName": "fk_track_to_userlovedtracks",
@@ -1279,8 +1325,8 @@
           "columnIds": [
             "e09dd599-3335-4367-8f55-dfbb82081714"
           ],
-          "x": 1387.8595,
-          "y": 843.5316,
+          "x": 1378.8595,
+          "y": 843.7816,
           "direction": "left"
         },
         "constraintName": "fk_track_to_userrecenttracks",
@@ -1306,7 +1352,7 @@
             "6d102a84-30ff-4be1-af43-4ad8354a519b"
           ],
           "x": 1386.5232,
-          "y": 1105.4196,
+          "y": 1120.4196,
           "direction": "left"
         },
         "constraintName": "fk_track_to_usertoptracks",
@@ -1409,8 +1455,8 @@
           "columnIds": [
             "2adf290a-235b-42fb-a6ba-78b5e8ed65ad"
           ],
-          "x": 1812.6407,
-          "y": 436.2723,
+          "x": 1815.9741,
+          "y": 436.6057,
           "direction": "left"
         },
         "constraintName": "fk_tag_to_usertoptags",
@@ -1446,7 +1492,7 @@
       {
         "identification": false,
         "relationshipType": "ZeroOne",
-        "startRelationshipType": "Dash",
+        "startRelationshipType": "Ring",
         "start": {
           "tableId": "b9bbc103-6767-4843-8c6a-835e75e527d2",
           "columnIds": [
