@@ -147,8 +147,6 @@ if __name__ == "__main__":
                 for l in unique_listeners:
                     f.write(f"{l}\n")
 
-    unique_tags = set()
-
     if sys.argv[1] in ('-d', '-a'):
 
         # Get loved/recent/top tracks, top artists, top albums
@@ -288,3 +286,11 @@ if __name__ == "__main__":
     if sys.argv[1] in ('-t', '-a'):
         # Get top tags for items (artists, albums, tracks)
         item_tags = dict()
+        unique_tags = set()
+
+        with open(f'{DATA_FOLDER}/item_tags.json', 'w') as f:
+            f.write(json.dumps(item_tags, indent=4, ensure_ascii=False))
+
+        with open(f'{DATA_FOLDER}/unique_tags.dat', 'w') as f:
+            for tag in unique_tags:
+                f.write(f"{tag}\n")
