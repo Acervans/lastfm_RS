@@ -197,7 +197,7 @@ if __name__ == "__main__":
                     unique_tracks.add('\u254E'.join(unique_track))
 
                     loved_tracks[listener].append(
-                        '\u254E'.join([track_name, str(t[-1])]))
+                        '\u254E'.join([track_name, artist, str(t[-1])]))
 
                 # ---------------------- Recent Tracks ----------------------
                 print('\t- Getting recent tracks...')
@@ -214,7 +214,7 @@ if __name__ == "__main__":
                     unique_tracks.add('\u254E'.join(unique_track))
 
                     recent_tracks[listener].append(
-                        '\u254E'.join([track_name, str(t[-1])]))
+                        '\u254E'.join([track_name, artist, str(t[-1])]))
 
                 # ---------------------- Top Tracks ----------------------
                 print('\t- Getting top tracks...')
@@ -230,7 +230,8 @@ if __name__ == "__main__":
                     unique_artists.add(artist)
                     unique_tracks.add('\u254E'.join(unique_track))
 
-                    top_tracks[listener].append(track_name)
+                    top_tracks[listener].append(
+                        '\u254E'.join([track_name, artist]))
 
                 # ---------------------- Artists ----------------------
                 print('\t- Getting top artists...')
