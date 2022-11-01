@@ -1,6 +1,7 @@
 from lyricsgenius import Genius
 # from nrc_vad_analysis import analyze_string, analyze_text
 from bs4 import BeautifulSoup
+import sqlalchemy
 import pylast
 import requests
 import time
@@ -15,13 +16,14 @@ network = pylast.LastFMNetwork(
 
 payload = {"username_or_email": "Test_EPS", "password": "Tfg.EPS2022"}
 
-DATA_FOLDER = '../data'
+DATA_FOLDER = '../data/lastfm_data'
 LOGIN_URL = "https://www.last.fm/login"
 
-TRACK_LIMIT = 1
-ARTIST_LIMIT = 1
-ALBUM_LIMIT = 1
-TAG_LIMIT = 1
+CHART_LIMIT = 30
+TRACK_LIMIT = 20
+ARTIST_LIMIT = 10
+ALBUM_LIMIT = 10
+TAG_LIMIT = 5
 
 
 def login_lastfm(session):
@@ -49,19 +51,16 @@ def get_top_listeners(session, artist):
     top_listeners_div = soup.find("div", {"class": "buffer-standard"})
 
     top_listeners = []
-    # Check top listeners
-    if not top_listeners_div.find("p", {"class": "no-data-message"}):
-        # Get top listeners
-        top_listeners_list = top_listeners_div.find_all(
-            "a", {"class": "link-block-target"})
-        top_listeners = [listener.get_text()
-                         for listener in top_listeners_list]
+    if top_listeners_div:
+        # Check top listeners
+        if not top_listeners_div.find("p", {"class": "no-data-message"}):
+            # Get top listeners
+            top_listeners_list = top_listeners_div.find_all(
+                "a", {"class": "link-block-target"})
+            top_listeners = [listener.get_text()
+                             for listener in top_listeners_list]
 
     return top_listeners
-
-
-def get_chart_top_tags(limit):
-    return [tag[0] for tag in network.get_top_tags(limit=limit)]
 
 
 def get_tag_top_artists(tags):
@@ -75,16 +74,35 @@ def get_tag_top_artists(tags):
 
 def get_track_info(track: pylast.Track):
     artist = track.get_artist().get_name()
-    album = track.get_album()
+    try:
+        album = track.get_album()
+    except pylast.WSError:
+        return None
+    except Exception:
+        album = None
+
     if album:
         album = album.get_name()
     else:
         album = ''
     unique_track = (track.get_name(), artist, album)
 
-    # TODO get VAD?
-
     return unique_track
+
+
+def get_tags_list(tagged_item, limit, names_only=False):
+    top_tags = tagged_item.get_top_tags(limit=limit)
+    if names_only:
+        return [tag[0].name for tag in top_tags]
+    else:
+        return [tag[0] for tag in top_tags]
+
+
+def print_load_percentage(item_num, total_items):
+    perc = item_num*100//total_items
+    sys.stdout.write('\r')
+    sys.stdout.write("[%-20s] %d%%" % ('='*(perc//5), perc))
+    sys.stdout.flush()
 
 
 if __name__ == "__main__":
@@ -94,9 +112,9 @@ if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in available_opts:
         print(f'Usage: python3 {sys.argv[0]} [Option]')
         print('Options:')
-        print('\t-l => Scrapes listeners from top listeners, obtained from top tags')
+        print('\t-l => Scrapes listeners from top listeners, obtained from chart tags')
         print('\t-d => Obtains data from listeners saved with -l')
-        print('\t-t => Obtains top tags for all the items stored with -d')
+        print('\t-t => Obtains top tags and VAD values for all the items stored with -d')
         print('\t-a => Does everything. Scrapes listeners and obtains data and tags')
         sys.exit()
 
@@ -106,9 +124,9 @@ if __name__ == "__main__":
             print('Logging in...')
             login_lastfm(s)
 
-            print('Getting top 10 tags...')
-            # Get top 10 tags
-            chart_tags = get_chart_top_tags(limit=10)
+            print(f'Getting top {CHART_LIMIT} tags...')
+            # Get top chart tags
+            chart_tags = get_tags_list(network, limit=CHART_LIMIT)
             print(f"Tags: {[tag.name for tag in chart_tags]}", end='\n\n')
 
             print('Getting top artists...')
@@ -150,21 +168,6 @@ if __name__ == "__main__":
     if sys.argv[1] in ('-d', '-a'):
 
         # Get loved/recent/top tracks, top artists, top albums
-        # NOTE: Search tags of each item AFTER storing everything
-        # tags = [tag[0].get_name()
-        #     for tag in x.get_top_tags(limit=TAG_LIMIT)]
-
-        # unique_tags.update(tags)
-        #             item_tags[unique_track] = tags
-        # TODO: VAD
-        # kb = pylast.Artist('Kudasaibeats', network)
-        # for x in kb.get_top_tags():
-        #     print(x.item.get_name())
-        # print(kb.get_bio_summary())
-
-        # # Maybe use some tags + bio summary to evaluate VAD of an artist
-        # print(genius.search_song('lone digger', 'caravan palace').lyrics)
-
         unique_artists = set()
         unique_albums = set()
         unique_tracks = set()
@@ -175,11 +178,12 @@ if __name__ == "__main__":
         top_albums = dict()
 
         with open(f'{DATA_FOLDER}/all_unique_listeners.dat', 'r') as f:
-            print('Getting data from all unique listeners...')
-            for i, listener in enumerate(f.readlines()[:1]):
-                listener = listener.strip()
+            unique_listeners = f.read().splitlines()
+            print(
+                f'Getting data from all {len(unique_listeners)} unique listeners...')
+            for i, listener in enumerate(unique_listeners):
 
-                print(f'[{i}] {listener}')
+                print(f'[{i+1}] {listener}')
                 user = network.get_user(listener)
 
                 # ---------------------- Loved Tracks ----------------------
@@ -189,6 +193,8 @@ if __name__ == "__main__":
                 for t in lt:
                     track = t[0]
                     unique_track = get_track_info(track)
+                    if not unique_track:
+                        continue
                     track_name, artist, album = unique_track
 
                     if album:
@@ -201,20 +207,28 @@ if __name__ == "__main__":
 
                 # ---------------------- Recent Tracks ----------------------
                 print('\t- Getting recent tracks...')
-                rt = user.get_recent_tracks(limit=TRACK_LIMIT)
                 recent_tracks[listener] = list()
-                for t in rt:
-                    track = t[0]
-                    unique_track = get_track_info(track)
-                    track_name, artist, album = unique_track
+                try:
+                    rt = user.get_recent_tracks(limit=TRACK_LIMIT)
+                    for t in rt:
+                        track = t[0]
+                        unique_track = get_track_info(track)
+                        if not unique_track:
+                            continue
+                        track_name, artist, album = unique_track
 
-                    if album:
-                        unique_albums.add('\u254E'.join([album, artist]))
-                    unique_artists.add(artist)
-                    unique_tracks.add('\u254E'.join(unique_track))
+                        if album:
+                            unique_albums.add(
+                                '\u254E'.join([album, artist]))
+                        unique_artists.add(artist)
+                        unique_tracks.add('\u254E'.join(unique_track))
 
-                    recent_tracks[listener].append(
-                        '\u254E'.join([track_name, artist, str(t[-1])]))
+                        recent_tracks[listener].append(
+                            '\u254E'.join([track_name, artist, str(t[-1])]))
+
+                # Recent tracks hidden by user
+                except pylast.PyLastError:
+                    pass
 
                 # ---------------------- Top Tracks ----------------------
                 print('\t- Getting top tracks...')
@@ -223,6 +237,8 @@ if __name__ == "__main__":
                 for t in tt:
                     track = t[0]
                     unique_track = get_track_info(track)
+                    if not unique_track:
+                        continue
                     track_name, artist, album = unique_track
 
                     if album:
@@ -241,7 +257,6 @@ if __name__ == "__main__":
                     artist_name = artist.get_name()
                     unique_artists.add(artist_name)
                     top_artists[listener].append(artist_name)
-                    # TODO get VAD?
 
                 # ---------------------- Albums ----------------------
                 print('\t- Getting top albums...')
@@ -253,7 +268,6 @@ if __name__ == "__main__":
                     unique_albums.add('\u254E'.join([album_name, artist_name]))
                     top_albums[listener].append(
                         '\u254E'.join([album_name, artist_name]))
-                    # TODO get VAD?
 
         with open(f'{DATA_FOLDER}/loved_tracks.json', 'w') as f:
             f.write(json.dumps(loved_tracks,
@@ -285,9 +299,80 @@ if __name__ == "__main__":
                 f.write(f"{album}\n")
 
     if sys.argv[1] in ('-t', '-a'):
+        # TODO: VAD
+        # kb = pylast.Artist('Kudasaibeats', network)
+        # for x in kb.get_top_tags():
+        #     print(x.item.get_name())
+        # print(kb.get_bio_summary())
+
+        # Also get tracks per album or tracks per artist?
+
+        # # Maybe use some tags + bio summary to evaluate VAD of an artist
+        # print(genius.search_song('lone digger', 'caravan palace').lyrics)
+
         # Get top tags for items (artists, albums, tracks)
         item_tags = dict()
         unique_tags = set()
+        item_vad = dict()
+
+        item_tags['Artists'] = dict()
+        item_vad['Artists'] = dict()
+        with open(f'{DATA_FOLDER}/unique_artists.dat', 'r') as f:
+            unique_artists = f.read().splitlines()
+            total_artists = len(unique_artists)
+            print(
+                f'Getting tags and VAD for all {total_artists} unique artists: ')
+            for i, artist in enumerate(unique_artists):
+                artist_pylast = network.get_artist(artist)
+                tags_pylast = get_tags_list(artist_pylast, TAG_LIMIT)
+                tags = [tag.name for tag in tags_pylast]
+                item_tags['Artists'][artist] = tags
+                unique_tags.update(tags)
+                # TODO get VAD
+                # TODO get tags VAD
+
+                print_load_percentage(i+1, total_artists)
+            print('\n')
+
+        item_tags['Albums'] = dict()
+        item_vad['Albums'] = dict()
+        with open(f'{DATA_FOLDER}/unique_albums.dat', 'r') as f:
+            unique_albums = f.read().splitlines()
+            total_albums = len(unique_albums)
+            print(
+                f'Getting tags and VAD for all {total_albums} unique albums: ')
+            for i, album in enumerate(unique_albums):
+                album_name, artist = album.split('\u254E')
+                album_pylast = network.get_album(artist, album_name)
+                tags_pylast = get_tags_list(album_pylast, TAG_LIMIT)
+                tags = [tag.name for tag in tags_pylast]
+                item_tags['Albums'][album] = tags
+                unique_tags.update(tags)
+                # TODO get VAD
+                # TODO get tags VAD
+
+                print_load_percentage(i+1, total_albums)
+            print('\n')
+
+        item_tags['Tracks'] = dict()
+        item_vad['Tracks'] = dict()
+        with open(f'{DATA_FOLDER}/unique_tracks.dat', 'r') as f:
+            unique_tracks = f.read().splitlines()
+            total_tracks = len(unique_tracks)
+            print(
+                f'Getting tags and VAD for all {total_tracks} unique tracks: ')
+            for i, track in enumerate(unique_tracks):
+                track_name, artist, _ = track.split('\u254E')
+                track_pylast = network.get_track(artist, track_name)
+                tags_pylast = get_tags_list(track_pylast, TAG_LIMIT)
+                tags = [tag.name for tag in tags_pylast]
+                item_tags['Tracks'][track] = tags
+                unique_tags.update(tags)
+                # TODO get VAD
+                # TODO get tags VAD
+
+                print_load_percentage(i+1, total_tracks)
+            print()
 
         with open(f'{DATA_FOLDER}/item_tags.json', 'w') as f:
             f.write(json.dumps(item_tags, indent=4, ensure_ascii=False))
@@ -295,3 +380,6 @@ if __name__ == "__main__":
         with open(f'{DATA_FOLDER}/unique_tags.dat', 'w') as f:
             for tag in unique_tags:
                 f.write(f"{tag}\n")
+
+# db = sqlalchemy.create_engine("postgresql://alumnodb:alumnodb@localhost:5432/lastfm_db")
+# conn = db.connect()

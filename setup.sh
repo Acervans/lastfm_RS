@@ -6,7 +6,7 @@ SPACY_MODEL='en_core_web_lg'
 
 # Setup current environment with modules and libraries
 # App modules
-pip3 install autopep8 django django-admin dj_database_url psycopg2-binary bs4 nltk spacy pylast lyricsgenius whitenoise djLint tensorflow_recommenders
+pip3 install autopep8 django django-admin dj_database_url psycopg2-binary bs4 nltk spacy pylast lyricsgenius whitenoise djLint sqlalchemy tensorflow_recommenders
 # Additional modules
 pip3 install gunicorn zipp urllib3 typing-extensions toml text-unidecode static3 sqlparse six pytz PyJWT pyflakes pycparser \
              pycodestyle Pillow image flake8 Faker django-debug-toolbar django-crispy-forms django-allauth dj-static coverage
