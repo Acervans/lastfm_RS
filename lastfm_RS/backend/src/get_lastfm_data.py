@@ -14,6 +14,9 @@ network = pylast.LastFMNetwork(
     "23ff8e4c454cbb8ae4a13440bc0fa745", "a5efd0d4bbeed8c37b0c4bd7672edf58"
 )
 
+network.enable_rate_limit()
+network.enable_caching()
+
 payload = {"username_or_email": "Test_EPS", "password": "Tfg.EPS2022"}
 
 DATA_FOLDER = '../data/lastfm_data'
@@ -188,9 +191,8 @@ if __name__ == "__main__":
 
                 # ---------------------- Loved Tracks ----------------------
                 print('\t- Getting loved tracks...')
-                lt = user.get_loved_tracks(limit=TRACK_LIMIT)
                 loved_tracks[listener] = list()
-                for t in lt:
+                for t in user.get_loved_tracks(limit=TRACK_LIMIT):
                     track = t[0]
                     unique_track = get_track_info(track)
                     if not unique_track:
@@ -209,8 +211,7 @@ if __name__ == "__main__":
                 print('\t- Getting recent tracks...')
                 recent_tracks[listener] = list()
                 try:
-                    rt = user.get_recent_tracks(limit=TRACK_LIMIT)
-                    for t in rt:
+                    for t in user.get_recent_tracks(limit=TRACK_LIMIT):
                         track = t[0]
                         unique_track = get_track_info(track)
                         if not unique_track:
@@ -232,9 +233,8 @@ if __name__ == "__main__":
 
                 # ---------------------- Top Tracks ----------------------
                 print('\t- Getting top tracks...')
-                tt = user.get_top_tracks(limit=TRACK_LIMIT)
                 top_tracks[listener] = list()
-                for t in tt:
+                for t in user.get_top_tracks(limit=TRACK_LIMIT):
                     track = t[0]
                     unique_track = get_track_info(track)
                     if not unique_track:
