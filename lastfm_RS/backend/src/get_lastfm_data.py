@@ -79,8 +79,11 @@ def get_track_info(track: pylast.Track):
     artist = track.get_artist().get_name()
     try:
         album = track.get_album()
-    except pylast.WSError:
-        return None
+    except pylast.WSError as e:
+        if str(e) == "Track not found":
+            return None
+        else:
+            raise e
     except Exception:
         album = None
 
