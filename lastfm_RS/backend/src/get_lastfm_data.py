@@ -167,7 +167,7 @@ if __name__ == "__main__":
 
             # Save all unique listeners
             unique_listeners = sorted(unique_listeners)
-            with open(f'{DATA_FOLDER}/all_unique_listeners.dat', 'w', encoding='utf-8') as f:
+            with open(f'{DATA_FOLDER}/unique_listeners.dat', 'w', encoding='utf-8') as f:
                 for l in unique_listeners:
                     f.write(f"{l}\n")
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
         top_artists = dict()
         top_albums = dict()
 
-        with open(f'{DATA_FOLDER}/all_unique_listeners.dat', 'r') as f:
+        with open(f'{DATA_FOLDER}/unique_listeners.dat', 'r') as f:
             unique_listeners = f.read().splitlines()
             print(
                 f'Getting data from all {len(unique_listeners)} unique listeners...')
