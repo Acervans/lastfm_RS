@@ -161,13 +161,13 @@ if __name__ == "__main__":
 
             # Save listeners by artist
             artist_listeners = dict(sorted(artist_listeners.items()))
-            with open(f'{DATA_FOLDER}/top_listeners_by_artist.json', 'w') as f:
+            with open(f'{DATA_FOLDER}/top_listeners_by_artist.json', 'w', encoding='utf-8') as f:
                 f.write(json.dumps(artist_listeners,
                         indent=4, ensure_ascii=False))
 
             # Save all unique listeners
             unique_listeners = sorted(unique_listeners)
-            with open(f'{DATA_FOLDER}/all_unique_listeners.dat', 'w') as f:
+            with open(f'{DATA_FOLDER}/all_unique_listeners.dat', 'w', encoding='utf-8') as f:
                 for l in unique_listeners:
                     f.write(f"{l}\n")
 
@@ -318,32 +318,32 @@ if __name__ == "__main__":
                     except pylast.WSError:
                         continue
 
-        with open(f'{DATA_FOLDER}/loved_tracks.json', 'w') as f:
+        with open(f'{DATA_FOLDER}/loved_tracks.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(loved_tracks,
                     indent=4, ensure_ascii=False))
 
-        with open(f'{DATA_FOLDER}/recent_tracks.json', 'w') as f:
+        with open(f'{DATA_FOLDER}/recent_tracks.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(recent_tracks,
                     indent=4, ensure_ascii=False))
 
-        with open(f'{DATA_FOLDER}/top_tracks.json', 'w') as f:
+        with open(f'{DATA_FOLDER}/top_tracks.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(top_tracks, indent=4, ensure_ascii=False))
 
-        with open(f'{DATA_FOLDER}/top_artists.json', 'w') as f:
+        with open(f'{DATA_FOLDER}/top_artists.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(top_artists, indent=4, ensure_ascii=False))
 
-        with open(f'{DATA_FOLDER}/top_albums.json', 'w') as f:
+        with open(f'{DATA_FOLDER}/top_albums.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(top_albums, indent=4, ensure_ascii=False))
 
-        with open(f'{DATA_FOLDER}/unique_tracks.dat', 'w') as f:
+        with open(f'{DATA_FOLDER}/unique_tracks.dat', 'w', encoding='utf-8') as f:
             for track in unique_tracks:
                 f.write(f"{track}\n")
 
-        with open(f'{DATA_FOLDER}/unique_artists.dat', 'w') as f:
+        with open(f'{DATA_FOLDER}/unique_artists.dat', 'w', encoding='utf-8') as f:
             for artist in unique_artists:
                 f.write(f"{artist}\n")
 
-        with open(f'{DATA_FOLDER}/unique_albums.dat', 'w') as f:
+        with open(f'{DATA_FOLDER}/unique_albums.dat', 'w', encoding='utf-8') as f:
             for album in unique_albums:
                 f.write(f"{album}\n")
 
@@ -423,10 +423,10 @@ if __name__ == "__main__":
                 print_load_percentage(i+1, total_tracks)
             print()
 
-        with open(f'{DATA_FOLDER}/item_tags.json', 'w') as f:
+        with open(f'{DATA_FOLDER}/item_tags.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(item_tags, indent=4, ensure_ascii=False))
 
-        with open(f'{DATA_FOLDER}/unique_tags.dat', 'w') as f:
+        with open(f'{DATA_FOLDER}/unique_tags.dat', 'w', encoding='utf-8') as f:
             for tag in unique_tags:
                 f.write(f"{tag}\n")
 
