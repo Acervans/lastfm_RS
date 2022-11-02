@@ -192,6 +192,15 @@ if __name__ == "__main__":
                 print(f'[{i+1}] {listener}')
                 user = network.get_user(listener)
 
+                # Check if user still exists
+                try:
+                    user.get_registered()
+                except pylast.WSError as e:
+                    if str(e) == "User not found":
+                        continue
+                    else:
+                        pass
+
                 # ---------------------- Loved Tracks ----------------------
                 print('\t- Getting loved tracks...')
                 loved_tracks[listener] = list()
