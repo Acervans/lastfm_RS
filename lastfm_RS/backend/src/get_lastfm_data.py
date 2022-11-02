@@ -192,82 +192,118 @@ if __name__ == "__main__":
                 # ---------------------- Loved Tracks ----------------------
                 print('\t- Getting loved tracks...')
                 loved_tracks[listener] = list()
-                for t in user.get_loved_tracks(limit=TRACK_LIMIT):
-                    track = t[0]
-                    unique_track = get_track_info(track)
-                    if not unique_track:
+                success = False
+                while success is False:
+                    try:
+                        for t in user.get_loved_tracks(limit=TRACK_LIMIT):
+                            track = t[0]
+                            unique_track = get_track_info(track)
+                            if not unique_track:
+                                continue
+                            track_name, artist, album = unique_track
+
+                            if album:
+                                unique_albums.add(
+                                    '\u254E'.join([album, artist]))
+                            unique_artists.add(artist)
+                            unique_tracks.add('\u254E'.join(unique_track))
+
+                            loved_tracks[listener].append(
+                                '\u254E'.join([track_name, artist, str(t[-1])]))
+                        success = True
+
+                    except pylast.WSError:
                         continue
-                    track_name, artist, album = unique_track
-
-                    if album:
-                        unique_albums.add('\u254E'.join([album, artist]))
-                    unique_artists.add(artist)
-                    unique_tracks.add('\u254E'.join(unique_track))
-
-                    loved_tracks[listener].append(
-                        '\u254E'.join([track_name, artist, str(t[-1])]))
 
                 # ---------------------- Recent Tracks ----------------------
                 print('\t- Getting recent tracks...')
                 recent_tracks[listener] = list()
-                try:
-                    for t in user.get_recent_tracks(limit=TRACK_LIMIT):
-                        track = t[0]
-                        unique_track = get_track_info(track)
-                        if not unique_track:
-                            continue
-                        track_name, artist, album = unique_track
+                success = False
+                while success is False:
+                    try:
+                        for t in user.get_recent_tracks(limit=TRACK_LIMIT):
+                            track = t[0]
+                            unique_track = get_track_info(track)
+                            if not unique_track:
+                                continue
+                            track_name, artist, album = unique_track
 
-                        if album:
-                            unique_albums.add(
-                                '\u254E'.join([album, artist]))
-                        unique_artists.add(artist)
-                        unique_tracks.add('\u254E'.join(unique_track))
+                            if album:
+                                unique_albums.add(
+                                    '\u254E'.join([album, artist]))
+                            unique_artists.add(artist)
+                            unique_tracks.add('\u254E'.join(unique_track))
 
-                        recent_tracks[listener].append(
-                            '\u254E'.join([track_name, artist, str(t[-1])]))
+                            recent_tracks[listener].append(
+                                '\u254E'.join([track_name, artist, str(t[-1])]))
+                        success = True
 
-                # Recent tracks hidden by user
-                except pylast.PyLastError:
-                    pass
+                    except pylast.WSError:
+                        continue
+                    # Recent tracks hidden by user
+                    except pylast.PyLastError:
+                        success = True
 
                 # ---------------------- Top Tracks ----------------------
                 print('\t- Getting top tracks...')
                 top_tracks[listener] = list()
-                for t in user.get_top_tracks(limit=TRACK_LIMIT):
-                    track = t[0]
-                    unique_track = get_track_info(track)
-                    if not unique_track:
+                success = False
+                while success is False:
+                    try:
+                        for t in user.get_top_tracks(limit=TRACK_LIMIT):
+                            track = t[0]
+                            unique_track = get_track_info(track)
+                            if not unique_track:
+                                continue
+                            track_name, artist, album = unique_track
+
+                            if album:
+                                unique_albums.add(
+                                    '\u254E'.join([album, artist]))
+                            unique_artists.add(artist)
+                            unique_tracks.add('\u254E'.join(unique_track))
+
+                            top_tracks[listener].append(
+                                '\u254E'.join([track_name, artist]))
+                        success = True
+
+                    except pylast.WSError:
                         continue
-                    track_name, artist, album = unique_track
-
-                    if album:
-                        unique_albums.add('\u254E'.join([album, artist]))
-                    unique_artists.add(artist)
-                    unique_tracks.add('\u254E'.join(unique_track))
-
-                    top_tracks[listener].append(
-                        '\u254E'.join([track_name, artist]))
 
                 # ---------------------- Artists ----------------------
                 print('\t- Getting top artists...')
                 top_artists[listener] = list()
-                for artist in user.get_top_artists(limit=ARTIST_LIMIT):
-                    artist = artist[0]
-                    artist_name = artist.get_name()
-                    unique_artists.add(artist_name)
-                    top_artists[listener].append(artist_name)
+                success = False
+                while success is False:
+                    try:
+                        for artist in user.get_top_artists(limit=ARTIST_LIMIT):
+                            artist = artist[0]
+                            artist_name = artist.get_name()
+                            unique_artists.add(artist_name)
+                            top_artists[listener].append(artist_name)
+                        success = True
+
+                    except pylast.WSError:
+                        continue
 
                 # ---------------------- Albums ----------------------
                 print('\t- Getting top albums...')
                 top_albums[listener] = list()
-                for album in user.get_top_albums(limit=ALBUM_LIMIT):
-                    album = album[0]
-                    artist_name = album.get_artist().get_name()
-                    album_name = album.get_name()
-                    unique_albums.add('\u254E'.join([album_name, artist_name]))
-                    top_albums[listener].append(
-                        '\u254E'.join([album_name, artist_name]))
+                success = False
+                while success is False:
+                    try:
+                        for album in user.get_top_albums(limit=ALBUM_LIMIT):
+                            album = album[0]
+                            artist_name = album.get_artist().get_name()
+                            album_name = album.get_name()
+                            unique_albums.add('\u254E'.join(
+                                [album_name, artist_name]))
+                            top_albums[listener].append(
+                                '\u254E'.join([album_name, artist_name]))
+                        success = True
+
+                    except pylast.WSError:
+                        continue
 
         with open(f'{DATA_FOLDER}/loved_tracks.json', 'w') as f:
             f.write(json.dumps(loved_tracks,
