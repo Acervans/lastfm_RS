@@ -197,6 +197,7 @@ if __name__ == "__main__":
                     user.get_registered()
                 except pylast.WSError as e:
                     if str(e) == "User not found":
+                        print(f"\t- User '{listener}' not found :(")
                         continue
                     else:
                         pass
