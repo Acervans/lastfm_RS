@@ -299,7 +299,7 @@ if __name__ == "__main__":
                             top_artists[listener].append(artist_name)
                         success = True
 
-                    except (pylast.WSError, pylast.PyLastError):
+                    except pylast.WSError:
                         continue
 
                 # ---------------------- Albums ----------------------
@@ -318,7 +318,7 @@ if __name__ == "__main__":
                                 '\u254E'.join([album_name, artist_name]))
                         success = True
 
-                    except (pylast.WSError, pylast.PyLastError):
+                    except pylast.WSError:
                         continue
 
         with open(f'{DATA_FOLDER}/loved_tracks.json', 'w', encoding='utf-8') as f:
