@@ -227,7 +227,7 @@ if __name__ == "__main__":
                                 '\u254E'.join([track_name, artist, str(t[-1])]))
                         success = True
 
-                    except (pylast.WSError, pylast.NetworkError, pylast.PyLastError):
+                    except pylast.PyLastError:
                         continue
 
                 # ---------------------- Recent Tracks ----------------------
@@ -285,7 +285,7 @@ if __name__ == "__main__":
                                 '\u254E'.join([track_name, artist]))
                         success = True
 
-                    except (pylast.WSError, pylast.NetworkError, pylast.PyLastError):
+                    except pylast.PyLastError:
                         continue
 
                 # ---------------------- Artists ----------------------
@@ -301,7 +301,7 @@ if __name__ == "__main__":
                             top_artists[listener].append(artist_name)
                         success = True
 
-                    except (pylast.WSError, pylast.NetworkError):
+                    except pylast.PyLastError:
                         continue
 
                 # ---------------------- Albums ----------------------
@@ -320,7 +320,7 @@ if __name__ == "__main__":
                                 '\u254E'.join([album_name, artist_name]))
                         success = True
 
-                    except (pylast.WSError, pylast.NetworkError):
+                    except pylast.PyLastError:
                         continue
 
         with open(f'{DATA_FOLDER}/loved_tracks.json', 'w', encoding='utf-8') as f:
