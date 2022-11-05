@@ -24,7 +24,7 @@ DATA_FOLDER = '../data/lastfm_data'
 LOGIN_URL = "https://www.last.fm/login"
 
 TODAY = date.today()
-MAX_PLAYCOUNT_PER_DAY = 500
+MAX_PLAYCOUNT_PER_DAY = 1000
 
 CHART_LIMIT = 30
 TRACK_LIMIT = 20
@@ -209,7 +209,7 @@ if __name__ == "__main__":
                     pass
 
                 delta = TODAY - date.fromtimestamp(registered)
-                # More than 500 scrobbles per day, probably a bot
+                # More than 1000 scrobbles per day, probably a bot
                 if user.get_playcount() > delta.days*MAX_PLAYCOUNT_PER_DAY:
                     print(f"\t- User '{listener}' is a bot :(")
                     continue
