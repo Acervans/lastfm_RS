@@ -211,6 +211,7 @@ if __name__ == "__main__":
                 delta = TODAY - date.fromtimestamp(registered)
                 # More than 500 scrobbles per day, probably a bot
                 if user.get_playcount() > delta.days*MAX_PLAYCOUNT_PER_DAY:
+                    print(f"\t- User '{listener}' is a bot :(")
                     continue
 
                 # ---------------------- Loved Tracks ----------------------
