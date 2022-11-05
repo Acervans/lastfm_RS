@@ -1,6 +1,7 @@
 from lyricsgenius import Genius
 # from nrc_vad_analysis import analyze_string, analyze_text
 from bs4 import BeautifulSoup
+from datetime import date
 import sqlalchemy
 import pylast
 import requests
@@ -21,6 +22,9 @@ payload = {"username_or_email": "Test_EPS", "password": "Tfg.EPS2022"}
 
 DATA_FOLDER = '../data/lastfm_data'
 LOGIN_URL = "https://www.last.fm/login"
+
+TODAY = date.today()
+MAX_PLAYCOUNT_PER_DAY = 500
 
 CHART_LIMIT = 30
 TRACK_LIMIT = 20
@@ -194,7 +198,7 @@ if __name__ == "__main__":
 
                 # Check if user still exists
                 try:
-                    user.get_registered()
+                    registered = int(user.get_registered())
                 except pylast.WSError as e:
                     if str(e) == "User not found":
                         print(f"\t- User '{listener}' not found :(")
@@ -203,6 +207,11 @@ if __name__ == "__main__":
                         pass
                 except pylast.NetworkError:
                     pass
+
+                delta = TODAY - date.fromtimestamp(registered)
+                # More than 500 scrobbles per day, probably a bot
+                if user.get_playcount() > delta.days*MAX_PLAYCOUNT_PER_DAY:
+                    continue
 
                 # ---------------------- Loved Tracks ----------------------
                 print('\t- Getting loved tracks...')
