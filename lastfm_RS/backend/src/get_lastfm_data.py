@@ -25,6 +25,7 @@ LOGIN_URL = "https://www.last.fm/login"
 
 TODAY = date.today()
 MAX_PLAYCOUNT_PER_DAY = 2000
+MAX_ATTEMPTS = 50
 
 CHART_LIMIT = 30
 TRACK_LIMIT = 20
@@ -217,8 +218,8 @@ if __name__ == "__main__":
                 # ---------------------- Loved Tracks ----------------------
                 print('\t- Getting loved tracks...')
                 loved_tracks[listener] = list()
-                success = False
-                while success is False:
+                attempts = 0
+                while attempts < MAX_ATTEMPTS:
                     try:
                         for t in user.get_loved_tracks(limit=TRACK_LIMIT):
                             track = t[0]
@@ -235,16 +236,16 @@ if __name__ == "__main__":
 
                             loved_tracks[listener].append(
                                 '\u254E'.join([track_name, artist, str(t[-1])]))
-                        success = True
+                        attempts = MAX_ATTEMPTS
 
                     except pylast.PyLastError:
-                        continue
+                        attempts += 1
 
                 # ---------------------- Recent Tracks ----------------------
                 print('\t- Getting recent tracks...')
                 recent_tracks[listener] = list()
-                success = False
-                while success is False:
+                attempts = 0
+                while attempts < MAX_ATTEMPTS:
                     try:
                         for t in user.get_recent_tracks(limit=TRACK_LIMIT):
                             track = t[0]
@@ -261,22 +262,22 @@ if __name__ == "__main__":
 
                             recent_tracks[listener].append(
                                 '\u254E'.join([track_name, artist, str(t[-1])]))
-                        success = True
+                        attempts = MAX_ATTEMPTS
 
                     except (pylast.WSError, pylast.NetworkError):
-                        continue
+                        attempts += 1
                     # Recent tracks hidden by user
                     except pylast.PyLastError as e:
                         if e.__cause__ and str(e.__cause__) == "Login: User required to be logged in":
-                            success = True
+                            attempts = MAX_ATTEMPTS
                         else:
-                            continue
+                            attempts += 1
 
                 # ---------------------- Top Tracks ----------------------
                 print('\t- Getting top tracks...')
                 top_tracks[listener] = list()
-                success = False
-                while success is False:
+                attempts = 0
+                while attempts < MAX_ATTEMPTS:
                     try:
                         for t in user.get_top_tracks(limit=TRACK_LIMIT):
                             track = t[0]
@@ -293,32 +294,32 @@ if __name__ == "__main__":
 
                             top_tracks[listener].append(
                                 '\u254E'.join([track_name, artist]))
-                        success = True
+                        attempts = MAX_ATTEMPTS
 
                     except pylast.PyLastError:
-                        continue
+                        attempts += 1
 
                 # ---------------------- Artists ----------------------
                 print('\t- Getting top artists...')
                 top_artists[listener] = list()
-                success = False
-                while success is False:
+                attempts = 0
+                while attempts < MAX_ATTEMPTS:
                     try:
                         for artist in user.get_top_artists(limit=ARTIST_LIMIT):
                             artist = artist[0]
                             artist_name = artist.get_name()
                             unique_artists.add(artist_name)
                             top_artists[listener].append(artist_name)
-                        success = True
+                        attempts = MAX_ATTEMPTS
 
                     except pylast.PyLastError:
-                        continue
+                        attempts += 1
 
                 # ---------------------- Albums ----------------------
                 print('\t- Getting top albums...')
                 top_albums[listener] = list()
-                success = False
-                while success is False:
+                attempts = 0
+                while attempts < MAX_ATTEMPTS:
                     try:
                         for album in user.get_top_albums(limit=ALBUM_LIMIT):
                             album = album[0]
@@ -328,10 +329,10 @@ if __name__ == "__main__":
                                 [album_name, artist_name]))
                             top_albums[listener].append(
                                 '\u254E'.join([album_name, artist_name]))
-                        success = True
+                        attempts = MAX_ATTEMPTS
 
                     except pylast.PyLastError:
-                        continue
+                        attempts += 1
 
         with open(f'{DATA_FOLDER}/loved_tracks.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(loved_tracks,
