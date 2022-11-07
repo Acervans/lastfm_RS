@@ -210,8 +210,16 @@ if __name__ == "__main__":
                     pass
 
                 delta = TODAY - date.fromtimestamp(registered)
-                # More than 2000 scrobbles per day, probably a bot
-                if user.get_playcount() > delta.days*MAX_PLAYCOUNT_PER_DAY:
+                isbot = False
+                attempts = 0
+                while attempts < MAX_ATTEMPTS:
+                    try:
+                        # More than 2000 scrobbles per day, probably a bot
+                        isbot = user.get_playcount() > delta.days*MAX_PLAYCOUNT_PER_DAY
+                        attempts = MAX_ATTEMPTS
+                    except pylast.WSError:
+                        attempts += 1
+                if isbot:
                     print(f"\t- User '{listener}' is a bot :(")
                     continue
 
