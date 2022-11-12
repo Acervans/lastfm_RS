@@ -23,11 +23,11 @@ payload = {"username_or_email": "Test_EPS", "password": "Tfg.EPS2022"}
 DATA_FOLDER = '../data/lastfm_data'
 LOGIN_URL = "https://www.last.fm/login"
 
-TODAY = date.today()
+SEPARATOR = '\u254E'
 MAX_PLAYCOUNT_PER_DAY = 2000
 MAX_ATTEMPTS = 50
 
-CHART_LIMIT = 30
+CHART_LIMIT = 50
 TRACK_LIMIT = 20
 ARTIST_LIMIT = 10
 ALBUM_LIMIT = 10
@@ -164,6 +164,7 @@ if __name__ == "__main__":
             print(f'# Unique listeners: {len(unique_listeners)}')
             print(f'# All listeners: {all_listeners_count}')
 
+            print('Saving listeners... ', end='')
             # Save listeners by artist
             artist_listeners = dict(sorted(artist_listeners.items()))
             with open(f'{DATA_FOLDER}/top_listeners_by_artist.json', 'w', encoding='utf-8') as f:
@@ -175,6 +176,7 @@ if __name__ == "__main__":
             with open(f'{DATA_FOLDER}/unique_listeners.dat', 'w', encoding='utf-8') as f:
                 for l in unique_listeners:
                     f.write(f"{l}\n")
+            print('SUCCESS')
 
     if sys.argv[1] in ('-d', '-a'):
 
@@ -209,14 +211,14 @@ if __name__ == "__main__":
                 except pylast.NetworkError:
                     pass
 
-                delta = TODAY - date.fromtimestamp(registered)
+                delta = date.today() - date.fromtimestamp(registered)
                 isbot = False
                 attempts = 0
                 while attempts < MAX_ATTEMPTS:
                     try:
                         # More than 2000 scrobbles per day, probably a bot
                         isbot = user.get_playcount() > delta.days*MAX_PLAYCOUNT_PER_DAY
-                        attempts = MAX_ATTEMPTS
+                        break
                     except pylast.WSError:
                         attempts += 1
                 if isbot:
@@ -238,13 +240,13 @@ if __name__ == "__main__":
 
                             if album:
                                 unique_albums.add(
-                                    '\u254E'.join([album, artist]))
+                                    SEPARATOR.join([album, artist]))
                             unique_artists.add(artist)
-                            unique_tracks.add('\u254E'.join(unique_track))
+                            unique_tracks.add(SEPARATOR.join(unique_track))
 
                             loved_tracks[listener].append(
-                                '\u254E'.join([track_name, artist, str(t[-1])]))
-                        attempts = MAX_ATTEMPTS
+                                SEPARATOR.join([track_name, artist, str(t[-1])]))
+                        break
 
                     except pylast.PyLastError:
                         attempts += 1
@@ -264,20 +266,20 @@ if __name__ == "__main__":
 
                             if album:
                                 unique_albums.add(
-                                    '\u254E'.join([album, artist]))
+                                    SEPARATOR.join([album, artist]))
                             unique_artists.add(artist)
-                            unique_tracks.add('\u254E'.join(unique_track))
+                            unique_tracks.add(SEPARATOR.join(unique_track))
 
                             recent_tracks[listener].append(
-                                '\u254E'.join([track_name, artist, str(t[-1])]))
-                        attempts = MAX_ATTEMPTS
+                                SEPARATOR.join([track_name, artist, str(t[-1])]))
+                        break
 
                     except (pylast.WSError, pylast.NetworkError):
                         attempts += 1
                     # Recent tracks hidden by user
                     except pylast.PyLastError as e:
                         if e.__cause__ and str(e.__cause__) == "Login: User required to be logged in":
-                            attempts = MAX_ATTEMPTS
+                            break
                         else:
                             attempts += 1
 
@@ -296,13 +298,13 @@ if __name__ == "__main__":
 
                             if album:
                                 unique_albums.add(
-                                    '\u254E'.join([album, artist]))
+                                    SEPARATOR.join([album, artist]))
                             unique_artists.add(artist)
-                            unique_tracks.add('\u254E'.join(unique_track))
+                            unique_tracks.add(SEPARATOR.join(unique_track))
 
                             top_tracks[listener].append(
-                                '\u254E'.join([track_name, artist]))
-                        attempts = MAX_ATTEMPTS
+                                SEPARATOR.join([track_name, artist]))
+                        break
 
                     except pylast.PyLastError:
                         attempts += 1
@@ -318,7 +320,7 @@ if __name__ == "__main__":
                             artist_name = artist.get_name()
                             unique_artists.add(artist_name)
                             top_artists[listener].append(artist_name)
-                        attempts = MAX_ATTEMPTS
+                        break
 
                     except pylast.PyLastError:
                         attempts += 1
@@ -333,15 +335,16 @@ if __name__ == "__main__":
                             album = album[0]
                             artist_name = album.get_artist().get_name()
                             album_name = album.get_name()
-                            unique_albums.add('\u254E'.join(
+                            unique_albums.add(SEPARATOR.join(
                                 [album_name, artist_name]))
                             top_albums[listener].append(
-                                '\u254E'.join([album_name, artist_name]))
-                        attempts = MAX_ATTEMPTS
+                                SEPARATOR.join([album_name, artist_name]))
+                        break
 
                     except pylast.PyLastError:
                         attempts += 1
 
+        print('Saving track, artist and album data... ', end='')
         with open(f'{DATA_FOLDER}/loved_tracks.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(loved_tracks,
                     indent=4, ensure_ascii=False))
@@ -370,6 +373,7 @@ if __name__ == "__main__":
         with open(f'{DATA_FOLDER}/unique_albums.dat', 'w', encoding='utf-8') as f:
             for album in unique_albums:
                 f.write(f"{album}\n")
+        print('SUCCESS')
 
     if sys.argv[1] in ('-t', '-a'):
         # TODO: VAD
@@ -415,7 +419,7 @@ if __name__ == "__main__":
             print(
                 f'Getting tags and VAD for all {total_albums} unique albums: ')
             for i, album in enumerate(unique_albums):
-                album_name, artist = album.split('\u254E')
+                album_name, artist = album.split(SEPARATOR)
                 album_pylast = network.get_album(artist, album_name)
                 tags_pylast = get_tags_list(album_pylast, TAG_LIMIT)
                 tags = [tag.name for tag in tags_pylast]
@@ -435,7 +439,7 @@ if __name__ == "__main__":
             print(
                 f'Getting tags and VAD for all {total_tracks} unique tracks: ')
             for i, track in enumerate(unique_tracks):
-                track_name, artist, _ = track.split('\u254E')
+                track_name, artist, _ = track.split(SEPARATOR)
                 track_pylast = network.get_track(artist, track_name)
                 tags_pylast = get_tags_list(track_pylast, TAG_LIMIT)
                 tags = [tag.name for tag in tags_pylast]
@@ -447,12 +451,17 @@ if __name__ == "__main__":
                 print_load_percentage(i+1, total_tracks)
             print()
 
+        print('Saving tag and VAD data... ', end='')
         with open(f'{DATA_FOLDER}/item_tags.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(item_tags, indent=4, ensure_ascii=False))
+
+        with open(f'{DATA_FOLDER}/item_vad.json', 'w', encoding='utf-8') as f:
+            f.write(json.dumps(item_vad, indent=4, ensure_ascii=False))
 
         with open(f'{DATA_FOLDER}/unique_tags.dat', 'w', encoding='utf-8') as f:
             for tag in unique_tags:
                 f.write(f"{tag}\n")
+        print('SUCCESS')
 
 # db = sqlalchemy.create_engine("postgresql://alumnodb:alumnodb@localhost:5432/lastfm_db")
 # conn = db.connect()

@@ -1,5 +1,5 @@
 .vscode/
-lastfm_RS/backend/data/lastfm_data/
+lastfm_RS/backend/data/lastfm_data*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
