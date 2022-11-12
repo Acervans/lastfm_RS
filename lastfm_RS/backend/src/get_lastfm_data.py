@@ -159,8 +159,6 @@ if __name__ == "__main__":
                 artist_listeners[artist] = top_listeners
                 all_listeners_count += len(top_listeners)
 
-                time.sleep(1)
-
             print(f'# Unique listeners: {len(unique_listeners)}')
             print(f'# All listeners: {all_listeners_count}')
 
