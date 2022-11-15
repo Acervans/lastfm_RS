@@ -5,7 +5,6 @@ from datetime import date
 import sqlalchemy
 import pylast
 import requests
-import time
 import json
 import sys
 
