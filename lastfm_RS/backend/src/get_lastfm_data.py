@@ -30,7 +30,7 @@ CHART_LIMIT = 50
 TRACK_LIMIT = 20
 ARTIST_LIMIT = 10
 ALBUM_LIMIT = 10
-TAG_LIMIT = 5
+TAG_LIMIT = 10
 
 
 def login_lastfm(session):
