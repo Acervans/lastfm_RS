@@ -260,8 +260,6 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
         if detailed:
             vad = deque([text, 'N/A', 'N/A', 'N/A', 'N/A',
                         'N/A', 0, 'N/A', all_words])
-            if lang_check:
-                vad.extend(['N/A', 'N/A'])
         else:
             vad = None
 
@@ -283,9 +281,11 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
             stsc = (pos_words - neg_words) / num_found
             vad = deque([text, sentiment, vad.label, stsc, arousal, dominance, ("%d out of %d" % (
                 num_found, len(all_words))), found_words, all_words])
-            if lang_check:
-                lang, lang_score = parsed_str._.language, parsed_str._.language_score
-                vad.extend([lang, lang_score])
+
+    # Language detection
+    if detailed and lang_check:
+        lang, lang_score = parsed_str._.language, parsed_str._.language_score
+        vad.extend([lang, lang_score])
 
     return vad
 

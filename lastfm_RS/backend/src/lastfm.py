@@ -13,4 +13,4 @@ print(kb.get_bio_summary())
 
 # Maybe use some tags + bio summary to evaluate VAD of an artist
 
-print(genius.search_song('lone digger', 'caravan palace').lyrics)
+print(genius.search_song('junkie @english-translation', 'frederic').lyrics)
