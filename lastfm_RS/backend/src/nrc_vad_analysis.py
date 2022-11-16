@@ -80,14 +80,14 @@ DECREASE = \
     ["almost", "barely", "kinda", "less", "little", "marginally",
      "occasionally", "partly", "slightly", "somewhat", "sorta"]
 
-# booster multiplers
+# Booster multiplers
 INC_MUL = 1.25
 DEC_MUL = 0.75
 
-# wordnet part-of-speech tags
+# Wordnet part-of-speech tags
 POS_TAGS = ('N', 'V', 'R', 'J')
 
-# accepted tags following a modifier
+# Accepted tags following a modifier
 MODIF_POS_TAGS = POS_TAGS + tuple('D')
 
 
@@ -102,7 +102,7 @@ class VAD:
     label: str = field(init=False)
 
     def __post_init__(self):
-        # set sentiment label
+        # Set sentiment label
         self.label = self.sentiment_label(self.valence)
 
     @staticmethod
@@ -134,22 +134,22 @@ def analyze_file(input_file, output_dir, mode, lang_check=False):
     output_file = os.path.join(output_dir, "Output NRC-VAD Sentiment " +
                                os.path.splitext(os.path.basename(input_file))[0] + ".csv")
 
-    # read file into string
+    # Read file into string
     with open(input_file, 'r') as myfile:
         fulltext = myfile.read()
-    # end method if file is empty
+    # End method if file is empty
     if len(fulltext) < 1:
         print('Empty file.')
         return
 
-    # check each word in sentence for sentiment and write to output_file
+    # Check each word in sentence for sentiment and write to output_file
     with open(output_file, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         if lang_check:
             fields = FIELDNAMES_LANG
         else:
             fields = FIELDNAMES
-        writer.writerow(fields)  # write header
+        writer.writerow(fields)  # Write header
 
         analyze_text(fulltext, mode, True, lang_check, writer)
 
@@ -167,18 +167,18 @@ def analyze_text(fulltext, mode, detailed=False, lang_check=False, writer=None):
         - list of lists of values that map to fieldnames, but without an index
     """
 
-    # split into sentences
+    # Split into sentences
     sentences = nlp(fulltext).sents
-    vad = []  # list of vad analysis values
+    vad = []  # List of vad analysis values
 
-    # analyze each sentence for sentiment
+    # Analyze each sentence for sentiment
     for i, s in enumerate(sentences):
         values = analyze_parsed_string(s, mode, detailed, lang_check)
         if detailed:
-            # append sentence index
+            # Append sentence index
             values.appendleft(i)
 
-        # output sentiment info for this sentence
+        # Output sentiment info for this sentence
         if writer:
             writer.writerow(values)
 
@@ -216,34 +216,34 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
 
     all_words = []
     found_words = []
-    v_list = []  # holds valence scores
-    a_list = []  # holds arousal scores
-    d_list = []  # holds dominance scores
-    pos_words = neg_words = 0  # counts words for each label
+    v_list = []  # Holds valence scores
+    a_list = []  # Holds arousal scores
+    d_list = []  # Holds dominance scores
+    pos_words = neg_words = 0  # Counts words for each label
 
-    # input Doc/Span object and raw string
+    # Input Doc/Span object and raw string
     words = parsed_str
     text = parsed_str.text
 
-    # search for each valid word's sentiment in NRC-VAD
+    # Search for each valid word's sentiment in NRC-VAD
     for index, token in enumerate(words):
-        # get pos fine-grained tag
+        # Get POS fine-grained tag
         pos = token.tag_[0]
 
-        # don't process stops or words w/ punctuation
+        # Don't process stops or words w/ punctuation
         if (token.is_stop and pos != 'N') or not token.is_alpha:
             continue
 
-        # search for lemmatized word in NRC-VAD
+        # Search for lemmatized word in NRC-VAD
         # and evaluate its VAD values
         lemma, results = search_and_evaluate(
             token, pos, index, words)
 
         all_words.append(lemma)
 
-        # word was found
+        # Word was found
         if results:
-            # prefixed string, VAD values and whether sentiment is positive
+            # Prefixed string, VAD values and whether sentiment is positive
             append_str, v, a, d, positive = results
 
             found_words.append(append_str)
@@ -256,7 +256,7 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
             elif positive is False:
                 neg_words += 1
 
-    if len(found_words) == 0:  # no words found in NRC-VAD for this sentence
+    if len(found_words) == 0:  # No words found in NRC-VAD for this sentence
         if detailed:
             vad = deque([text, 'N/A', 'N/A', 'N/A', 'N/A',
                         'N/A', 0, 'N/A', all_words])
@@ -264,7 +264,7 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
             vad = None
 
     else:
-        # get vad values
+        # Get VAD values
         if mode == 'median':
             sentiment = max(min(1, statistics.median(v_list)), 0)
             arousal = statistics.median(a_list)
@@ -274,7 +274,7 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
             arousal = statistics.fmean(a_list)
             dominance = statistics.fmean(d_list)
 
-        # set sentiment label
+        # Set sentiment label
         vad = VAD(sentiment, arousal, dominance)
         if detailed:
             num_found = len(found_words)
@@ -282,7 +282,7 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
             vad = deque([text, sentiment, vad.label, stsc, arousal, dominance, ("%d out of %d" % (
                 num_found, len(all_words))), found_words, all_words])
 
-    # Language detection
+    # Language detection attributes
     if detailed and lang_check:
         lang, lang_score = parsed_str._.language, parsed_str._.language_score
         vad.extend([lang, lang_score])
@@ -321,7 +321,7 @@ def search_and_evaluate(token, pos, current_index, words):
             if pos == 'N' or pos == 'V':
                 lemma = token.lemma_.lower()
 
-            # adapt to wordnet ADJ pos
+            # Adapt to wordnet ADJ pos
             elif pos == 'J':
                 pos = 'A'
         else:
@@ -350,7 +350,7 @@ def search_and_evaluate(token, pos, current_index, words):
             is_adverb = prior_tok.tag_[0] == 'R'
             is_other_boost = prior_tok.tag_ in (
                 'UH', 'VBG', 'VBP')
-            # check next word pos (only for adverbs)
+            # Check next word POS (only for adverbs)
             if inc is None and (is_other_boost or words[j + 1].tag_[0] in MODIF_POS_TAGS):
                 if is_adverb:
                     if prior_tok.lower_ in INCREASE:
@@ -360,19 +360,19 @@ def search_and_evaluate(token, pos, current_index, words):
                 elif is_other_boost and prior_tok.lower_ in INCREASE_EXTRA:
                     inc = True
 
-            # stop at start of current sentence or if both modifiers are active
+            # Stop at start of current sentence or if both modifiers are active
             if prior_tok.is_sent_start or (neg is not None and inc is not None):
                 break
 
-            # do not count adverbs or non-alphanumerics
+            # Do not count adverbs or non-alphanumerics
             if is_adverb or not prior_tok.is_alpha:
                 current_index -= 1
             j -= 1
 
         if first_neg:
-            # neg before modifier
+            # Neg before modifier
             neg = False
-            inc = not inc  # reverse booster polarity
+            inc = not inc  # Reverse booster polarity
 
         return neg, first_neg, inc
 
@@ -416,7 +416,7 @@ def search_and_evaluate(token, pos, current_index, words):
         :return: tuple with modified VAD values and whether sentiment is positive
         """
         if neg:
-            # reverse polarity for this word
+            # Reverse polarity for this word
             v = 1 - v
             a = 1 - a
             d = 1 - d
@@ -425,22 +425,22 @@ def search_and_evaluate(token, pos, current_index, words):
 
         positive = None
 
-        # apply modifiers
-        if l[0] == 'p':  # positive
+        # Apply modifiers
+        if l[0] == 'p':  # Positive
             positive = True
 
             if inc is True:
-                v *= INC_MUL  # increase positive valence
+                v *= INC_MUL  # Increase positive valence
             if inc is False:
-                v *= DEC_MUL  # decrease positive valence
+                v *= DEC_MUL  # Decrease positive valence
 
-        elif l[2] == 'g':  # negative
+        elif l[2] == 'g':  # Negative
             positive = False
 
             if inc is True:
-                v = 1 - INC_MUL*(1-v)  # decrease negative valence
+                v = 1 - INC_MUL*(1-v)  # Decrease negative valence
             if inc is False:
-                v = 1 - DEC_MUL*(1-v)  # increase negative valence
+                v = 1 - DEC_MUL*(1-v)  # Increase negative valence
 
         return v, a, d, positive
 
@@ -454,16 +454,16 @@ def search_and_evaluate(token, pos, current_index, words):
         """
         syns = dict()
 
-        # look for synonyms in synsets
+        # Look for synonyms in synsets
         for syn in wn.synsets(lemma, pos=wn_pos.lower()):
             for l in syn.lemmas():
                 name = l.name()
-                # avoid compounds
+                # Avoid compounds
                 if '_' not in name:
                     syns[name] = None
 
         if syns:
-            # remove original lemma if present
+            # Remove original lemma if present
             syns.pop(orig_lemma, None)
             return list(syns.keys())
         else:
@@ -471,29 +471,29 @@ def search_and_evaluate(token, pos, current_index, words):
 
     # -------------- END AUXILIARY FUNCTIONS --------------
 
-    # lemmatize word based on part-of-speech
+    # Lemmatize word using part-of-speech
     lemma, wn_pos = _lemmatize_by_pos(token, pos)
 
-    syns = []  # holds synonyms
-    s = 0  # synonyms index
-    orig_lemma = lemma  # original lemma
+    syns = []  # Holds synonyms
+    s = 0  # Synonyms index
+    orig_lemma = lemma  # Original lemma
 
-    # search until found or break
+    # Search until found or break
     while True:
         if syns:
-            # search for next synonym
+            # Search for next synonym
             lemma = syns[s]
             s += 1
 
-        # search word in nrc-vad
+        # Search word in NRC-VAD
         for row in reader:
             if row['Word'].casefold() == lemma.casefold():
 
-                # check for negation and degree adverbs in 3 words before current word
+                # Check for negation and degree adverbs in 3 words before current word
                 if token.is_sent_start:
-                    neg = None  # negation
-                    first_neg = False  # negation detected first
-                    inc = None  # increase or decrease
+                    neg = None  # Negation
+                    first_neg = False  # Negation detected first
+                    inc = None  # Increase or Decrease
                 else:
                     neg, first_neg, inc = _check_modifiers(
                         current_index, words)
@@ -508,15 +508,15 @@ def search_and_evaluate(token, pos, current_index, words):
                 results = (append_str,) + _apply_modifiers(v, a, d, neg, inc)
                 return orig_lemma, results
 
-        # pos not suitable for synonyms
+        # POS not suitable for synonyms
         if not wn_pos:
             break
 
-        # lemma not found in nrc-vad, check for synonyms
+        # Lemma not found in NRC-VAD, check for synonyms
         if not syns:
             syns = _get_synonyms(orig_lemma, wn_pos)
 
-            # no synonyms found
+            # No synonyms found
             if not syns:
                 break
 
@@ -536,19 +536,19 @@ def main(input_file, input_dir, output_dir, mode):
     :return:
     """
 
-    if len(output_dir) < 0 or not os.path.exists(output_dir):  # empty output
+    if len(output_dir) < 0 or not os.path.exists(output_dir):  # Empty output
         print('No output directory specified, or path does not exist')
         sys.exit(0)
-    elif len(input_file) == 0 and len(input_dir) == 0:  # empty input
+    elif len(input_file) == 0 and len(input_dir) == 0:  # Empty input
         print('No input specified. Please give either a single file or a directory of files to analyze.')
         sys.exit(1)
-    elif len(input_file) > 0:  # handle single file
+    elif len(input_file) > 0:  # Handle single file
         if os.path.exists(input_file):
             analyze_file(input_file, output_dir, mode)
         else:
             print('Input file "' + input_file + '" is invalid.')
             sys.exit(0)
-    elif len(input_dir) > 0:  # handle directory
+    elif len(input_dir) > 0:  # Handle directory
         if os.path.isdir(input_dir):
             directory = os.fsencode(input_dir)
             for file in os.listdir(directory):
@@ -565,7 +565,7 @@ def main(input_file, input_dir, output_dir, mode):
 
 
 if __name__ == '__main__':
-    # get arguments from command line
+    # Get arguments from command line
     parser = argparse.ArgumentParser(
         description='Sentiment analysis with NRC-VAD.')
     parser.add_argument('--file', type=str, dest='input_file', default='',
@@ -578,5 +578,5 @@ if __name__ == '__main__':
                         help='mode with which to calculate sentiment in the sentence: mean or median')
     args = parser.parse_args()
 
-    # run main
+    # Run main
     sys.exit(main(args.input_file, args.input_dir, args.output_dir, args.mode))
