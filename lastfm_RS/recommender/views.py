@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate
 from .forms import PreviewTrackForm, RegisterForm, VADAnalysisForm
 from bs4 import BeautifulSoup
-from backend.src.nrc_vad_analysis import FIELDNAMES, analyze_string, analyze_text
+from backend.src.nrc_vad_analysis import FIELDNAMES, FIELDNAMES_LANG, analyze_string, analyze_text
 import requests
 import pylast
 import lyricsgenius
@@ -152,20 +152,25 @@ def vad_analysis(request):
             text = form.cleaned_data.get('text')
             mode = form.cleaned_data.get('mode')
             method = form.cleaned_data.get('method')
+            lang_check = form.cleaned_data.get('lang_check')
+
+            if lang_check:
+                fieldnames = FIELDNAMES_LANG
+            else:
+                fieldnames = FIELDNAMES
 
             if method == 'text':
                 fun = analyze_string
-                fieldnames = FIELDNAMES[1:]
+                fieldnames = fieldnames[1:]
                 fieldnames[0] = 'Text'
             else:
                 fun = analyze_text
-                fieldnames = FIELDNAMES
 
             return render(
                 request,
                 'vad_analysis.html',
                 {'fieldnames': fieldnames,
-                 'results': fun(text, mode, True),
+                 'results': fun(text, mode, True, lang_check),
                  'method': method},
             )
     else:

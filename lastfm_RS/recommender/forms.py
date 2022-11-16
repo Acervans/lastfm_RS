@@ -22,3 +22,4 @@ class VADAnalysisForm(forms.Form):
         'mean', 'Mean'), ('median', 'Median')], widget=forms.RadioSelect, initial='mean')
     method = forms.ChoiceField(label='Analysis Method', choices=[(
         'text', 'Whole Text'), ('sentences', 'By Sentences')], widget=forms.RadioSelect, initial='text')
+    lang_check = forms.BooleanField(required=False, label='Check Language')

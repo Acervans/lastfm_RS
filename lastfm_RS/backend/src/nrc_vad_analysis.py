@@ -17,7 +17,9 @@ Parameters:
 from nltk.corpus import wordnet as wn
 from dataclasses import dataclass, field
 from collections import deque
+from spacy.tokens import Span
 import spacy
+import spacy_fastlang
 import csv
 import sys
 import os
@@ -29,8 +31,16 @@ dirname = os.path.dirname(__file__)
 # CSV file with lexicon and VAD values
 nrc = os.path.join(dirname, "../data/NRC-VAD-Lexicon.csv")
 # Use spaCy as Natural Language Processor
-nlp = spacy.load('en_core_web_lg', disable=['parser', 'ner'])
+nlp = spacy.load('en_core_web_lg')
+nlp.select_pipes(disable=['ner', 'parser'])
+nlp.add_pipe('language_detector')
 nlp.enable_pipe('senter')
+
+# Set language detection attributes for Span objects
+Span.set_extension(
+    "language", getter=lambda s: s.doc._.language, force=True)
+Span.set_extension(
+    "language_score", getter=lambda s: s.doc._.language_score, force=True)
 
 # Open NRC-VAD and store as list of dictionaries
 with open(nrc, encoding="utf-8-sig") as csvfile:
@@ -38,6 +48,8 @@ with open(nrc, encoding="utf-8-sig") as csvfile:
 
 FIELDNAMES = ['Sentence ID', 'Sentence', 'Valence', 'Sentiment Label', 'Sentiment Score', 'Arousal', 'Dominance',
               '# Words Found', 'Found Words', 'All Words']
+
+FIELDNAMES_LANG = FIELDNAMES + ['Language', 'Language Score']
 
 NEGATE = ["neither", "never", "none", "nope", "nor", "n\'t", "no", "not",
           "nothing", "nobody", "nowhere", "without", "despite", "rarely",
@@ -109,13 +121,14 @@ class VAD:
         return iter([self.label, self.valence, self.arousal, self.dominance])
 
 
-def analyze_file(input_file, output_dir, mode):
+def analyze_file(input_file, output_dir, mode, lang_check=False):
     """
     Performs sentiment analysis on the text file given as input using the NRC-VAD database.
     Outputs results to a new CSV file in output_dir.
     :param input_file: path of .txt file to analyze
     :param output_dir: path of directory to create new output file
     :param mode: determines how sentiment values for a sentence are computed (median or mean)
+    :param lang_check: whether to include language information in the analysis
     :return:
     """
     output_file = os.path.join(output_dir, "Output NRC-VAD Sentiment " +
@@ -132,17 +145,22 @@ def analyze_file(input_file, output_dir, mode):
     # check each word in sentence for sentiment and write to output_file
     with open(output_file, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(FIELDNAMES)  # write header
+        if lang_check:
+            fields = FIELDNAMES_LANG
+        else:
+            fields = FIELDNAMES
+        writer.writerow(fields)  # write header
 
-        analyze_text(fulltext, mode, True, writer)
+        analyze_text(fulltext, mode, True, lang_check, writer)
 
 
-def analyze_text(fulltext, mode, detailed=False, writer=None):
+def analyze_text(fulltext, mode, detailed=False, lang_check=False, writer=None):
     """
     Performs sentiment analysis on the sentences of a text using the NRC-VAD database.
     :param fulltext: string of the text to split into sentences and analyze
     :param mode: determines how sentiment values for a sentence are computed (median or mean)
     :param detailed: determines whether the detailed values of the analysis should be returned
+    :param lang_check: whether to include language information in the detailed analysis
     :param writer: csv.writer of csv file to which analysis results will be stored
     :return either:
         - list of objects with VAD values of the analyzed text
@@ -155,7 +173,7 @@ def analyze_text(fulltext, mode, detailed=False, writer=None):
 
     # analyze each sentence for sentiment
     for i, s in enumerate(sentences):
-        values = analyze_parsed_string(s, mode, detailed)
+        values = analyze_parsed_string(s, mode, detailed, lang_check)
         if detailed:
             # append sentence index
             values.appendleft(i)
@@ -169,26 +187,28 @@ def analyze_text(fulltext, mode, detailed=False, writer=None):
     return vad
 
 
-def analyze_string(string, mode, detailed=False):
+def analyze_string(string, mode, detailed=False, lang_check=False):
     """
     Performs sentiment analysis on a string using the NRC-VAD database.
     :param string: string to be analyzed
     :param mode: determines how sentiment values are computed (median or mean)
     :param detailed: determines whether the detailed values of the analysis should be returned
+    :param lang_check: whether to include language information in the detailed analysis
     :return either:
         - VAD object containing the VAD values of the string; or None if no words were analyzed
         - list of values that map to fieldnames, but without an index
     """
-    return analyze_parsed_string(nlp(string), mode, detailed)
+    return analyze_parsed_string(nlp(string), mode, detailed, lang_check)
 
 
-def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
+def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=False):
     """
     Performs sentiment analysis on a Doc/Span object from a parsed string using
     the NRC-VAD database.
     :param parsed_str: Doc/Span object from a string parsed with spaCy NLP
     :param mode: determines how sentiment values are computed (median or mean)
     :param detailed: determines whether the detailed values of the analysis should be returned
+    :param lang_check: whether to include language information in the detailed analysis
     :return either:
         - VAD object containing the VAD values of the string; or None if no words were analyzed
         - list of values that map to fieldnames, but without an index
@@ -238,8 +258,10 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
 
     if len(found_words) == 0:  # no words found in NRC-VAD for this sentence
         if detailed:
-            vad = deque([text, 'N/A', 'N/A', 'N/A'
-                        'N/A', 'N/A', 0, 'N/A', all_words])
+            vad = deque([text, 'N/A', 'N/A', 'N/A', 'N/A',
+                        'N/A', 0, 'N/A', all_words])
+            if lang_check:
+                vad.extend(['N/A', 'N/A'])
         else:
             vad = None
 
@@ -261,6 +283,9 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False):
             stsc = (pos_words - neg_words) / num_found
             vad = deque([text, sentiment, vad.label, stsc, arousal, dominance, ("%d out of %d" % (
                 num_found, len(all_words))), found_words, all_words])
+            if lang_check:
+                lang, lang_score = parsed_str._.language, parsed_str._.language_score
+                vad.extend([lang, lang_score])
 
     return vad
 
