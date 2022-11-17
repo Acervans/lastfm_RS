@@ -426,7 +426,7 @@ if __name__ == "__main__":
                 print(
                     f'Getting tags for all {total_items} unique {item_name}: ')
 
-                for i, item in enumerate(unique_items[:2]):
+                for i, item in enumerate(unique_items):
                     attempts = 0
                     while attempts < MAX_ATTEMPTS:
                         try:
