@@ -154,7 +154,7 @@ def analyze_file(input_file, output_dir, mode, lang_check=False):
         analyze_text(fulltext, mode, True, lang_check, writer)
 
 
-def analyze_text(fulltext, mode, detailed=False, lang_check=False, writer=None):
+def analyze_text(fulltext, mode='mean', detailed=False, lang_check=False, writer=None):
     """
     Performs sentiment analysis on the sentences of a text using the NRC-VAD database.
     :param fulltext: string of the text to split into sentences and analyze
@@ -187,7 +187,7 @@ def analyze_text(fulltext, mode, detailed=False, lang_check=False, writer=None):
     return vad
 
 
-def analyze_string(string, mode, detailed=False, lang_check=False):
+def analyze_string(string, mode='mean', detailed=False, lang_check=False):
     """
     Performs sentiment analysis on a string using the NRC-VAD database.
     :param string: string to be analyzed

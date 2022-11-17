@@ -1,12 +1,15 @@
 from lyricsgenius import Genius
-# from nrc_vad_analysis import analyze_string, analyze_text
+from nrc_vad_analysis import analyze_string
 from bs4 import BeautifulSoup
 from datetime import date
+import time
 import sqlalchemy
 import pylast
+import wikipediaapi
 import requests
 import json
 import sys
+import numpy as np
 
 genius = Genius(
     "wub8JMLwasqRZWGFM-JwSDrfT1YCFLah7T1tDvC6km3BhadU1D4vT1IsOfHNuOIq")
@@ -31,6 +34,9 @@ TRACK_LIMIT = 20
 ARTIST_LIMIT = 10
 ALBUM_LIMIT = 10
 TAG_LIMIT = 10
+
+TAG_VAD_THRESHOLD = 10
+WEIGHT_RATIO = 1.3  # Must be between 1 and 2
 
 
 def login_lastfm(session):
@@ -57,7 +63,7 @@ def get_top_listeners(session, artist):
         artist_url).content, "html.parser")
     top_listeners_div = soup.find("div", {"class": "buffer-standard"})
 
-    top_listeners = []
+    top_listeners = list()
     if top_listeners_div:
         # Check top listeners
         if not top_listeners_div.find("p", {"class": "no-data-message"}):
@@ -108,6 +114,21 @@ def get_tags_list(tagged_item, limit, names_only=False):
         return [tag[0] for tag in top_tags]
 
 
+def get_vad_average(tags, tag_vads, weighted=True):
+    vadst = list()
+    for tag in tags:
+        if tag_vads[tag]:
+            vadst.append([float(val)
+                         for val in tag_vads[tag]])
+    if vadst:
+        if weighted:
+            weights = [(1/WEIGHT_RATIO)**i for i in range(1, len(vadst)+1)]
+        else:
+            weights = None
+        vadst = np.average(vadst, weights=weights, axis=0).tolist()
+    return vadst
+
+
 def print_load_percentage(item_num, total_items):
     perc = item_num*100//total_items
     sys.stdout.write('\r')
@@ -118,15 +139,17 @@ def print_load_percentage(item_num, total_items):
 
 if __name__ == "__main__":
 
-    available_opts = ('-l', '-d', '-t', '-a')
+    available_opts = ('-l', '-d', '-t', '-s', '-a')
 
     if len(sys.argv) != 2 or sys.argv[1] not in available_opts:
         print(f'Usage: python3 {sys.argv[0]} [Option]')
         print('Options:')
         print('\t-l => Scrapes listeners from top listeners, obtained from chart tags')
         print('\t-d => Obtains data from listeners saved with -l')
-        print('\t-t => Obtains top tags and VAD values for all the items stored with -d')
-        print('\t-a => Does everything. Scrapes listeners and obtains data and tags')
+        print('\t-t => Obtains top tags for all items stored with -d, as well as the VAD value of each tag')
+        print('\t-s => Obtains the mean VAD sentiment values for all items stored with -d')
+        print(
+            '\t-a => Does everything. Scrapes listeners, obtains data, tags and VAD values')
         sys.exit()
 
     if sys.argv[1] in ('-l', '-a'):
@@ -374,130 +397,159 @@ if __name__ == "__main__":
         print('SUCCESS')
 
     if sys.argv[1] in ('-t', '-a'):
-        # TODO: VAD
-        # kb = pylast.Artist('Kudasaibeats', network)
-        # for x in kb.get_top_tags():
-        #     print(x.item.get_name())
-        # print(kb.get_bio_summary())
-
-        # Also get tracks per album or tracks per artist?
-
-        # # Maybe use some tags + bio summary to evaluate VAD of an artist
-        # print(genius.search_song('lone digger', 'caravan palace').lyrics)
 
         # Get top tags for items (artists, albums, tracks)
         item_tags = dict()
         unique_tags = set()
         unique_pylast_tags = set()
-        item_vad = dict()
 
+        # ---------------------- Artists ----------------------
         item_tags['Artists'] = dict()
-        item_vad['Artists'] = dict()
         with open(f'{DATA_FOLDER}/unique_artists.dat', 'r', encoding='utf-8') as f:
             unique_artists = f.read().splitlines()
             total_artists = len(unique_artists)
             print(
-                f'Getting tags and VAD for all {total_artists} unique artists: ')
-            attempts = 0
-            while attempts < MAX_ATTEMPTS:
-                try:
-                    for i, artist in enumerate(unique_artists):
+                f'Getting tags for all {total_artists} unique Artists: ')
+
+            for i, artist in enumerate(unique_artists):
+                attempts = 0
+                while attempts < MAX_ATTEMPTS:
+                    try:
                         artist_pylast = network.get_artist(artist)
                         tags_pylast = get_tags_list(artist_pylast, TAG_LIMIT)
                         tags = [tag.name for tag in tags_pylast]
                         item_tags['Artists'][artist] = tags
                         unique_pylast_tags.update(tags_pylast)
-                        # TODO get VAD
 
                         print_load_percentage(i+1, total_artists)
-                    break
+                        break
 
-                except pylast.PyLastError:
-                    attempts += 1
+                    except pylast.PyLastError:
+                        attempts += 1
             print('\n')
 
+        # ---------------------- Albums ----------------------
         item_tags['Albums'] = dict()
-        item_vad['Albums'] = dict()
         with open(f'{DATA_FOLDER}/unique_albums.dat', 'r', encoding='utf-8') as f:
             unique_albums = f.read().splitlines()
             total_albums = len(unique_albums)
             print(
-                f'Getting tags and VAD for all {total_albums} unique albums: ')
-            attempts = 0
-            while attempts < MAX_ATTEMPTS:
-                try:
-                    for i, album in enumerate(unique_albums):
+                f'Getting tags for all {total_albums} unique Albums: ')
+            for i, album in enumerate(unique_albums):
+                attempts = 0
+                while attempts < MAX_ATTEMPTS:
+                    try:
                         album_name, artist = album.split(SEPARATOR)
                         album_pylast = network.get_album(artist, album_name)
                         tags_pylast = get_tags_list(album_pylast, TAG_LIMIT)
                         tags = [tag.name for tag in tags_pylast]
                         item_tags['Albums'][album] = tags
                         unique_pylast_tags.update(tags_pylast)
-                        # TODO get VAD
 
                         print_load_percentage(i+1, total_albums)
-                    break
+                        break
 
-                except pylast.PyLastError:
-                    attempts += 1
+                    except pylast.PyLastError:
+                        attempts += 1
             print('\n')
 
+        # ---------------------- Tracks ----------------------
         item_tags['Tracks'] = dict()
-        item_vad['Tracks'] = dict()
         with open(f'{DATA_FOLDER}/unique_tracks.dat', 'r', encoding='utf-8') as f:
             unique_tracks = f.read().splitlines()
             total_tracks = len(unique_tracks)
             print(
-                f'Getting tags and VAD for all {total_tracks} unique tracks: ')
-            attempts = 0
-            while attempts < MAX_ATTEMPTS:
-                try:
-                    for i, track in enumerate(unique_tracks):
+                f'Getting tags for all {total_tracks} unique Tracks: ')
+            for i, track in enumerate(unique_tracks):
+                attempts = 0
+                while attempts < MAX_ATTEMPTS:
+                    try:
                         track_name, artist, _ = track.split(SEPARATOR)
                         track_pylast = network.get_track(artist, track_name)
                         tags_pylast = get_tags_list(track_pylast, TAG_LIMIT)
                         tags = [tag.name for tag in tags_pylast]
                         item_tags['Tracks'][track] = tags
                         unique_pylast_tags.update(tags_pylast)
-                        # TODO get VAD
+                        # NOTE Use lyrics for additional VAD values
 
                         print_load_percentage(i+1, total_tracks)
-                    break
+                        break
 
-                except pylast.PyLastError:
-                    attempts += 1
+                    except pylast.PyLastError:
+                        attempts += 1
             print('\n')
 
-        item_vad['Tags'] = dict()
-        total_tags = len(unique_pylast_tags)
-        print(
-            f'Getting VAD for all {total_tags} unique tags: ')
-        attempts = 0
-        while attempts < MAX_ATTEMPTS:
-            try:
-                for i, tag_pylast in enumerate(unique_pylast_tags):
-                    tag = tag_pylast.name
-                    unique_tags.add(tag)
-                    # TODO get VAD
-                    # item_vad['Tags'][tag] = v,a,d,stsc
-
-                    print_load_percentage(i+1, total_tags)
-                break
-
-            except pylast.PyLastError:
-                attempts += 1
-        print()
-
-        print('Saving tag and VAD data... ', end='')
+        print('Saving items\' tag data... ', end='')
         with open(f'{DATA_FOLDER}/item_tags.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(item_tags, indent=4, ensure_ascii=False))
+        print('SUCCESS\n')
 
-        # with open(f'{DATA_FOLDER}/item_vad.json', 'w', encoding='utf-8') as f:
-        #     f.write(json.dumps(item_vad, indent=4, ensure_ascii=False))
+        # ---------------------- Tags VAD ----------------------
+        tag_vads = dict()
+        wiki = wikipediaapi.Wikipedia('en')
 
+        total_tags = len(unique_pylast_tags)
+        print(
+            f'Getting VAD values for all {total_tags} unique Tags: ')
+        # Get VAD for each unique tag
+        for i, tag_pylast in enumerate(unique_pylast_tags):
+            attempts = 0
+            while attempts < MAX_ATTEMPTS:
+                try:
+                    vadsc = list()
+                    tag = tag_pylast.name
+                    unique_tags.add(tag)
+                    page = wiki.page(tag)
+                    if page.exists():
+                        text = wiki.page(tag).summary
+                        vad = analyze_string(text, detailed=True)
+                        vadsc = vad[1], vad[4], vad[5], vad[3]
+                    tag_vads[tag] = vadsc
+
+                    print_load_percentage(i+1, total_tags)
+                    time.sleep(0.5)
+                    break
+
+                except (pylast.PyLastError, requests.exceptions.ReadTimeout):
+                    attempts += 1
+        print('\n')
+
+        print('Saving unique tags and VAD values... ', end='')
         with open(f'{DATA_FOLDER}/unique_tags.dat', 'w', encoding='utf-8') as f:
             for tag in unique_tags:
                 f.write(f"{tag}\n")
+
+        with open(f'{DATA_FOLDER}/tag_vads.json', 'w', encoding='utf-8') as f:
+            f.write(json.dumps(tag_vads, indent=4, ensure_ascii=False))
+        print('SUCCESS')
+
+    if sys.argv[1] in ('-s', '-a'):
+
+        # Get VAD values for items (artists, albums, tracks)
+        item_vads = dict()
+
+        with open(f'{DATA_FOLDER}/item_tags.json', 'r', encoding='utf-8') as f:
+            item_tags = json.load(f)
+        with open(f'{DATA_FOLDER}/tag_vads.json', 'r', encoding='utf-8') as f:
+            tag_vads = json.load(f)
+
+        for item_name, item_dict in item_tags.items():
+            item_vads[item_name] = dict()
+            total_items = len(item_tags[item_name])
+            print(
+                f'Getting VAD values for all {total_items} unique {item_name}: ')
+            for i, (item, tags) in enumerate(item_dict.items()):
+                # TODO Weighted mean instead
+                vadst_mean = get_vad_average(
+                    tags[:TAG_VAD_THRESHOLD], tag_vads, weighted=True)
+                item_vads[item_name][item] = vadst_mean
+
+                print_load_percentage(i+1, total_items)
+            print('\n')
+
+        print('Saving items\' VAD data... ', end='')
+        with open(f'{DATA_FOLDER}/item_vads.json', 'w', encoding='utf-8') as f:
+            f.write(json.dumps(item_vads, indent=4, ensure_ascii=False))
         print('SUCCESS')
 
 # db = sqlalchemy.create_engine("postgresql://alumnodb:alumnodb@localhost:5432/lastfm_db")
