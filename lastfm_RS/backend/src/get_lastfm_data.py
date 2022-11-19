@@ -421,12 +421,13 @@ if __name__ == "__main__":
         # Get tags for each type of item
         for item_name, item_dict in item_tags.items():
             with open(f'{DATA_FOLDER}/unique_{item_name.lower()}.dat', 'r', encoding='utf-8') as f:
-                unique_items = f.read().splitlines()
+                unique_items = f.readlines()
                 total_items = len(unique_items)
                 print(
                     f'Getting tags for all {total_items} unique {item_name}: ')
 
                 for i, item in enumerate(unique_items):
+                    item = item.strip()
                     attempts = 0
                     while attempts < MAX_ATTEMPTS:
                         try:
