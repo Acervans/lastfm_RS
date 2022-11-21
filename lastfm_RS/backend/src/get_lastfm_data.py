@@ -36,7 +36,7 @@ ALBUM_LIMIT = 10
 TAG_LIMIT = 10
 
 TAG_VAD_THRESHOLD = 10
-WEIGHT_RATIO = 1.2  # Must be between 1 and 2
+WEIGHT_RATIO = 1/1.2  # Must be between 1 and 2
 
 
 def login_lastfm(session):
@@ -133,7 +133,7 @@ def get_vad_average(tags, tag_vads, weighted=True):
                          for val in tag_vads[tag]])
     if vadst:
         if weighted:
-            weights = [(1/WEIGHT_RATIO)**i for i in range(1, len(vadst)+1)]
+            weights = [(WEIGHT_RATIO)**i for i in range(1, len(vadst)+1)]
         else:
             weights = None
         vadst = np.average(vadst, weights=weights, axis=0).tolist()
