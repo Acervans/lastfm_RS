@@ -36,7 +36,7 @@ ALBUM_LIMIT = 10
 TAG_LIMIT = 10
 
 TAG_VAD_THRESHOLD = 10
-WEIGHT_RATIO = 1.3  # Must be between 1 and 2
+WEIGHT_RATIO = 1.2  # Must be between 1 and 2
 
 
 def login_lastfm(session):
