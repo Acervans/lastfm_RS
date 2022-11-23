@@ -125,6 +125,11 @@ def get_pylast_item(item, item_type):
         return network.get_track(artist, track_name)
 
 
+def is_music_page(page: wikipediaapi.WikipediaPage):
+    cats = page.categories.keys()
+    return any(['music' in cat.lower() for cat in cats])
+
+
 def get_vad_average(tags, tag_vads, weighted=True):
     vadst = list()
     for tag in tags:
@@ -150,14 +155,15 @@ def print_load_percentage(item_num, total_items):
 
 if __name__ == "__main__":
 
-    available_opts = ('-l', '-d', '-t', '-s', '-a')
+    available_opts = ('-l', '-d', '-t', '-v', '-s', '-a')
 
     if len(sys.argv) != 2 or sys.argv[1] not in available_opts:
         print(f'Usage: python3 {sys.argv[0]} [Option]')
         print('Options:')
         print('\t-l => Scrapes listeners from top listeners, obtained from chart tags')
         print('\t-d => Obtains data from listeners saved with -l')
-        print('\t-t => Obtains top tags for all items stored with -d, as well as the VAD value of each tag')
+        print('\t-t => Obtains top tags for all items stored with -d')
+        print('\t-v => Obtains the VAD value of each unique tag obtained with -t')
         print('\t-s => Obtains the mean VAD sentiment values for all items stored with -d')
         print(
             '\t-a => Does everything. Scrapes listeners, obtains data, tags and VAD values')
@@ -411,7 +417,6 @@ if __name__ == "__main__":
 
         # Get top tags for items (artists, albums, tracks)
         item_tags = dict()
-        unique_tags = set()
         unique_pylast_tags = set()
 
         item_tags['Artists'] = dict()
@@ -453,53 +458,64 @@ if __name__ == "__main__":
                                 attempts += 1
                 print('\n')
 
-        print('Saving items\' tag data... ', end='')
+        print('Saving unique tags and items\' tag data... ', end='')
         with open(f'{DATA_FOLDER}/item_tags.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(item_tags, indent=4, ensure_ascii=False))
-        print('SUCCESS\n')
 
-        # ---------------------- Tags VAD ----------------------
-        tag_vads = dict()
-        wiki = wikipediaapi.Wikipedia('en')
-
-        total_tags = len(unique_pylast_tags)
-        print(
-            f'Getting VAD values for all {total_tags} unique Tags: ')
-        # Get VAD for each unique tag
-        for i, tag_pylast in enumerate(unique_pylast_tags):
-            attempts = 0
-            while attempts < MAX_ATTEMPTS:
-                try:
-                    vadsc = list()
-                    # Get tag name
-                    tag = tag_pylast.name
-                    # Add to unique tag names
-                    unique_tags.add(tag)
-                    # Get Wikipedia page for tag
-                    page = wiki.page(tag)
-                    if page.exists():
-                        # Get Wikipedia summary for tag
-                        text = wiki.page(tag).summary
-                        # Analyze summary and extract VAD and StSc
-                        vad = analyze_string(text, detailed=True)
-                        vadsc = vad[1], vad[4], vad[5], vad[3]
-                    # Assign VAD and StSc to current tag
-                    tag_vads[tag] = vadsc
-
-                    print_load_percentage(i+1, total_tags)
-                    # Rate limit
-                    time.sleep(0.5)
-                    break
-
-                except (pylast.PyLastError, requests.exceptions.ReadTimeout):
-                    attempts += 1
-        print('\n')
-
-        print('Saving unique tags and VAD values... ', end='')
+        # Use pylast objects to ensure unique tags
+        unique_tags = sorted([ptag.name for ptag in unique_pylast_tags])
         with open(f'{DATA_FOLDER}/unique_tags.dat', 'w', encoding='utf-8') as f:
             for tag in unique_tags:
                 f.write(f"{tag}\n")
+        print('SUCCESS\n')
 
+    if sys.argv[1] in ('-v', '-a'):
+
+        # Get VAD + StSc for each unique tag
+        tag_vads = dict()
+        wiki = wikipediaapi.Wikipedia('en')
+
+        with open(f'{DATA_FOLDER}/unique_tags.dat', 'r', encoding='utf-8') as f:
+            unique_tags = f.readlines()
+            total_tags = len(unique_tags)
+            print(
+                f'Getting VAD values for all {total_tags} unique Tags: ')
+            # Get VAD for each unique tag
+            for i, tag in enumerate(unique_tags):
+                tag = tag.strip()
+                attempts = 0
+                while attempts < MAX_ATTEMPTS:
+                    try:
+                        vadsc = list()
+                        # Get Wikipedia page for tag
+                        page = wiki.page(tag)
+                        if not is_music_page(page):
+                            music_page = wiki.page(f"{tag} music")
+                        if music_page.exists():
+                            page = music_page
+
+                        if page.exists():
+                            # Get Wikipedia summary for tag
+                            text = page.summary
+                            # Analyze summary and extract VAD and StSc
+                            vad = analyze_string(text, detailed=True)
+                            vadsc = vad[1], vad[4], vad[5], vad[3]
+
+                        # Assign VAD and StSc to current tag
+                        tag_vads[tag] = vadsc
+
+                        print_load_percentage(i+1, total_tags)
+                        # Rate limit
+                        time.sleep(0.3)
+                        break
+
+                    except (pylast.PyLastError, requests.exceptions.ReadTimeout):
+                        attempts += 1
+                    except KeyError:
+                        break
+            print('\n')
+
+        print('Saving tags\' VAD values... ', end='')
         with open(f'{DATA_FOLDER}/tag_vads.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(tag_vads, indent=4, ensure_ascii=False))
         print('SUCCESS')
