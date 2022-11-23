@@ -489,12 +489,15 @@ if __name__ == "__main__":
                         vadsc = list()
                         # Get Wikipedia page for tag
                         page = wiki.page(tag)
-                        if not is_music_page(page):
+                        exists = page.exists()
+                        # Page non-existent or not music-related
+                        if not exists or (exists and not is_music_page(page)):
+                            # Check page with music topic
                             music_page = wiki.page(f"{tag} music")
-                        if music_page.exists():
-                            page = music_page
-
-                        if page.exists():
+                            if music_page.exists():
+                                page = music_page
+                                exists = True
+                        if exists:
                             # Get Wikipedia summary for tag
                             text = page.summary
                             # Analyze summary and extract VAD and StSc
