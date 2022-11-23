@@ -279,7 +279,7 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
         vad = VAD(sentiment, arousal, dominance)
         if detailed:
             # Sentiment score
-            stsc = (pos_words - neg_words) / (pos_words + neg_words)
+            stsc = (pos_words - neg_words) / max(1, pos_words + neg_words)
             vad = deque([text, sentiment, vad.label, stsc, arousal, dominance, ("%d out of %d" % (
                 num_found, len(all_words))), found_words, all_words])
 
