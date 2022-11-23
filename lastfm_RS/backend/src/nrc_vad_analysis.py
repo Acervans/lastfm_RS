@@ -256,7 +256,8 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
             elif positive is False:
                 neg_words += 1
 
-    if len(found_words) == 0:  # No words found in NRC-VAD for this sentence
+    num_found = len(found_words)
+    if num_found == 0:  # No words found in NRC-VAD for this sentence
         if detailed:
             vad = deque([text, 'N/A', 'N/A', 'N/A', 'N/A',
                         'N/A', 0, 'N/A', all_words])
@@ -277,8 +278,8 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
         # Set sentiment label
         vad = VAD(sentiment, arousal, dominance)
         if detailed:
-            num_found = len(found_words)
-            stsc = (pos_words - neg_words) / num_found
+            # Sentiment score
+            stsc = (pos_words - neg_words) / (pos_words + neg_words)
             vad = deque([text, sentiment, vad.label, stsc, arousal, dominance, ("%d out of %d" % (
                 num_found, len(all_words))), found_words, all_words])
 
