@@ -512,7 +512,7 @@ if __name__ == "__main__":
                         time.sleep(0.01)
                         break
 
-                    except (pylast.PyLastError, requests.exceptions.ReadTimeout):
+                    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
                         attempts += 1
                     except KeyError:
                         break
