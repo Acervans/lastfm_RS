@@ -509,7 +509,7 @@ if __name__ == "__main__":
 
                         print_load_percentage(i+1, total_tags)
                         # Rate limit
-                        time.sleep(0.01)
+                        time.sleep(0.05)
                         break
 
                     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
