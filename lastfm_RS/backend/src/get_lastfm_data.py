@@ -483,7 +483,6 @@ if __name__ == "__main__":
             # Get VAD for each unique tag
             for i, tag in enumerate(unique_tags):
                 tag = tag.strip()
-                # Default values
                 tag_vads[tag] = list()
                 attempts = 0
                 while attempts < MAX_ATTEMPTS:
