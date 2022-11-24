@@ -486,6 +486,9 @@ if __name__ == "__main__":
                 attempts = 0
                 while attempts < MAX_ATTEMPTS:
                     try:
+                        # Rate limit
+                        time.sleep(0.01)
+
                         vadsc = list()
                         # Get Wikipedia page for tag
                         page = wiki.page(tag)
@@ -508,8 +511,6 @@ if __name__ == "__main__":
                         tag_vads[tag] = vadsc
 
                         print_load_percentage(i+1, total_tags)
-                        # Rate limit
-                        time.sleep(0.05)
                         break
 
                     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
