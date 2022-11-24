@@ -483,13 +483,14 @@ if __name__ == "__main__":
             # Get VAD for each unique tag
             for i, tag in enumerate(unique_tags):
                 tag = tag.strip()
+                # Default values
+                tag_vads[tag] = list()
                 attempts = 0
                 while attempts < MAX_ATTEMPTS:
                     try:
                         # Rate limit
                         time.sleep(0.01)
 
-                        vadsc = list()
                         # Get Wikipedia page for tag
                         page = wiki.page(tag)
                         exists = page.exists()
@@ -506,9 +507,8 @@ if __name__ == "__main__":
                             # Analyze summary and extract VAD and StSc
                             vad = analyze_string(text, detailed=True)
                             vadsc = vad[1], vad[4], vad[5], vad[3]
-
-                        # Assign VAD and StSc to current tag
-                        tag_vads[tag] = vadsc
+                            # Assign VAD and StSc to current tag
+                            tag_vads[tag] = vadsc
 
                         print_load_percentage(i+1, total_tags)
                         break
@@ -540,7 +540,7 @@ if __name__ == "__main__":
             print(
                 f'Getting VAD values for all {total_items} unique {item_name}: ')
             for i, (item, tags) in enumerate(item_dict.items()):
-                # TODO Weighted mean instead
+                # NOTE Try different weights for averages
                 vadst_mean = get_vad_average(
                     tags[:TAG_VAD_THRESHOLD], tag_vads, weighted=True)
                 item_vads[item_name][item] = vadst_mean
