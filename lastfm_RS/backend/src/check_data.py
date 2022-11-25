@@ -14,6 +14,8 @@ with open(f'{DATA_FOLDER}/tag_vads.json', 'r', encoding='utf-8') as f:
     tag_vads = json.load(f)
 with open(f'{DATA_FOLDER}/item_tags.json', 'r', encoding='utf-8') as f:
     item_tags = json.load(f)
+with open(f'{DATA_FOLDER}/item_vads.json', 'r', encoding='utf-8') as f:
+    item_vads = json.load(f)
 
 with open(f'{DATA_FOLDER}/unique_tracks.dat', 'r', encoding='utf-8') as f:
     num_tracks = len(f.readlines())
@@ -60,6 +62,19 @@ for tag, vads in tag_vads.items():
     if vads:
         c_tagw_vad += 1
 
+c_itemw_tag = dict()
+c_itemw_vad = dict()
+for item_type in item_tags.keys():
+    c_itemw_tag[item_type] = 0
+    for item, tags in item_tags[item_type].items():
+        if tags:
+            c_itemw_tag[item_type] += 1
+            
+    c_itemw_vad[item_type] = 0
+    for item, vads in item_vads[item_type].items():
+        if vads:
+            c_itemw_vad[item_type] += 1
+
 print(f"Unique tracks: {num_tracks}")
 print(f"Unique artists: {num_artists}")
 print(f"Unique albums: {num_albums}")
@@ -73,6 +88,9 @@ print(f"Users with top albums: {c_albums}")
 print(f"Users with top artists: {c_artists}\n")
 
 print(f"Users with data of all types: {c_all_items}")
-print(f"Users with data of all types except loved tracks: {c_exclude_loved}")
+print(f"Users with data of all types except loved tracks: {c_exclude_loved}\n")
 
 print(f"Tags with VAD: {c_tagw_vad}/{num_tags}")
+for item_type in c_itemw_tag.keys():
+    print(f"{item_type} with tags: {c_itemw_tag[item_type]}/{len(item_tags[item_type])}")
+    print(f"{item_type} with VADSc: {c_itemw_vad[item_type]}/{len(item_tags[item_type])}")
