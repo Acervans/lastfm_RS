@@ -27,6 +27,9 @@ import statistics
 import time
 import argparse
 
+# Suppress fasttext deprecation warning
+spacy_fastlang.fasttext.FastText.eprint = lambda x: None
+
 dirname = os.path.dirname(__file__)
 # CSV file with lexicon and VAD values
 nrc = os.path.join(dirname, "../data/NRC-VAD-Lexicon.csv")
