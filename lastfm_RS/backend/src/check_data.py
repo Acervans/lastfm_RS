@@ -10,6 +10,10 @@ with open(f'{DATA_FOLDER}/loved_tracks.json', 'r', encoding='utf-8') as f:
     t4 = json.load(f)
 with open(f'{DATA_FOLDER}/recent_tracks.json', 'r', encoding='utf-8') as f:
     t5 = json.load(f)
+with open(f'{DATA_FOLDER}/tag_vads.json', 'r', encoding='utf-8') as f:
+    tag_vads = json.load(f)
+with open(f'{DATA_FOLDER}/item_tags.json', 'r', encoding='utf-8') as f:
+    item_tags = json.load(f)
 
 with open(f'{DATA_FOLDER}/unique_tracks.dat', 'r', encoding='utf-8') as f:
     num_tracks = len(f.readlines())
@@ -22,6 +26,9 @@ with open(f'{DATA_FOLDER}/unique_artists.dat', 'r', encoding='utf-8') as f:
 
 with open(f'{DATA_FOLDER}/unique_albums.dat', 'r', encoding='utf-8') as f:
     num_albums = len(f.readlines())
+    
+with open(f'{DATA_FOLDER}/unique_tags.dat', 'r', encoding='utf-8') as f:
+    num_tags = len(f.readlines())
 
 users = t1.keys()
 c_exclude_loved = 0
@@ -47,10 +54,16 @@ for u in users:
         c_ltracks += 1
     if t5[u]:
         c_rtracks += 1
+       
+c_tagw_vad = 0 
+for tag, vads in tag_vads.items():
+    if vads:
+        c_tagw_vad += 1
 
 print(f"Unique tracks: {num_tracks}")
 print(f"Unique artists: {num_artists}")
 print(f"Unique albums: {num_albums}")
+print(f"Unique tags: {num_tags}")
 print(f"Unique listeners (valid/total): {len(t1)}/{num_users}\n")
 
 print(f"Users with top tracks: {c_ttracks}")
@@ -61,3 +74,5 @@ print(f"Users with top artists: {c_artists}\n")
 
 print(f"Users with data of all types: {c_all_items}")
 print(f"Users with data of all types except loved tracks: {c_exclude_loved}")
+
+print(f"Tags with VAD: {c_tagw_vad}/{num_tags}")

@@ -3,7 +3,6 @@ from nrc_vad_analysis import analyze_string
 from bs4 import BeautifulSoup
 from datetime import date
 import time
-import sqlalchemy
 import pylast
 import wikipediaapi
 import requests
@@ -441,7 +440,7 @@ if __name__ == "__main__":
                             # Obtain pylast tags
                             tags_pylast = get_tags_list(item_pylast, TAG_LIMIT)
                             # Get tags as strings
-                            tags = [tag.name for tag in tags_pylast]
+                            tags = [tag.name for tag in tags_pylast if tag.name]
                             # Assign tags to current item
                             item_dict[item] = tags
                             # Update unique pylast Tags
@@ -505,9 +504,11 @@ if __name__ == "__main__":
                             text = page.summary
                             # Analyze summary and extract VAD and StSc
                             vad = analyze_string(text, detailed=True)
-                            vadsc = vad[1], vad[4], vad[5], vad[3]
-                            # Assign VAD and StSc to current tag
-                            tag_vads[tag] = vadsc
+
+                            if 'N/A' not in vadsc:
+                                vadsc = vad[1], vad[4], vad[5], vad[3]
+                                # Assign VAD and StSc to current tag
+                                tag_vads[tag] = vadsc
 
                         print_load_percentage(i+1, total_tags)
                         break
@@ -533,6 +534,9 @@ if __name__ == "__main__":
         with open(f'{DATA_FOLDER}/tag_vads.json', 'r', encoding='utf-8') as f:
             tag_vads = json.load(f)
 
+        # Lowercase tag keys in tag_vads
+        tag_vads = dict([(k.lower(), v) for k, v in tag_vads.items()])
+
         for item_name, item_dict in item_tags.items():
             item_vads[item_name] = dict()
             total_items = len(item_tags[item_name])
@@ -540,6 +544,9 @@ if __name__ == "__main__":
                 f'Getting VAD values for all {total_items} unique {item_name}: ')
             for i, (item, tags) in enumerate(item_dict.items()):
                 # NOTE Try different weights for averages
+
+                # Lowercase tags for each item
+                tags = [t.lower() for t in tags]
                 vadst_mean = get_vad_average(
                     tags[:TAG_VAD_THRESHOLD], tag_vads, weighted=True)
                 item_vads[item_name][item] = vadst_mean
@@ -551,6 +558,3 @@ if __name__ == "__main__":
         with open(f'{DATA_FOLDER}/item_vads.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(item_vads, indent=4, ensure_ascii=False))
         print('SUCCESS')
-
-# db = sqlalchemy.create_engine("postgresql://alumnodb:alumnodb@localhost:5432/lastfm_db")
-# conn = db.connect()
