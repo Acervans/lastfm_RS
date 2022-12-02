@@ -2,9 +2,8 @@ from lyricsgenius import Genius
 from nrc_vad_analysis import analyze_string
 from bs4 import BeautifulSoup
 from datetime import date
-import time
 import pylast
-import wikipediaapi
+import wikipedia
 import requests
 import json
 import sys
@@ -52,7 +51,7 @@ def login_lastfm(session):
     payload["csrfmiddlewaretoken"] = csrftoken
 
     # Log into Last FM (necessary to view listeners)
-    s.post(LOGIN_URL, data=payload, headers=dict(Referer=LOGIN_URL))
+    session.post(LOGIN_URL, data=payload, headers=dict(Referer=LOGIN_URL))
 
 
 def get_top_listeners(session, artist):
@@ -124,9 +123,25 @@ def get_pylast_item(item, item_type):
         return network.get_track(artist, track_name)
 
 
-def is_music_page(page: wikipediaapi.WikipediaPage):
-    cats = page.categories.keys()
-    return any(['music' in cat.lower() for cat in cats])
+def is_music_page(page: wikipedia.WikipediaPage):
+    return any(['music' in cat.lower() for cat in page.categories])
+
+
+def search_wikipedia_music_page(title):
+    pages = wikipedia.search(title)
+    if pages:
+        page = wikipedia.page(pages[0], auto_suggest=False)
+    else:
+        page = None
+
+    # Page non-existent or not music-related
+    if not page or (page and not is_music_page(page)):
+        # Check page with music topic
+        music_page = search_wikipedia_music_page(f"{title} music")
+        if music_page:
+            page = music_page
+
+    return page
 
 
 def get_vad_average(tags, tag_vads, weighted=True):
@@ -372,6 +387,7 @@ if __name__ == "__main__":
                             album = album[0]
                             artist_name = album.get_artist().get_name()
                             album_name = album.get_name()
+                            unique_artists.add(artist_name)
                             unique_albums.add(SEPARATOR.join(
                                 [album_name, artist_name]))
                             top_albums[listener].append(
@@ -432,6 +448,7 @@ if __name__ == "__main__":
 
                 for i, item in enumerate(unique_items):
                     item = item.strip()
+                    item_dict[item] = list()
                     attempts = 0
                     while attempts < MAX_ATTEMPTS:
                         try:
@@ -472,7 +489,11 @@ if __name__ == "__main__":
 
         # Get VAD + StSc for each unique tag
         tag_vads = dict()
-        wiki = wikipediaapi.Wikipedia('en')
+
+        # English Wikipedia
+        wikipedia.set_lang('en')
+        # Enable rate limiting
+        wikipedia.set_rate_limiting(True)
 
         with open(f'{DATA_FOLDER}/unique_tags.dat', 'r', encoding='utf-8') as f:
             unique_tags = f.readlines()
@@ -486,26 +507,15 @@ if __name__ == "__main__":
                 attempts = 0
                 while attempts < MAX_ATTEMPTS:
                     try:
-                        # Rate limit
-                        time.sleep(0.01)
-
                         # Get Wikipedia page for tag
-                        page = wiki.page(tag)
-                        exists = page.exists()
-                        # Page non-existent or not music-related
-                        if not exists or (exists and not is_music_page(page)):
-                            # Check page with music topic
-                            music_page = wiki.page(f"{tag} music")
-                            if music_page.exists():
-                                page = music_page
-                                exists = True
-                        if exists:
+                        page = search_wikipedia_music_page(tag)
+                        if page:
                             # Get Wikipedia summary for tag
                             text = page.summary
                             # Analyze summary and extract VAD and StSc
                             vad = analyze_string(text, detailed=True)
 
-                            if 'N/A' not in vadsc:
+                            if 'N/A' not in vad:
                                 vadsc = vad[1], vad[4], vad[5], vad[3]
                                 # Assign VAD and StSc to current tag
                                 tag_vads[tag] = vadsc
