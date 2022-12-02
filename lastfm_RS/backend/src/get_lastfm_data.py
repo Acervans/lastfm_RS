@@ -137,7 +137,10 @@ def search_wikipedia_music_page(title, music_suffix=False):
             page = wikipedia.page(pages[0], auto_suggest=False)
         except wikipedia.exceptions.DisambiguationError as e:
             # Use disambiguation suggestion
-            page = wikipedia.page(str(e).split('\n')[1], auto_suggest=False)
+            suggestion = next((p for p in str(e).split(
+                '\n')[1:] if not p.endswith('(disambiguation)')), None)
+            if suggestion:
+                page = wikipedia.page(suggestion, auto_suggest=False)
 
     # Page non-existent or not music-related
     if not music_suffix and (not page or (page and not is_music_page(page))):
