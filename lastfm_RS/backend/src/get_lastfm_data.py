@@ -133,16 +133,11 @@ def search_wikipedia_music_page(title, music_suffix=False):
     pages = wikipedia.search(title)
     page = None
     if pages:
-        i = 0
-        found = False
-        while not found:
-            try:
-                page = wikipedia.page(pages[i], auto_suggest=False)
-                found = True
-            except wikipedia.exceptions.DisambiguationError as e:
-                i = 0
-                pages = str(e).split('\n')[1:]
-                print(pages)
+        try:
+            page = wikipedia.page(pages[0], auto_suggest=False)
+        except wikipedia.exceptions.DisambiguationError as e:
+            # Use disambiguation suggestion
+            pages = str(e).split('\n')[1]
 
     # Page non-existent or not music-related
     if not music_suffix and (not page or (page and not is_music_page(page))):
