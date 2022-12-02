@@ -2,6 +2,8 @@ from lyricsgenius import Genius
 from nrc_vad_analysis import analyze_string
 from bs4 import BeautifulSoup
 from datetime import date
+from requests.exceptions import ConnectionError, ReadTimeout
+from wikipedia.exceptions import WikipediaException, PageError, DisambiguationError
 import pylast
 import wikipedia
 import requests
@@ -135,7 +137,7 @@ def search_wikipedia_music_page(title, music_suffix=False):
     if pages:
         try:
             page = wikipedia.page(pages[0], auto_suggest=False)
-        except wikipedia.exceptions.DisambiguationError as e:
+        except DisambiguationError as e:
             # Use disambiguation suggestion
             for suggestion in str(e).split('\n')[1:]:
                 # Avoid disambiguations
@@ -143,7 +145,7 @@ def search_wikipedia_music_page(title, music_suffix=False):
                     try:
                         page = wikipedia.page(suggestion, auto_suggest=False)
                     # Check next suggestion if non-existent
-                    except (wikipedia.exceptions.PageError, wikipedia.exceptions.DisambiguationError):
+                    except (PageError, DisambiguationError):
                         continue
 
     # Page non-existent or not music-related
@@ -535,7 +537,7 @@ if __name__ == "__main__":
                         print_load_percentage(i+1, total_tags)
                         break
 
-                    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                    except (ConnectionError, ReadTimeout, WikipediaException):
                         attempts += 1
                     except KeyError:
                         break
