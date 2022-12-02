@@ -127,17 +127,23 @@ def is_music_page(page: wikipedia.WikipediaPage):
     return any(['music' in cat.lower() for cat in page.categories])
 
 
-def search_wikipedia_music_page(title):
+def search_wikipedia_music_page(title, music_suffix=False):
+    if music_suffix:
+        title += " music"
     pages = wikipedia.search(title)
+    page = None
     if pages:
-        page = wikipedia.page(pages[0], auto_suggest=False)
-    else:
-        page = None
+        for p in pages:
+            try:
+                page = wikipedia.page(p, auto_suggest=False)
+                break
+            except wikipedia.exceptions.DisambiguationError:
+                continue
 
     # Page non-existent or not music-related
-    if not page or (page and not is_music_page(page)):
+    if not music_suffix and (not page or (page and not is_music_page(page))):
         # Check page with music topic
-        music_page = search_wikipedia_music_page(f"{title} music")
+        music_page = search_wikipedia_music_page(title, music_suffix=True)
         if music_page:
             page = music_page
 
