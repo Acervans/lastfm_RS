@@ -143,7 +143,7 @@ def search_wikipedia_music_page(title, music_suffix=False):
                     try:
                         page = wikipedia.page(suggestion, auto_suggest=False)
                     # Check next suggestion if non-existent
-                    except wikipedia.exceptions.PageError:
+                    except (wikipedia.exceptions.PageError, wikipedia.exceptions.DisambiguationError):
                         continue
 
     # Page non-existent or not music-related
