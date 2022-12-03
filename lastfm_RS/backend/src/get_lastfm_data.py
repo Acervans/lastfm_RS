@@ -537,9 +537,9 @@ if __name__ == "__main__":
                         print_load_percentage(i+1, total_tags)
                         break
 
-                    except (ConnectionError, AssertionError, ReadTimeout):
+                    except (ConnectionError, ReadTimeout):
                         attempts += 1
-                    except WikipediaException:
+                    except (AssertionError, WikipediaException):
                         continue
                     except KeyError:
                         break
