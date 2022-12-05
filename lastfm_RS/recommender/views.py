@@ -109,7 +109,7 @@ def get_track_context(artist, title, do_lyrics):
         artist_url = 'https://www.last.fm/music/' + artist.replace(' ', '+')
 
         soup = BeautifulSoup(requests.get(
-            track_url).content, "html.parser")
+            track_url).content, "lxml")
         plinks = soup.find('ul', {'class': 'play-this-track-playlinks'})
 
         # get playlinks for youtube and spotify embeds
