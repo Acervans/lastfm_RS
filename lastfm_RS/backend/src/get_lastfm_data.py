@@ -35,6 +35,7 @@ ARTIST_LIMIT = 10
 ALBUM_LIMIT = 10
 TAG_LIMIT = 10
 
+MAX_WIKIPEDIA_REQUEST = 300
 TAG_VAD_THRESHOLD = 10
 WEIGHT_RATIO = 1/1.2  # Must be between 0.5 and 1
 
@@ -522,7 +523,8 @@ if __name__ == "__main__":
                 while attempts < MAX_ATTEMPTS:
                     try:
                         # Get Wikipedia page for tag
-                        page = search_wikipedia_music_page(tag)
+                        page = search_wikipedia_music_page(
+                            tag[:MAX_WIKIPEDIA_REQUEST])
                         if page:
                             # Get Wikipedia summary for tag
                             text = page.summary
