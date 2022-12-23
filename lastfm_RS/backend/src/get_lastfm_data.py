@@ -132,7 +132,7 @@ def is_music_page(page: wikipedia.WikipediaPage):
 
 def search_wikipedia_music_page(title, music_suffix=False):
     if music_suffix:
-        title += " music"
+        title = title[:MAX_WIKIPEDIA_REQUEST - 6] + " music"
     pages = wikipedia.search(title)
     page = None
     if pages:
