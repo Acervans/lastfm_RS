@@ -3,8 +3,8 @@
     "version": "2.2.11",
     "width": 2500,
     "height": 2500,
-    "scrollTop": -326,
-    "scrollLeft": -409,
+    "scrollTop": -449,
+    "scrollLeft": -75,
     "zoomLevel": 1,
     "show": {
       "tableComment": true,
@@ -95,7 +95,7 @@
           {
             "name": "VAD",
             "comment": "",
-            "dataType": "varchar",
+            "dataType": "float8[]",
             "default": "",
             "option": {
               "autoIncrement": false,
@@ -120,7 +120,7 @@
           "active": false,
           "left": 869.3673,
           "top": 1098.0938,
-          "zIndex": 13,
+          "zIndex": 10,
           "widthName": 60,
           "widthComment": 60
         },
@@ -226,7 +226,7 @@
           {
             "name": "VAD",
             "comment": "",
-            "dataType": "varchar",
+            "dataType": "float8[]",
             "default": "",
             "option": {
               "autoIncrement": false,
@@ -251,7 +251,7 @@
           "active": false,
           "left": 869.337,
           "top": 814.5479,
-          "zIndex": 12,
+          "zIndex": 8,
           "widthName": 60,
           "widthComment": 60
         },
@@ -334,7 +334,7 @@
           {
             "name": "VAD",
             "comment": "",
-            "dataType": "varchar",
+            "dataType": "float8[]",
             "default": "",
             "option": {
               "autoIncrement": false,
@@ -359,7 +359,7 @@
           "active": false,
           "left": 439.4814,
           "top": 862.7454,
-          "zIndex": 11,
+          "zIndex": 9,
           "widthName": 60,
           "widthComment": 60
         },
@@ -421,7 +421,7 @@
           "active": false,
           "left": 1815.8038,
           "top": 1243.9167,
-          "zIndex": 14,
+          "zIndex": 11,
           "widthName": 60,
           "widthComment": 60
         },
@@ -481,7 +481,7 @@
           {
             "name": "VAD",
             "comment": "",
-            "dataType": "varchar",
+            "dataType": "float8[]",
             "default": "",
             "option": {
               "autoIncrement": false,
@@ -506,7 +506,7 @@
           "active": false,
           "left": 869.9342,
           "top": 338.6562,
-          "zIndex": 10,
+          "zIndex": 6,
           "widthName": 60,
           "widthComment": 60
         },
@@ -570,13 +570,13 @@
             "default": "",
             "option": {
               "autoIncrement": false,
-              "primaryKey": false,
+              "primaryKey": true,
               "unique": false,
-              "notNull": false
+              "notNull": true
             },
             "ui": {
               "active": false,
-              "pk": false,
+              "pk": true,
               "fk": false,
               "pfk": false,
               "widthName": 60,
@@ -591,7 +591,7 @@
           "active": false,
           "left": 1378.1934,
           "top": 921.3664,
-          "zIndex": 7,
+          "zIndex": 13,
           "widthName": 105.1680908203125,
           "widthComment": 60
         },
@@ -655,13 +655,13 @@
             "default": "",
             "option": {
               "autoIncrement": false,
-              "primaryKey": false,
+              "primaryKey": true,
               "unique": false,
-              "notNull": false
+              "notNull": true
             },
             "ui": {
               "active": false,
-              "pk": false,
+              "pk": true,
               "fk": false,
               "pfk": false,
               "widthName": 60,
@@ -676,7 +676,7 @@
           "active": false,
           "left": 1378.8595,
           "top": 778.5316,
-          "zIndex": 6,
+          "zIndex": 12,
           "widthName": 110.53709411621094,
           "widthComment": 60
         },
@@ -738,7 +738,7 @@
           "active": false,
           "left": 1386.5232,
           "top": 1065.4196,
-          "zIndex": 9,
+          "zIndex": 5,
           "widthName": 90.99807739257812,
           "widthComment": 60
         },
@@ -800,7 +800,7 @@
           "active": false,
           "left": 868.8175,
           "top": 1456.1941,
-          "zIndex": 4,
+          "zIndex": 2,
           "widthName": 98.68109130859375,
           "widthComment": 60
         },
@@ -862,7 +862,7 @@
           "active": false,
           "left": 869.5315,
           "top": 1329.216,
-          "zIndex": 5,
+          "zIndex": 3,
           "widthName": 91.47908020019531,
           "widthComment": 60
         },
@@ -924,7 +924,7 @@
           "active": false,
           "left": 1815.9741,
           "top": 381.6057,
-          "zIndex": 8,
+          "zIndex": 4,
           "widthName": 80.31207275390625,
           "widthComment": 60
         },
@@ -986,7 +986,7 @@
           "active": false,
           "left": 1390.4285,
           "top": 581.4376,
-          "zIndex": 3,
+          "zIndex": 1,
           "widthName": 84.52409362792969,
           "widthComment": 60
         },
@@ -1048,7 +1048,7 @@
           "active": false,
           "left": 869.6427,
           "top": 596.5241,
-          "zIndex": 1,
+          "zIndex": 14,
           "widthName": 84.0430908203125,
           "widthComment": 60
         },
@@ -1110,7 +1110,7 @@
           "active": false,
           "left": 441.5497,
           "top": 348.906,
-          "zIndex": 2,
+          "zIndex": 7,
           "widthName": 91.72610473632812,
           "widthComment": 60
         },

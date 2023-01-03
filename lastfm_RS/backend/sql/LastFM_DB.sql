@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS Album (
   id integer NOT NULL GENERATED ALWAYS AS IDENTITY,
   name varchar NOT NULL,
   artist_id integer NOT NULL,
-  VAD varchar,
+  VAD float8 [],
   PRIMARY KEY (id)
 );
 
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS AlbumTopTags (
 CREATE TABLE IF NOT EXISTS Artist (
   id integer NOT NULL GENERATED ALWAYS AS IDENTITY,
   name varchar NOT NULL UNIQUE,
-  VAD varchar,
+  VAD float8 [],
   PRIMARY KEY (id)
 );
 
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS ArtistTopTags (
 CREATE TABLE IF NOT EXISTS Tag (
   id integer NOT NULL GENERATED ALWAYS AS IDENTITY,
   name varchar NOT NULL UNIQUE,
-  VAD varchar,
+  VAD float8 [],
   PRIMARY KEY (id)
 );
 
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS Track (
   name varchar NOT NULL,
   artist_id integer NOT NULL,
   album_id integer,
-  VAD varchar,
+  VAD float8 [],
   PRIMARY KEY (id)
 );
 
@@ -57,14 +57,14 @@ CREATE TABLE IF NOT EXISTS UserLovedTracks (
   user_id integer NOT NULL,
   track_id integer NOT NULL,
   love_at timestamp,
-  PRIMARY KEY (user_id, track_id)
+  PRIMARY KEY (user_id, track_id, love_at)
 );
 
 CREATE TABLE IF NOT EXISTS UserRecentTracks (
   user_id integer NOT NULL,
   track_id integer NOT NULL,
   listen_at timestamp,
-  PRIMARY KEY (user_id, track_id)
+  PRIMARY KEY (user_id, track_id, listen_at)
 );
 
 CREATE TABLE IF NOT EXISTS UserTopAlbums (

@@ -87,7 +87,7 @@ def get_tag_top_artists(tags):
 
 
 def get_track_info(track: pylast.Track):
-    artist = track.get_artist().get_name()
+    artist = track.get_artist().get_name(properly_capitalized=True)
     try:
         album = track.get_album()
     except pylast.WSError as e:
@@ -99,7 +99,7 @@ def get_track_info(track: pylast.Track):
         album = None
 
     if album:
-        album = album.get_name()
+        album = album.get_name(properly_capitalized=True)
     else:
         album = ''
     unique_track = (track.get_name(), artist, album)
@@ -400,7 +400,7 @@ if __name__ == "__main__":
                     try:
                         for album in user.get_top_albums(limit=ALBUM_LIMIT):
                             album = album[0]
-                            artist_name = album.get_artist().get_name()
+                            artist_name = album.get_artist().get_name(properly_capitalized=True)
                             album_name = album.get_name()
                             unique_artists.add(artist_name)
                             unique_albums.add(SEPARATOR.join(

@@ -22,7 +22,7 @@ reset_db: clear_db update_db create_super_user
 clear_db:
 	@echo Clear Database
 	dropdb --if-exists $(PGDATABASE)
-	createdb
+	createdb -E utf8
 
 shell:
 	@echo manage.py  shell

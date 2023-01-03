@@ -8,6 +8,9 @@ VAD_DATA = $(DATA)/item_vads.json $(DATA)/tag_vads.json
 
 all:
 
+reset_db:
+	make -C ../.. $@
+
 clean_listeners:
 	rm -f $(LISTENERS)
 
