@@ -32,6 +32,10 @@ insert_code = \"\"\"        # inserted
             if header:
                 header.replace_with('')
 
+            controls = div.find('div', class_=re.compile('LyricsControls'))
+            if controls:
+                controls.replace_with('')
+
 \"\"\"
 
 already_ins = False

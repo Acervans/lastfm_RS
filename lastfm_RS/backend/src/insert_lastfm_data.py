@@ -1,10 +1,8 @@
 from sqlalchemy import create_engine, inspect, text, MetaData, select, Table
 from datetime import datetime
+from constants import *
 import json
 
-DATA_FOLDER = '../data/lastfm_data'
-SQL_FOLDER = '../sql'
-SEPARATOR = '\u254E'
 
 db = create_engine(
     "postgresql://alumnodb:alumnodb@localhost:5432/lastfm_db", client_encoding="UTF-8")

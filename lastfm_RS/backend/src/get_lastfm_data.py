@@ -1,43 +1,21 @@
-from lyricsgenius import Genius
+from constants import *
 from nrc_vad_analysis import analyze_string
 from bs4 import BeautifulSoup
 from datetime import date
 from requests.exceptions import ConnectionError, ReadTimeout
 from wikipedia.exceptions import WikipediaException, PageError, DisambiguationError
+import numpy as np
 import pylast
 import wikipedia
 import requests
 import json
 import sys
-import numpy as np
 
-genius = Genius(
-    "wub8JMLwasqRZWGFM-JwSDrfT1YCFLah7T1tDvC6km3BhadU1D4vT1IsOfHNuOIq")
-network = pylast.LastFMNetwork(
-    "23ff8e4c454cbb8ae4a13440bc0fa745", "a5efd0d4bbeed8c37b0c4bd7672edf58"
-)
 
-network.enable_rate_limit()
-network.enable_caching()
+PYLAST.enable_rate_limit()
+PYLAST.enable_caching()
 
 payload = {"username_or_email": "Test_EPS", "password": "Tfg.EPS2022"}
-
-DATA_FOLDER = '../data/lastfm_data'
-LOGIN_URL = "https://www.last.fm/login"
-
-SEPARATOR = '\u254E'
-MAX_PLAYCOUNT_PER_DAY = 2000
-MAX_ATTEMPTS = 50
-
-CHART_LIMIT = 50
-TRACK_LIMIT = 20
-ARTIST_LIMIT = 10
-ALBUM_LIMIT = 10
-TAG_LIMIT = 10
-
-MAX_WIKIPEDIA_REQUEST = 300
-TAG_VAD_THRESHOLD = 10
-WEIGHT_RATIO = 1/1.2  # Must be between 0.5 and 1
 
 
 def login_lastfm(session):
@@ -117,13 +95,13 @@ def get_tags_list(tagged_item, limit, names_only=False):
 
 def get_pylast_item(item, item_type):
     if item_type == "Artists":
-        return network.get_artist(item)
+        return PYLAST.get_artist(item)
     if item_type == "Albums":
         album_name, artist = item.split(SEPARATOR)
-        return network.get_album(artist, album_name)
+        return PYLAST.get_album(artist, album_name)
     if item_type == "Tracks":
         track_name, artist, _ = item.split(SEPARATOR)
-        return network.get_track(artist, track_name)
+        return PYLAST.get_track(artist, track_name)
 
 
 def is_music_page(page: wikipedia.WikipediaPage):
@@ -206,7 +184,7 @@ if __name__ == "__main__":
 
             print(f'Getting top {CHART_LIMIT} tags...')
             # Get top chart tags
-            chart_tags = get_tags_list(network, limit=CHART_LIMIT)
+            chart_tags = get_tags_list(PYLAST, limit=CHART_LIMIT)
             print(f"Tags: {[tag.name for tag in chart_tags]}", end='\n\n')
 
             print('Getting top artists...')
@@ -264,7 +242,7 @@ if __name__ == "__main__":
             for i, listener in enumerate(unique_listeners):
 
                 print(f'[{i+1}] {listener}')
-                user = network.get_user(listener)
+                user = PYLAST.get_user(listener)
 
                 # Check if user still exists
                 try:

@@ -1,5 +1,6 @@
+from constants import *
 import json
-DATA_FOLDER = '../data/lastfm_data'
+
 with open(f'{DATA_FOLDER}/top_albums.json', 'r', encoding='utf-8') as f:
     t1 = json.load(f)
 with open(f'{DATA_FOLDER}/top_artists.json', 'r', encoding='utf-8') as f:

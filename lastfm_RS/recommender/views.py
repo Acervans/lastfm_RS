@@ -3,16 +3,11 @@ from django.contrib.auth import authenticate
 from .forms import PreviewTrackForm, RegisterForm, VADAnalysisForm
 from bs4 import BeautifulSoup
 from backend.src.nrc_vad_analysis import FIELDNAMES, FIELDNAMES_LANG, analyze_string, analyze_text
+from backend.src.constants import GENIUS, PYLAST
 import requests
 import pylast
-import lyricsgenius
 
 # Create your views here.
-
-genius = lyricsgenius.Genius(
-    'wub8JMLwasqRZWGFM-JwSDrfT1YCFLah7T1tDvC6km3BhadU1D4vT1IsOfHNuOIq', verbose=False)
-network = pylast.LastFMNetwork(
-    '23ff8e4c454cbb8ae4a13440bc0fa745', 'a5efd0d4bbeed8c37b0c4bd7672edf58')
 
 
 def index(request):
@@ -92,7 +87,7 @@ def get_track_context(artist, title, do_lyrics):
     :param do_lyrics: determines whether the lyrics should be searched using the Genius API
     :return context: dict with context of the track
     """
-    track = pylast.Track(artist, title, network)
+    track = pylast.Track(artist, title, PYLAST)
 
     yt_id = sp_id = mbid = track_url = artist_url = lyrics = None
     found = False
@@ -126,7 +121,7 @@ def get_track_context(artist, title, do_lyrics):
 
         # get lyrics from Genius API
         if do_lyrics:
-            gsong = genius.search_song(title, artist, get_full_info=False)
+            gsong = GENIUS.search_song(title, artist, get_full_info=False)
             if gsong:
                 lyrics = gsong.lyrics
 
