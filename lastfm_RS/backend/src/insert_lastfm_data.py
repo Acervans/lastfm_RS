@@ -121,10 +121,10 @@ def item_tag_insert(item_tags, conn):
                 inserted.add(key)
                 id_dict, table_id = map_items[item_type]
                 id_key = item_type.lower()[:-1] + "_id"
-                tags = {tag.lower() for tag in tags}
-                for tag in tags:
+                tags = list(dict.fromkeys([tag.lower() for tag in tags]))
+                for p, tag in enumerate(tags):
                     stmts.append(
-                        {id_key: id_dict[key], 'tag_id': tag_ids[tag.lower()]})
+                        {id_key: id_dict[key], 'tag_id': tag_ids[tag], 'priority': p + 1})
         conn.execute(table(table_id).insert(), stmts)
 
 
