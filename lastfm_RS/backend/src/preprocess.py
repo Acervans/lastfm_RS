@@ -3,7 +3,7 @@ import json
 
 
 def duplicate_tracks_without_album():
-    """ Removes tracks that have duplicates WITH albums """
+    """ Removes tracks WITHOUT album that have a duplicate WITH album """
 
     with open(f'{DATA_FOLDER}/unique_tracks.dat', 'r', encoding='utf-8') as f:
         tracks = f.readlines()

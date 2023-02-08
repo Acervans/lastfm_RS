@@ -45,7 +45,8 @@ def insert_items(engine, filename, insert_fun, **kwargs):
 def tag_insert(tag_vads, conn):
     stmts = list()
     for tag, vads in tag_vads.items():
-        stmts.append({'name': tag, 'vad': vads})
+        # Insert tags in lowercase
+        stmts.append({'name': tag.lower(), 'vad': vads})
     conn.execute(table('tag').insert(), stmts)
 
 
@@ -56,7 +57,10 @@ def artist_insert(item_vads, conn):
     for artist, vads in artist_vads.items():
         if artist.lower() not in inserted:
             inserted.add(artist.lower())
-            stmts.append({'name': artist, 'vad': vads})
+            stmts.append({
+                'name': artist,
+                'vad': vads
+            })
     conn.execute(table('artist').insert(), stmts)
 
 
@@ -69,8 +73,11 @@ def album_insert(item_vads, conn):
             inserted.add(album.lower())
             album_name, artist_name = album.split(SEPARATOR)
             artist_id = artist_ids[artist_name.lower()]
-            stmts.append(
-                {'name': album_name, 'artist_id': artist_id, 'vad': vads})
+            stmts.append({
+                'name': album_name,
+                'artist_id': artist_id,
+                'vad': vads
+            })
     conn.execute(table('album').insert(), stmts)
 
 
@@ -88,8 +95,12 @@ def track_insert(item_vads, conn):
                     (album_name.lower(), artist_name.lower()))]
             else:
                 album_id = None
-            stmts.append({'name': track_name, 'artist_id': artist_id,
-                          'album_id': album_id, 'vad': vads})
+            stmts.append({
+                'name': track_name,
+                'artist_id': artist_id,
+                'album_id': album_id,
+                'vad': vads
+            })
     conn.execute(table('track').insert(), stmts)
 
 
@@ -123,8 +134,11 @@ def item_tag_insert(item_tags, conn):
                 id_key = item_type.lower()[:-1] + "_id"
                 tags = list(dict.fromkeys([tag.lower() for tag in tags]))
                 for p, tag in enumerate(tags):
-                    stmts.append(
-                        {id_key: id_dict[key], 'tag_id': tag_ids[tag], 'priority': p + 1})
+                    stmts.append({
+                        id_key: id_dict[key],
+                        'tag_id': tag_ids[tag],
+                        'priority': p + 1
+                    })
         conn.execute(table(table_id).insert(), stmts)
 
 
@@ -140,7 +154,10 @@ def top_item_insert(top_items, conn, kwargs):
             item_key = item.lower()
             if item_key not in inserted and item_key in id_dict:
                 inserted.add(item_key)
-                stmts.append({'user_id': user_id, id_key: id_dict[item_key]})
+                stmts.append({
+                    'user_id': user_id,
+                    id_key: id_dict[item_key]
+                })
     conn.execute(table(table_name).insert(), stmts)
 
 
@@ -157,9 +174,12 @@ def track_timestamp_insert(tracks, conn, kwargs):
                 item_split = item.split(SEPARATOR)
                 key = SEPARATOR.join(
                     (item_split[0].lower(), item_split[1].lower()))
-                stmts.append({'user_id': user_id,
-                              'track_id': track_ids[key],
-                              timestamp_col: datetime.utcfromtimestamp(int(item_split[2]))})
+                stmts.append({
+                    'user_id': user_id,
+                    'track_id': track_ids[key],
+                    timestamp_col: datetime.utcfromtimestamp(
+                        int(item_split[2]))
+                })
     conn.execute(table(table_name).insert(), stmts)
 
 
@@ -185,7 +205,7 @@ if __name__ == "__main__":
         print('ALREADY_EXECUTED')
 
     with db.connect() as conn:
-        tag_ids = {tag.lower(): t_id for tag, t_id in conn.execute(
+        tag_ids = {tag: t_id for tag, t_id in conn.execute(
             select(table('tag').c.name, table('tag').c.id))}
 
     # Insert artists if empty
