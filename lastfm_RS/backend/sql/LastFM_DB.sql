@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS Album (
 CREATE TABLE IF NOT EXISTS AlbumTopTags (
   album_id integer NOT NULL,
   tag_id integer NOT NULL,
-  priority integer NOT NULL,
+  rank integer NOT NULL,
   PRIMARY KEY (album_id, tag_id)
 );
 
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS Artist (
 CREATE TABLE IF NOT EXISTS ArtistTopTags (
   artist_id integer NOT NULL,
   tag_id integer NOT NULL,
-  priority integer NOT NULL,
+  rank integer NOT NULL,
   PRIMARY KEY (artist_id, tag_id)
 );
 
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS Track (
 CREATE TABLE IF NOT EXISTS TrackTopTags (
   track_id integer NOT NULL,
   tag_id integer NOT NULL,
-  priority integer NOT NULL,
+  rank integer NOT NULL,
   PRIMARY KEY (track_id, tag_id)
 );
 
@@ -73,25 +73,28 @@ CREATE TABLE IF NOT EXISTS UserRecentTracks (
 CREATE TABLE IF NOT EXISTS UserTopAlbums (
   user_id integer NOT NULL,
   album_id integer NOT NULL,
+  rank integer NOT NULL,
   PRIMARY KEY (user_id, album_id)
 );
 
 CREATE TABLE IF NOT EXISTS UserTopArtists (
   user_id integer NOT NULL,
   artist_id integer NOT NULL,
+  rank integer NOT NULL,
   PRIMARY KEY (user_id, artist_id)
 );
 
 CREATE TABLE IF NOT EXISTS UserTopTags (
   user_id integer NOT NULL,
   tag_id integer NOT NULL,
-  priority integer NOT NULL,
+  rank integer NOT NULL,
   PRIMARY KEY (user_id, tag_id)
 );
 
 CREATE TABLE IF NOT EXISTS UserTopTracks (
   user_id integer NOT NULL,
   track_id integer NOT NULL,
+  rank integer NOT NULL,
   PRIMARY KEY (user_id, track_id)
 );
 

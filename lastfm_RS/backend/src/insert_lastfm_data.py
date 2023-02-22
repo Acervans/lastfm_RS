@@ -133,11 +133,11 @@ def item_tag_insert(item_tags, conn):
                 id_dict, table_id = map_items[item_type]
                 id_key = item_type.lower()[:-1] + "_id"
                 tags = list(dict.fromkeys([tag.lower() for tag in tags]))
-                for p, tag in enumerate(tags):
+                for r, tag in enumerate(tags):
                     stmts.append({
                         id_key: id_dict[key],
                         'tag_id': tag_ids[tag],
-                        'priority': p + 1
+                        'rank': r + 1
                     })
         conn.execute(table(table_id).insert(), stmts)
 
@@ -150,13 +150,14 @@ def top_item_insert(top_items, conn, kwargs):
     for user, items in top_items.items():
         user_id = user_ids[user.lower()]
         inserted = set()
-        for item in items:
+        for r, item in enumerate(items):
             item_key = item.lower()
             if item_key not in inserted and item_key in id_dict:
                 inserted.add(item_key)
                 stmts.append({
                     'user_id': user_id,
-                    id_key: id_dict[item_key]
+                    id_key: id_dict[item_key],
+                    'rank': r + 1
                 })
     conn.execute(table(table_name).insert(), stmts)
 
