@@ -564,3 +564,160 @@ if __name__ == "__main__":
         with open(f'{DATA_FOLDER}/item_vads.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(item_vads, indent=4, ensure_ascii=False))
         print('SUCCESS')
+
+
+######################### GET SINGLE USER DATA - USED ON WEBPAGE #########################
+
+def get_user_data(username: str, filepath: str = None, verbose=False) -> dict:
+    """ Gets relevant last.fm data of a user into a dictionary
+
+    Args:
+        username (str): Username of user to query
+        filepath (str, optional): File to save data as JSON
+        verbose (boolean, optional): Print each step
+
+    Returns:
+        dict: Dictionary with all data retrieved
+    """
+
+    if verbose:
+        print(f"Querying all data for user '{username}':", flush=True)
+
+    data = dict()
+    user = PYLAST.get_user(username)
+
+    # Check if user still exists
+    try:
+        user.get_registered()
+    except pylast.WSError as e:
+        if str(e) == "User not found":
+            print(f"\t- User '{user}' not found :(")
+            return None
+        else:
+            pass
+
+    # ---------------------- Loved Tracks ----------------------
+    if verbose:
+        print('\t- Getting loved tracks...', end=' ', flush=True)
+
+    loved_tracks = list()
+    try:
+        for t in user.get_loved_tracks(limit=TRACK_LIMIT):
+            track = t[0]
+            unique_track = get_track_info(track)
+            if not unique_track:
+                continue
+            track_name, artist, album = unique_track
+
+            # Name Artist Timestamp
+            loved_tracks.append([track_name, artist, str(t[-1])])
+
+    except pylast.PyLastError:
+        # TODO do something
+        return None
+
+    if verbose:
+        print('OK')
+
+    data['LOVED_TRACKS'] = loved_tracks
+
+    # ---------------------- Recent Tracks ----------------------
+    if verbose:
+        print('\t- Getting recent tracks...', end=' ', flush=True)
+
+    recent_tracks = list()
+    try:
+        for t in user.get_recent_tracks(limit=TRACK_LIMIT):
+            track = t[0]
+            unique_track = get_track_info(track)
+            if not unique_track:
+                continue
+            track_name, artist, album = unique_track
+
+            recent_tracks.append([track_name, artist, str(t[-1])])
+
+    except (pylast.WSError, pylast.NetworkError):
+        # TODO do something
+        return None
+    # Recent tracks hidden by user
+    except pylast.PyLastError as e:
+        if e.__cause__ and str(e.__cause__) == "Login: User required to be logged in":
+            pass
+        else:
+            # TODO do something
+            return None
+
+    if verbose:
+        print('OK')
+
+    data['RECENT_TRACKS'] = recent_tracks
+
+    # ---------------------- Top Tracks ----------------------
+    if verbose:
+        print('\t- Getting top tracks...', end=' ', flush=True)
+
+    top_tracks = list()
+    try:
+        for t in user.get_top_tracks(limit=TRACK_LIMIT):
+            track = t[0]
+            unique_track = get_track_info(track)
+            if not unique_track:
+                continue
+            track_name, artist, album = unique_track
+
+            top_tracks.append([track_name, artist])
+
+    except pylast.PyLastError:
+        # TODO do something
+        return None
+
+    if verbose:
+        print('OK')
+
+    data['TOP_TRACKS'] = top_tracks
+
+    # ---------------------- Artists ----------------------
+    if verbose:
+        print('\t- Getting top artists...', end=' ', flush=True)
+
+    top_artists = list()
+    try:
+        for artist in user.get_top_artists(limit=ARTIST_LIMIT):
+            artist = artist[0]
+            artist_name = artist.get_name()
+            top_artists.append(artist_name)
+
+    except pylast.PyLastError:
+        # TODO do something
+        return None
+
+    if verbose:
+        print('OK')
+
+    data['TOP_ARTISTS'] = top_artists
+
+    # ---------------------- Albums ----------------------
+    if verbose:
+        print('\t- Getting top albums...', end=' ', flush=True)
+
+    top_albums = list()
+    try:
+        for album in user.get_top_albums(limit=ALBUM_LIMIT):
+            album = album[0]
+            artist_name = album.get_artist().get_name(properly_capitalized=True)
+            album_name = album.get_name()
+            top_albums.append([album_name, artist_name])
+    except pylast.PyLastError:
+        # TODO do something
+        return None
+
+    if verbose:
+        print('OK')
+
+    data['TOP_ALBUMS'] = top_albums
+
+    if filepath:
+        with open(filepath, 'w') as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+
+    return data
