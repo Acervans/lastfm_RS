@@ -1,0 +1,33 @@
+data_path: ../../data/recsys_data
+dataset: lastfm_recbole
+
+# dataset config : Context-aware Recommendation
+load_col:
+    inter: ['user_id', 'track_id', 'rating', 'timestamp']
+    item: ['track_id', 'v', 'a', 'd', 'stsc']
+    user: ['user_id']
+USER_ID_FIELD: user_id
+ITEM_ID_FIELD: track_id
+threshold: {'rating': 2.0}
+normalize_all: True
+
+# model config
+embedding_size: 10
+
+# Training and evaluation config
+epochs: 500
+train_batch_size: 4096
+eval_batch_size: 4096
+
+eval_args:
+  split: {'RS':[0.8,0.1,0.1]}
+  order: RO
+  group_by: user
+  mode: labeled
+train_neg_sample_args: ~
+metrics: ['AUC', 'LogLoss', 'RMSE']
+valid_metric: AUC
+
+# metrics: ['Recall', 'MRR', 'NDCG', 'Hit', 'Precision']
+# topk: 20
+# valid_metric: MRR@20
