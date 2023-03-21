@@ -1,5 +1,8 @@
+lastfm_RS/backend/research/recbole_research/log*/
+lastfm_RS/backend/research/recbole_research/saved/
+lastfm_RS/backend/data/lastfm_data/*
+
 .vscode/
-lastfm_RS/backend/data/lastfm_data*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
