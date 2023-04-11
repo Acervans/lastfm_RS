@@ -3,31 +3,49 @@ dataset: lastfm_recbole
 
 # dataset config : Context-aware Recommendation
 load_col:
-    inter: ['user_id', 'track_id', 'rating', 'timestamp']
-    item: ['track_id', 'v', 'a', 'd', 'stsc']
-    user: ['user_id']
+    inter: [user_id, track_id, rating, timestamp]
+    item: [track_id, vadst]
+    user: [user_id]
+
 USER_ID_FIELD: user_id
 ITEM_ID_FIELD: track_id
-threshold: {'rating': 2.0}
+threshold: {'rating': 3.0}
 normalize_all: True
 
 # model config
 embedding_size: 10
 
 # Training and evaluation config
-epochs: 500
+epochs: 300
 train_batch_size: 4096
 eval_batch_size: 4096
+stopping_step: 5
 
 eval_args:
-  split: {'RS':[0.8,0.1,0.1]}
+  split: {'RS': [0.8,0.1,0.1]}
   order: RO
   group_by: user
-  mode: labeled
-train_neg_sample_args: ~
-metrics: ['AUC', 'LogLoss', 'RMSE']
-valid_metric: AUC
+  # mode: uni100
+  mode: full
 
-# metrics: ['Recall', 'MRR', 'NDCG', 'Hit', 'Precision']
-# topk: 20
-# valid_metric: MRR@20
+train_neg_sample_args: 
+  distribution: uniform
+
+# metrics: ['AUC', 'LogLoss', 'RMSE', 'MAE']
+# valid_metric: LogLoss
+
+metrics: [Recall, MRR, NDCG, Hit, Precision]
+topk: 20
+valid_metric: NDCG@20
+
+## FFM & FwFM
+# fields: {0: ['user_id'], 1: ['track_id', 'vadst']}
+
+## XGBoost
+xgb_num_boost_round: 100
+xgb_early_stopping_rounds: 10
+xgb_verbose_eval: 10
+
+## LightGBM
+# lgb_params: {'verbose': 1}
+# lgb_num_boost_round: 300
