@@ -1,6 +1,7 @@
 lastfm_RS/backend/research/recbole_research/log*/
-lastfm_RS/backend/research/recbole_research/saved/
+lastfm_RS/backend/research/recbole_research/saved/*
 lastfm_RS/backend/data/lastfm_data/*
+lastfm_RS/backend/data/recsys_data/lastfm_recbole/*
 
 .vscode/
 
@@ -26,7 +27,6 @@ __pycache__/
 *.war
 *.nar
 *.ear
-*.zip
 *.tar.gz
 *.rar
 
