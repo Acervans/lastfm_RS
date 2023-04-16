@@ -76,9 +76,44 @@ def all_loved_tracks():
     return pd.DataFrame(q, columns=['user_id', 'track_id', 'love_at'])
 
 
+def merge_tracks(track_dfs: list, min_playcount: int = None) -> pd.DataFrame:
+    """ Merges DataFrames with format [user, track, rating, timestamp<Optional>]
+
+    Args:
+        track_dfs (list): List of track DataFrames to merge
+        min_playcount (int | None): Minimum playcount for a track to be added.
+
+    Returns:
+        DataFrame: Merged tracks
+    """
+    merged_track_ratings = pd.concat(track_dfs, ignore_index=True)
+    merged_track_ratings['rating'] = merged_track_ratings['rating'].astype(np.float32)
+
+    # Discard tracks with less than min_playcount total listens
+    if min_playcount is not None:
+        listen_count = merged_track_ratings['track_id'].value_counts()
+        discard_ids = listen_count[listen_count < min_playcount].index
+        merged_track_ratings = merged_track_ratings.loc[~merged_track_ratings.track_id.isin(discard_ids)]
+
+    # Sort by desc. rating and drop duplicates while keeping highest rating
+    final_ratings = merged_track_ratings.sort_values('rating', ascending=False).drop_duplicates(
+        ['user_id', 'track_id'], keep='first').sort_values(['user_id', 'track_id']).reset_index(drop=True)
+
+    return final_ratings
+
+
 ###########################
 ###### USER'S TRACKS ######
 ###########################
+
+def get_user_id(username):
+    stmt = (select(USER.c.id)
+            .filter(USER.c.username == username))
+    
+    with session.begin() as s:
+        q = s.execute(stmt).first()[0]
+    return q
+
 
 def user_recent_tracks(username):
     stmt = (select(USER_RECENT_TRACKS.c.track_id)
