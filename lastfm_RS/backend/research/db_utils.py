@@ -42,6 +42,14 @@ def normalize(col, kind: str = 'minmax', usecol: pd.Series = None):
         return (col - usecol.mean()) / usecol.std()
 
 
+################################
+###### TABLE AS DATAFRAME ######
+################################
+
+def get_table_df(table_name: str):
+    return pd.read_sql_table(table_name, db.connect())
+
+
 ##########################################
 ###### ALL USER-TRACK RELATIONSHIPS ######
 ##########################################
