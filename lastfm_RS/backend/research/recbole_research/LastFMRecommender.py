@@ -4,7 +4,7 @@ from recbole.model.context_aware_recommender import xDeepFM
 import torch
 import torch.nn.functional as F
 
-class xDeepLastFM(ContextAwareMixin, xDeepFM):
+class LastFMRecommender(ContextAwareMixin, xDeepFM):
     
     def __init__(self, config, dataset):
         super().__init__(config, dataset)

@@ -6,8 +6,8 @@ load_col:
     inter: [user_id, track_id, rating, timestamp]
     # item: [track_id] # NO ADDITIONAL DATA
     # item: [track_id, vadst] # VADST
-    # item: [track_id, tags] # TAG SEQS
-    item: [track_id, artist_id] # ARTIST, No sparsity since all tracks must have an artist
+    item: [track_id, tags] # TAG SEQS
+    # item: [track_id, artist_id] # ARTIST, No sparsity since all tracks must have an artist
     # item: [track_id, artist_id, tags] # ARTIST + TAG_SEQS
     # item: [track_id, artist_id, album_id] # ARTIST + ALBUM, Only albums would not improve because of lack of data and sparsity
     # item: [track_id, artist_id, album_id, tags] # ARTIST + ALBUM + TAG_SEQS
