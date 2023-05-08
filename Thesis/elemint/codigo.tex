@@ -1,0 +1,48 @@
+Hay múltiples funciones para presentar el código. La primera de ellas es genérica y es \textbf{\textbackslash Code} que tiene 8 parámetros, el primero de ellos opcional. El resto de las funciones que se listarán más adelante tienen los primeros 7 parámetros idénticos a esta función y no tienen un octavo parámetro. Los parámetros significal lo siguiente:
+\begin{enumerate}
+  \item Parámetro opcional (entre corchetes si aparece) y es la etiqueta para referenciar el código en otra parte del texto.
+  \item Es la descripción corta que aparecerá en el listado de códigos. Si se deja vacía se utilizará la descripción larga.
+  \item Es la descripción larga del código.
+  \item Nombre (incluyendo el camino relativo) del fichero con el código a presentar.
+  \item Primera línea del código que se presentará en el texto.
+  \item Última línea del código que se presentará en el texto.
+  \item Número que aparecerá como primer número de línea del código presentado. Puede tomar el valor que desee el autor pero si se deja vacío el código no se numerará. Habitualmente estará vacío o valdrá 1 o lo mismo que el quinto parámetro.
+  \item El lenguaje tal y como se indica en el paquete listings.
+\end{enumerate}
+
+Para el autor no tenga que leer el paquete listings se han creado una serie de funciones sin el octavo parámetro y que ya indican el lenguaje correspondiente y son de uso más cómodo. Estas funciones son:
+
+\begin{description}
+\item [\textbackslash AdaCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código ADA
+\item [\textbackslash ASMCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código ensamblador de Intel.
+\item [\textbackslash ASMMotCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código ensamblador de Motorola.
+\item [\textbackslash CCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código en C.
+\item [\textbackslash CPPCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código C++.
+\item [\textbackslash CSharpCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código C\#.
+\item [\textbackslash GnuplotCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código gnuplot.
+\item [\textbackslash HaskellCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Haskell.
+\item [\textbackslash HTMLCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código HTML.
+\item [\textbackslash JavaCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Java.
+\item [\textbackslash LaTeXCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código \LaTeXe.
+\item [\textbackslash LispCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Lisp.
+\item [\textbackslash MakeCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Ficheros makefile.
+\item [\textbackslash MathematicaCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Mathematica.
+\item [\textbackslash MatlabCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Matlab.
+\item [\textbackslash OctaveCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Octave.
+\item [\textbackslash PascalCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Pascal.
+\item [\textbackslash PerlCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Perl.
+\item [\textbackslash PHPCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código PHP.
+\item [\textbackslash PythonCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Python.
+\item [\textbackslash RCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código R.
+\item [\textbackslash RubyCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Ruby.
+\item [\textbackslash ScilabCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código Scilab.
+\item [\textbackslash SQLCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código SQL.
+\item [\textbackslash VHDLCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código VHDL.
+\item [\textbackslash XMLCode{[label]}\{short cap\}\{long caption\}\{file\}\{init num\}\{end num\}\{first num\}] Código XML.
+\end{description}
+
+Es importante tener en cuenta que si el código es muy largo será el autor quien deberá partirlo manualmente si no cabe en la misma página y se recomienda que esto se haga en la edición final del documento. Un ejemplo de su uso se puede ver en el \cref{COD:CODIGOC} y como en todos los casos se puede acudir a los fuentes de este manual para ver su uso en \LaTeXe. Se puede ver otro ejemplo en \cref{COD:CODIGOPY}
+
+\CCode[COD:CODIGOC]{Respuesta a la conexión de los usuarios.}{En esta figura se presenta el código correspondiente a la conexión de los usuarios. Realmente este texto es por poner algo a modo de ejemplo en C.}{ejemploC/userconnectresponse.c}{84}{90}{1}
+
+\PythonCode[COD:CODIGOPY]{Conexión TCP.}{En esta figura se presenta el código correspondiente a la conexión TCP. Realmente este texto es por poner algo a modo de ejemplo en Python.}{python/tcpudp.py}{4}{15}{1}

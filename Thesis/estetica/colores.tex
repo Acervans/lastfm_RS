@@ -1,0 +1,93 @@
+\def\colbox#1#2{\fcolorbox{maincolor}{#1#2based}{\small\phantom{aaa}}}
+\def\mytableline#1{\textbf{#1} & \colbox{ud}{#1} & \colbox{vd}{#1} & \colbox{d}{#1} & \colbox{}{#1} & \colbox{l}{#1} & \colbox{vl}{#1} & \colbox{ul}{#1} & \colbox{bg}{#1} \\}
+
+ \def\colboxc#1#2#3{\fcolorbox{maincolor}{#1#2based#3}{\small\phantom{aaa}}}
+
+ \def\mytablelineb#1#2{\textbf{#2} & \colboxc{#1}{#2}{one} & \colboxc{#1}{#2}{two} & \colboxc{#1}{#2}{three} & \colboxc{#1}{#2}{four} & \colboxc{#1}{#2}{five} & \colboxc{#1}{#2}{six} & \colboxc{#1}{#2}{seven} & \colboxc{#1}{#2}{eight}\\ }
+
+\def\mytablelinec#1#2#3{\textbf{#2} & \colboxc{#1}{#3}{one} & \colboxc{#1}{#3}{two} & \colboxc{#1}{#3}{three} & \colboxc{#1}{#3}{four} & \colboxc{#1}{#3}{five} & \colboxc{#1}{#3}{six} & \colboxc{#1}{#3}{seven} & \colboxc{#1}{#3}{eight} \\ }
+
+El uso de los colores es muy simple, basta con usar el comando \textbf{{\textbackslash}color\{nombrecolor\}}. Hay muchos \Index{colores} \Subindex{colores}{predefinidos} dependiendo de la gama de colores elegida. En la tabla \ref{T:GAMACOLORES} se muestran todos estos colores donde el nombre del color se construye utilizando el prefijo correspondiente a su columna, la gama de colores representado en la fila y siempre acabado con el sufijo `based'. Una de las columnas no tiene prefijo y se corresponde con el color institucional. Por ejemplo, el color \textbf{depsbased} sería \colbox{d}{eps}.
+
+\begin{table}[Gamas de colores]{T:GAMACOLORES}{Gamas de colores y nombres de los colores correspondientes. El nombre del color se construye utilizando el prefijo correspondiente a su columna, la gama de colores representado en la fila y siempre acabado con el sufijo `based'.}
+\begin{tabular}{|c|cccccccc|}
+  \cline{2-9}
+  \multicolumn{1}{c|}{} & \textbf{ud} & \textbf{vd} & \textbf{d} &  & \textbf{l} & \textbf{vl} & \textbf{ul} & \textbf{bg} \\
+  \hline
+  \mytableline{uam}
+  \mytableline{ciencias}
+  \mytableline{derecho}
+  \mytableline{economicas}
+  \mytableline{enfermeria}
+  \mytableline{eps}
+  \mytableline{filosofia}
+  \mytableline{fisioterapia}
+  \mytableline{medicina}
+  \mytableline{profesorado}
+  \mytableline{psicologia}
+  \hline
+\end{tabular}
+\end{table}
+
+Así mismo existen un conjunto de colores para cada perfil de color que pueden verse en la tabla \ref{T:GAMACOMP} para los colores básicos, para los colores `vl' (verylight) se pueden ver en la tabla \ref{T:GAMACOMPL} y para los colores `vd' (verydark) se pueden ver en la tabla \ref{T:GAMACOMPD}.
+
+\begin{table}[Colores complementarios]{T:GAMACOMP}{Colores complementarios. El nombre del color se construye concatenando el nombre de la fila con el sufijo `based' y se añade como segundo sufijo el nombre de la columna.}
+\begin{tabular}{|c|cccccccc|}
+  \cline{2-9}
+  \multicolumn{1}{c|}{} & \textbf{one} & \textbf{two} & \textbf{three} & \textbf{four} & \textbf{five} & \textbf{six} & \textbf{seven} & \textbf{eight} \\
+  \hline
+  \mytablelineb{}{uam}
+  \mytablelineb{}{ciencias}
+  \mytablelineb{}{derecho}
+  \mytablelineb{}{economicas}
+  \mytablelinec{}{enfermeria}{medicina}
+  \mytablelineb{}{eps}
+  \mytablelineb{}{filosofia}
+  \mytablelineb{}{fisioterapia}
+  \mytablelineb{}{medicina}
+  \mytablelineb{}{profesorado}
+  \mytablelineb{}{psicologia}
+  \hline
+\end{tabular}
+\end{table}
+
+
+\begin{table}[Colores complementarios claros]{T:GAMACOMPL}{Colores complementarios claros. El nombre del color se construye concatenando el nombre de la fila con el prefijo `vl', el sufijo `based' y se añade como segundo sufijo el nombre de la columna.}
+\begin{tabular}{|c|cccccccc|}
+  \cline{2-9}
+  \multicolumn{1}{c|}{} & \textbf{one} & \textbf{two} & \textbf{three} & \textbf{four} & \textbf{five} & \textbf{six} & \textbf{seven} & \textbf{eight} \\
+  \hline
+  \mytablelineb{vl}{uam}
+  \mytablelineb{vl}{ciencias}
+  \mytablelineb{vl}{derecho}
+  \mytablelineb{vl}{economicas}
+  \mytablelinec{vl}{enfermeria}{medicina}
+  \mytablelineb{vl}{eps}
+  \mytablelineb{vl}{filosofia}
+  \mytablelineb{vl}{fisioterapia}
+  \mytablelineb{vl}{medicina}
+  \mytablelineb{vl}{profesorado}
+  \mytablelineb{vl}{psicologia}
+  \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[Colores complementarios oscuros]{T:GAMACOMPD}{Colores complementarios oscuros. El nombre del color se construye concatenando el nombre de la fila con el prefijo `vd', el sufijo `based' y se añade como segundo sufijo el nombre de la columna.}
+\begin{tabular}{|c|cccccccc|}
+  \cline{2-9}
+  \multicolumn{1}{c|}{} & \textbf{one} & \textbf{two} & \textbf{three} & \textbf{four} & \textbf{five} & \textbf{six} & \textbf{seven} & \textbf{eight} \\
+  \hline
+  \mytablelineb{vd}{uam}
+  \mytablelineb{vd}{ciencias}
+  \mytablelineb{vd}{derecho}
+  \mytablelineb{vd}{economicas}
+  \mytablelinec{vd}{enfermeria}{medicina}
+  \mytablelineb{vd}{eps}
+  \mytablelineb{vd}{filosofia}
+  \mytablelineb{vd}{fisioterapia}
+  \mytablelineb{vd}{medicina}
+  \mytablelineb{vd}{profesorado}
+  \mytablelineb{vd}{psicologia}
+  \hline
+\end{tabular}
+\end{table}

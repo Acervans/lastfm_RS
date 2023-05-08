@@ -1,0 +1,82 @@
+\subsubsection{Gráficas xy}
+
+\paragraph{Tipo de gráfica}
+
+Para crear una gráfica xy lo primero que es necesario es definir los ejes y títulos. Para ello se pueden utilizar distintos entornos dependiendo del tipo de ejes a utilizar, sin embargo todos los entornos tienen los mismos cinco parámetros que son, por este orden, el título de la gráfica, el título del eje x, el título del eje y y el ancho y el alto de la gráfica.
+
+Los entornos disponibles son los siguientes: \textbf{xyplot}, \textbf{semilogxplot}, \textbf{semilogyplot} y \textbf{loglogplot}. En la figura \ref{FIG:EJESXY} pueden verse los distintos esquemas.
+
+\begin{figure}[Esquemas de ejes de gráficas XY]{FIG:EJESXY}{En esta figura se pueden ver los resultados de aplicar los distintos entornos de gráficas xy.}
+  \subfigure[SFIG:XY]{xyplot}{
+    \begin{xyplot}{}{Eje x}{Eje y}{0.44\textwidth}{0.26\textheight}
+      \plotdatalined{data_d2.dat}{Datos}
+      \plotdatalined{data_d3.dat}{Datos2}
+    \end{xyplot}
+  }
+  \subfigure[SFIG:LOGLOG]{loglogplot}{
+    \begin{loglogplot}{}{Eje x}{Eje y}{0.44\textwidth}{0.26\textheight}
+      \plotdatalined{data_d2.dat}{Datos}
+      \plotdatalined{data_d3.dat}{Datos2}
+    \end{loglogplot}
+  }
+
+  \subfigure[SFIG:LOGX]{semilogxplot}{
+    \begin{semilogxplot}{}{Eje x}{Eje y}{0.44\textwidth}{0.26\textheight}
+      \plotdatalined{data_d2.dat}{Datos}
+      \plotdatalined{data_d3.dat}{Datos2}
+    \end{semilogxplot}
+  }
+  \subfigure[SFIG:LOGY]{semilogyplot}{
+    \begin{semilogyplot}{}{Eje x}{Eje y}{0.44\textwidth}{0.26\textheight}
+      \plotdatalined{data_d2.dat}{Datos}
+      \plotdatalined{data_d3.dat}{Datos2}
+    \end{semilogyplot}
+  }
+\end{figure}
+
+\paragraph{Datos}
+
+Para presentar los datos se tienen tres funciones posibles, ambas con dos parámetros, el primero es el nombre completo del fichero con los datos y el segundo es la etiqueta que van a tener estos datos. Los ficheros de datos son ficheros con dos columnas de valores y la primera fila es siempre una fila de etiquetas. Aunque estas etiquetas no se usan, el paquete utilizado permite operaciones de representación muy complejas con los datos y con ficheros con más de dos columnas de datos, para simplificar los comandos se ha preferido hacer así. Si se desea algo más fino y complejo es necesario utilizar los comandos del paquete \textbf{pgfplots}.
+
+Los comandos existentes son:
+\begin{description}
+  \item [\textbackslash plotdata\{file\}\{label\}] Pone los puntos asociados a los datos. El tipo de marca y el color los selecciona la función internamente.
+  \item [\textbackslash plotline\{file\}\{label\}] Une con una recta los puntos asociados a los datos. El color los selecciona la función internamente.
+  \item [\textbackslash plotline\{file\}\{label\}] Es la combinación de los dos anteriores.
+  \end{description}
+
+\paragraph{Expresiones matemáticas}
+
+Para representar expresiones matemáticas se dispone de la función \textbf{\textbackslash plotfunction{[n-samples]} \{expresion\}\{label\}\{xmin\}\{xmax\}}. El primero es un parámetro opcinal y por tanto debe ir entre corchetes si es que se pone; este parámetro es el número de muestreos de la función utilizados. Por otro lado `label' es la etiqueta en la gráfica y `xmin' y `xmax' es el rango que se va a utilizar para la gráfica en x. Las funciones que se pueden utilizar en la expresión son un poco limitadas e incluyen -, *, /, abs, round, floor, mod, <, >, max, min, sin, cos, tan, deg (conversión de radianes a grados), rad (conversión de grados a radianes), atan, asin, acos, cot, sec, cosec, exp, ln, sqrt, \^\  (potencia), ! (factorial), rand (aleatorio entre -1 y 1), rnd (aleatorio entre 0 y 1); sqrt,las constantes pi y e; las conversiones de formato numérico hex, Hex, oct, bin y algunas funciones más. Las funciones trigonométricas funcionan en grados.
+
+\begin{figure}[Representaciión de expresiones matemáticas]{FIG:MATHEM}{En esta figura se pueden ver los resultados de representar varias expresiones matemáticas.}
+    \begin{xyplot}{}{Eje x}{Eje y}{0.6\textwidth}{0.3\textheight}
+      \plotfunction{cos(x)^2}{$cos^2(x)$}{0}{360}
+      \plotfunction{cos(x)^4}{$cos^4(x)$}{0}{360}
+      \plotfunction{sin(x)^4}{$sin^4(x)$}{0}{360}
+      \plotfunction[400]{10*sin(x)^4*cos(x)^4}{$10 \cdot sin^4(x) \cdot cos^4(x)$}{0}{360}
+    \end{xyplot}
+  \end{figure}
+
+%
+%
+% % Preamble: \pgfplotsset{width=7cm,compat=newest}
+% \begin{tikzpicture}
+% \begin{axis}[
+% x tick label style={/pgf/number format/1000 sep=},
+% y tick label style={/pgf/number format/1000 sep=},
+% ylabel=Population,
+% enlargelimits=0.15,
+% legend style={at={(0.5,-0.15)},
+% anchor=north,legend columns=-1},
+% ybar,
+% width=17cm,
+% height=5cm,
+% bar width=25pt,
+% ]
+% \addplot table {bar1.dat};
+% \addplot table {bar2.dat};
+% \addplot table {bar3.dat};
+% \legend{Far,Near,Here}
+% \end{axis}
+% \end{tikzpicture}

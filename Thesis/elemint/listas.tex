@@ -1,0 +1,110 @@
+En este estilo se han modificado los entornos tradicionales para crear listas (itemize, enumerate o description) cambiando el espaciado, el tamaño de letra o los márgenes derecho e izquierdo. Sin embargo su uso es el tradicional.
+
+\subsection{Listas tradicionales de \LaTeXe}
+
+El aspecto con el que quedan las distintas listas tradicionales es el que se muetra a continuación.
+
+\paragraph{Punteado con anidación}
+\begin{itemize}
+        \item Un ejemplo anidado.
+        \begin{itemize}
+                \item Este es el primer punto anidado.
+                \item Y este el segundo.
+        \end{itemize}
+        \item Se sale de la anidación.
+\end{itemize}
+
+\paragraph{Enumerado con anidación}
+\begin{enumerate}
+        \item Un ejemplo anidado.
+        \begin{enumerate}
+                \item Este es el primer punto anidado.
+                \item Y este el segundo.
+        \end{enumerate}
+        \item Se sale de la anidación.
+\end{enumerate}
+
+\paragraph{Definiciones con anidación}
+
+\begin{description}
+        \item[Primer elemento:] Un ejemplo anidado.
+        \begin{description}
+                \item [Primer elemento interno:] Este es el primer punto anidado.
+                \item [Segundo interno:] Y este el segundo.
+        \end{description}
+        \item [Segundo:] Se sale de la anidación.
+\end{description}
+
+
+\subsection{Nuevos tipos de listas}
+
+Dadas las necesidades específicas que pueden tener estos documentos se han desarrollado una serie de tipos de listas específicos con el fin de cubrir esas necesidades.
+
+Se disponen de cinco entornos específicos que son \textbf{simplelist}, \textbf{functional}, \textbf{nonfunctional}, \textbf{functionality} y \textbf{objetive}. Es aspecto de este tipo de listas puede verse a continuación.
+
+\paragraph{Simplelist con anidación}
+
+Los elementos no llevan ningún tipo de marca ni están destacados de ninguna forma, sólo cambia la indentación de los elementos.
+
+\begin{simplelist}
+        \item Un ejemplo anidado.
+        \begin{simplelist}
+                \item Este es el primer punto anidado.
+                \item Y este el segundo.
+        \end{simplelist}
+        \item Se sale de la anidación.
+\end{simplelist}
+
+\paragraph{Functional con anidación}
+
+Se utiliza para definir requisitos funcionales.
+
+\begin{functional}
+        \item Un ejemplo anidado.
+        \begin{functional}
+                \item Este es el primer punto anidado.
+                \item Y este el segundo.
+        \end{functional}
+        \item Se sale de la anidación.
+\end{functional}
+
+\paragraph{Nonfunctional con anidación}
+
+Se utiliza para definir rquisitos no funcionales.
+
+\begin{nonfunctional}
+        \item Un ejemplo anidado.
+        \begin{nonfunctional}
+                \item Este es el primer punto anidado.
+                \item Y este el segundo.
+        \end{nonfunctional}
+        \item Se sale de la anidación.
+\end{nonfunctional}
+
+
+\paragraph{Functionality con anidación}
+
+Se utiliza para definir funcionalidades.
+
+\begin{functionality}
+        \item Un ejemplo anidado.
+        \begin{functionality}
+                \item Este es el primer punto anidado.
+                \item Y este el segundo.
+        \end{functionality}
+        \item Se sale de la anidación.
+\end{functionality}
+
+
+\paragraph{Objetive con anidación}
+
+Se utiliza para definir objetivos.
+
+\begin{objetive}
+        \item Un ejemplo anidado.
+        \begin{objetive}
+                \item Este es el primer punto anidado.
+                \item Y este el segundo.
+        \end{objetive}
+        \item Se sale de la anidación.
+\end{objetive}

@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+  echo -e "\n\r\r\033[31mEs necesario indicar el año (versión) de MacTex\033[00m\n\n"
+  exit 0
+fi
+
+MV="mv"
+RM="rm -rf"
+MKDIR="mkdir -p"
+TEXHASH="texhash"
+DIR=/usr/local/texlive/$1/texmf-dist/tex/LaTeXe/tfgtfmthesisuam
+
+function intermError
+{
+  if [ $? -ne 0 ]; then
+      echo -e "\n\r\r\033[31mHa habido un fallo inesperado en la instalación contacte"
+      echo -e "\r\rcon los creadores de este estilo indicando el código de error $1.\033[00m\n\n"
+      exit $1
+  fi
+}
+
+$MKDIR $DIR
+intermError 1
+$MV *.cls $DIR
+intermError 2
+$MV *.ist $DIR
+intermError 3
+$MV *.png $DIR
+intermError 4
+$RM *.tgz
+intermError 5
+$RM *.zip
+intermError 6
+$MKDIR /usr/local/doc/tfgtfmthesisuam
+intermError 7
+$MV * /usr/local/doc/tfgtfmthesisuam
+intermError 8
+
+$TEXHASH
+intermError 9
+
+echo -e "\n\r\r\033[32m Instalación correcta\033[00m\n\n"

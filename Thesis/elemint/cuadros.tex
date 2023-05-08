@@ -1,0 +1,5 @@
+Para poner un texto dentro de un cuadro de texto se dispone del entorno \textbf{textbox{[short]} \{label\}\{caption\}}. El primer parámetro es opcional y por tanto, si aparece, debe ir entre corchetes siendo texto corto que aparecerá en la lista de cuadros de texto; el segundo parámetro es una etiqueta para ser referenciado y no es opcional aunque puede dejarse en blanco; y el tercero es el texto que aparecerá bajo el cuadro. Los cuadros de texto son elementos flotantes. Ejemplo de un cuadro de texto es el que puede verse en el cuadro \ref{TB:LOREMIPSUM}.
+
+\begin{textbox}[Lorem ipsum]{TB:LOREMIPSUM}{Este es un cuadro de texto en el que usando el paquete lipsum se genera el texto internamente}
+  \lipsum[1]
+\end{textbox}

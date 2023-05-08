@@ -1,0 +1,180 @@
+\ifglsentryexists{ieee}{}%
+{%
+\gls@defglossaryentry{ieee}%
+{%
+name={IEEE},%
+sort={IEEE},%
+type={acronym},%
+first={Institute of Electrical and Electronics Engineers\glsspace (IEEE)},%
+firstplural={Institute of Electrical and Electronics Engineerss\glsspace (IEEEs)},%
+text={IEEE},%
+plural={IEEEs},%
+description={Institute of Electrical and Electronics Engineers},%
+descriptionplural={Institute of Electrical and Electronics Engineers\acrpluralsuffix },%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Institute of Electrical and Electronics Engineers},%
+longplural={Institute of Electrical and Electronics Engineerss},%
+short={IEEE},%
+shortplural={IEEEs},%
+counter={page},%
+parent={},%
+%
+}%
+}%
+\ifglsentryexists{definicion}{}%
+{%
+\gls@defglossaryentry{definicion}%
+{%
+name={definición},%
+sort={definición},%
+type={main},%
+first={definici\IeC {\'o}n},%
+firstplural={definiciones},%
+text={definici\IeC {\'o}n},%
+plural={definiciones},%
+description={Proposición que expone con claridad y exactitud los caracteres genéricos y diferenciales de algo material o inmaterial},%
+descriptionplural={Proposición que expone con claridad y exactitud los caracteres genéricos y diferenciales de algo material o inmaterial},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={},%
+longplural={},%
+short={},%
+shortplural={},%
+counter={page},%
+parent={},%
+%
+}%
+}%
+\ifglsentryexists{acronimo}{}%
+{%
+\gls@defglossaryentry{acronimo}%
+{%
+name={acrónimo},%
+sort={acrónimo},%
+type={main},%
+first={acr\IeC {\'o}nimo},%
+firstplural={acr\IeC {\'o}nimos},%
+text={acr\IeC {\'o}nimo},%
+plural={acr\IeC {\'o}nimos},%
+description={Sigla cuya configuración permite su pronunciación como una palabra; por ejemplo, ovni: objeto volador no identificado; TIC, tecnologías de la información y la comunicación},%
+descriptionplural={Sigla cuya configuración permite su pronunciación como una palabra; por ejemplo, ovni: objeto volador no identificado; TIC, tecnologías de la información y la comunicación},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={},%
+longplural={},%
+short={},%
+shortplural={},%
+counter={page},%
+parent={},%
+%
+}%
+}%
+\ifglsentryexists{wytiwyg}{}%
+{%
+\gls@defglossaryentry{wytiwyg}%
+{%
+name={WYTIWYG},%
+sort={WYTIWYG},%
+type={acronym},%
+first={What You Think Is What You Get\glsspace (WYTIWYG)},%
+firstplural={What You Think Is What You Gets\glsspace (WYTIWYGs)},%
+text={WYTIWYG},%
+plural={WYTIWYGs},%
+description={What You Think Is What You Get},%
+descriptionplural={What You Think Is What You Get\acrpluralsuffix },%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={What You Think Is What You Get},%
+longplural={What You Think Is What You Gets},%
+short={WYTIWYG},%
+shortplural={WYTIWYGs},%
+counter={page},%
+parent={},%
+%
+}%
+}%
+\ifglsentryexists{wysiwyg}{}%
+{%
+\gls@defglossaryentry{wysiwyg}%
+{%
+name={WYSIWYG},%
+sort={WYSIWYG},%
+type={acronym},%
+first={What You See Is What You Get\glsspace (WYSIWYG)},%
+firstplural={What You See Is What You Gets\glsspace (WYSIWYGs)},%
+text={WYSIWYG},%
+plural={WYSIWYGs},%
+description={What You See Is What You Get},%
+descriptionplural={What You See Is What You Get\acrpluralsuffix },%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={What You See Is What You Get},%
+longplural={What You See Is What You Gets},%
+short={WYSIWYG},%
+shortplural={WYSIWYGs},%
+counter={page},%
+parent={},%
+%
+}%
+}%
+\ifglsentryexists{OPCST}{}%
+{%
+\gls@defglossaryentry{OPCST}%
+{%
+name={opción de estilo},%
+sort={opción de estilo},%
+type={main},%
+first={opci\IeC {\'o}n de estilo},%
+firstplural={opciones de estilo},%
+text={opci\IeC {\'o}n de estilo},%
+plural={opciones de estilo},%
+description={Son los valores que modifican el funcionamiento del estilo. Se ponen entre corchetes y separadas por comas en el comando \textbackslash documentclass y antes de el nombre del estilo que irá entre llaves},%
+descriptionplural={Son los valores que modifican el funcionamiento del estilo. Se ponen entre corchetes y separadas por comas en el comando \textbackslash documentclass y antes de el nombre del estilo que irá entre llaves},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={},%
+longplural={},%
+short={},%
+shortplural={},%
+counter={page},%
+parent={},%
+%
+}%
+}%

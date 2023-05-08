@@ -1,0 +1,114 @@
+% arara: clean: {files: [tfgtfmthesisuam.aux, tfgtfmthesisuam.idx, tfgtfmthesisuam.ilg, tfgtfmthesisuam.ind, tfgtfmthesisuam.bbl, tfgtfmthesisuam.bcf, tfgtfmthesisuam.blg, tfgtfmthesisuam.run.xml, tfgtfmthesisuam.fdb_latexmk, tfgtfmthesisuam.fls, tfgtfmthesisuam.loe, tfgtfmthesisuam.lof, tfgtfmthesisuam.lol, tfgtfmthesisuam.lot, tfgtfmthesisuam.ltb, tfgtfmthesisuam.out, tfgtfmthesisuam.toc, tfgtfmthesisuam.upa, tfgtfmthesisuam.upb, tfgtfmthesisuam.acn, tfgtfmthesisuam.acr, tfgtfmthesisuam.alg, tfgtfmthesisuam.glg, tfgtfmthesisuam.glo, tfgtfmthesisuam.gls, tfgtfmthesisuam.glsdefs, tfgtfmthesisuam.idx,  tfgtfmthesisuam.ilg, tfgtfmthesisuam.xdy, tfgtfmthesisuam.loa, tfgtfmthesisuam.gnuploterrors , tfgtfmthesisuam.mw, tfgtfmthesisuam.fdb_latexmk ]}
+% arara: pdflatex: {shell: yes}
+% arara: makeglossaries
+% arara: makeindex: {style: tfgtfmthesisuam.ist }
+% arara: bibtex
+% arara: pdflatex: {shell: yes}
+% arara: pdflatex: {shell: yes}
+% arara: clean: {files: [tfgtfmthesisuam.aux, tfgtfmthesisuam.idx, tfgtfmthesisuam.ilg, tfgtfmthesisuam.ind, tfgtfmthesisuam.bbl, tfgtfmthesisuam.bcf, tfgtfmthesisuam.blg, tfgtfmthesisuam.run.xml, tfgtfmthesisuam.fdb_latexmk, tfgtfmthesisuam.fls, tfgtfmthesisuam.loe, tfgtfmthesisuam.lof, tfgtfmthesisuam.lol, tfgtfmthesisuam.lot, tfgtfmthesisuam.ltb, tfgtfmthesisuam.out, tfgtfmthesisuam.toc, tfgtfmthesisuam.upa, tfgtfmthesisuam.upb, tfgtfmthesisuam.acn, tfgtfmthesisuam.acr, tfgtfmthesisuam.alg, tfgtfmthesisuam.glg, tfgtfmthesisuam.glo, tfgtfmthesisuam.gls, tfgtfmthesisuam.glsdefs, tfgtfmthesisuam.idx,  tfgtfmthesisuam.ilg, tfgtfmthesisuam.xdy, tfgtfmthesisuam.loa, tfgtfmthesisuam.gnuploterrors , tfgtfmthesisuam.mw, tfgtfmthesisuam.fdb_latexmk ]}
+
+
+\documentclass[english,epsbased,copyright,final,printable,covers,extendedindex,firstnumbered,tfg,gnuplot]{tfgtfmthesisuam}
+
+\advisor{Alejandro Bellogín}
+\levelin{Ingeniería Informática}
+\title{Application of sentiment analysis on music recommendation}
+\subtitle{Sentiment features efficiency in a hybrid music recommender}
+\author{Javier Wang Zhou}
+\privateaddress{C\textbackslash\ Francisco Tomás y Valiente Nº 11}
+\copyrightdate{3 de Noviembre de 2017}
+
+\dedication{A mi mujer y a mis hijos}
+\famouscite{Lo peor es cuando has terminado un capítulo\\y la máquina de escribir no aplaude. \\[0.1em] \begin{flushright}Orson Welles\end{flushright}}
+\prefacefile{inicio/prefacio}
+\ackfile{inicio/agradecimientos}
+\resumenfile{inicio/resumen}
+\abstractfile{inicio/abstract}
+
+\keywords{Algunas}
+\palabrasclave{Otras}
+
+\coverdata
+{
+  Escuela Politécnica Superior \\
+  Universidad Autónoma de Madrid \\
+  C\textbackslash Francisco Tomás y Valiente nº 11
+}
+
+\bibliographyconfig{tfgtfmthesisuam}
+
+\datadir{data}
+\graphicsdir{img}
+\logosdir{img}
+\codesdir{codes}
+
+
+% hola
+% lo de la estructura, suele ser relativamente estándar, lo mejor es mirar otros tfgs:
+% https://abellogin.github.io/teaching.html
+% por ejemplo el de Eric de hace unos años podría ser un buen punto de partida, aunque depende del tema del TFG
+% puedes empezar con esto y cuando tengas una propuesta me escribes y lo reviso
+% a partir de ahí, es centrarte en escribir las secciones que veas más claras, me avisas cuando están, yo te doy feedback y así vamos iterando
+% lo más rollo siempre es el capítulo 2, el del estado del arte
+% ya luego, el capítulo de desarrollo y diseño, como es expllicar lo que has hecho, cuesta menos y vas más rápido
+% lo que hay que tener en cuenta en la parte de diseño es que se intenta demostrar que eres ingeniero, es decir, que sabes usar diagramas y eso que te enseñan en INGS
+% ya luego va el capítulo de pruebas, donde habrá que explicar todo lo que me has enseñado hoy (o casi todo)
+% ahí veremos cómo formatear los resultados, en qué orden presentarlo, y ver si tenemos explicación para lo que pasa
+% y tampoco mucho más: como tú has dicho, abstract, intro y conclusiones se suelen dejar para el final, pero por supuesto si algún día estás inspirado, puedes escribir por ahí alguna idea
+
+% pero si de aquí a lunes-martes-miércoles tienes la estructura, ya irías bien, porque eso te permite ir avanzando en paralelo (experimentos y escritura)
+
+% sí, eso es: a nivel 1 o 2, es decir: nombre de sección y, cuando lo tengas claro, de subsección
+% ya que los capítulos más o menos vienen definidos por la normativa
+
+% si, en mayo es mejor asegurar que apruebas las asignaturas
+% pero todo lo que adelantes, pues mejor, claro, pero la prioridad debe ser que apruebes, ya que si suspendes y entregas el tfg, no te dejan defender
+
+
+\begin{document}
+
+\chapter{Estética\label{CAP:ESTETICA}}{estetica/estetica}
+  \section{Tipo de documento\label{SEC:TIPODOC}}{estetica/tipodocumento}
+  \section{Gama de colores\label{SEC:GAMASEL}}{estetica/gamacolores}
+  \section{Colores\label{SEC:COLORES}}{estetica/colores}
+  \section{Uso de los colores\label{SEC:USOCOLORES}}{estetica/usocolores}
+
+\chapter{Estructura\label{CAP:ESTRUCTURA}}{estructura/estructura}
+  \section{Título, autor, tutor y otras variables\label{SEC:VARIABLES}}{estructura/titulo}
+  \section{Índices\label{SEC:INDICES}}{estructura/indices}
+  \section{Copyright, dedicatoria y cita inicial\label{SEC:COPYRIGHT}}{estructura/copyright}
+  \section[Prefacio, resumen ...]{Prefacio, resumen, abstract, agradecimientos y palabras clave.\label{SEC:PREFACIO}}{estructura/prefacioresumen}
+  \section[Partes, capítulos ...]{Partes, capítulos, apartados, subapartados, subsubapartados, párrafos y subpárrafos\label{SEC:CAPITULOS}}{estructura/capitulos}
+  \section[Glosario, acrónimos y definiciones]{Glosario, acrónimos y definiciones\label{SEC:GLOSARIO}}{estructura/glosario}
+  \section{Referencias\label{SEC:REFERENCIAS}}{estructura/referencias}
+  \section{Bibliografía\label{SEC:BIBLIOGRAFIA}}{estructura/bibliografia}
+
+\chapter{Primeros pasos\label{CAP:PRIMEROSPASOS}}{primpas/primpas}
+  \section{Estructurar el documento\label{SEC:ESTRUCTURAR}}{primpas/estructuradoc}
+  \section{Enlazar la bibliografía\label{SEC:ENLAZBIBLIOGRAFIA}}{primpas/enlazarbib}
+
+\chapter{Elementos internos\label{CAP:ELEMINT}}{elemint/elemint}
+  \section{Figuras\label{SEC:FIGURAS}}{elemint/figuras}
+    \subsection{Gráficas\label{SS:GRAFICAS}}{elemint/graficas}
+    \subsection{Imágenes\label{SS:INMAGENES}}{elemint/imagenes}
+    \subsection{Diagramas de Gantt\label{SS:GANTT}}{elemint/gantt}
+  \section{Tablas\label{SEC:TABLAS}}{elemint/tablas}
+    \subsection{Presupuestos\label{SS:PRESUPUESTOS}}{elemint/presupuestos}
+  \section{Cuadros de texto\label{SEC:CUADROS}}{elemint/cuadros}
+  \section{Ecuaciones\label{SEC:ECUACIONES}}{elemint/ecuaciones}
+  \section{Código\label{SEC:CODIGO}}{elemint/codigo}
+  \section{Algoritmos\label{SEC:ALGORITMOS}}{elemint/algoritmos}
+  \section{Listas\label{SEC:LISTAS}}{elemint/listas}
+  \section{Referencias internas e hiperenlaces\label{SEC:HIPERENLACES}}{elemint/hiperenlaces}
+\chapter{Compilación\label{CAP:COMPILACION}}{varios/compilacion}
+
+\appendix
+
+\chapter{Word\textsuperscript{\textregistered} vs. \LaTeXe\label{CAP:WORDLATEX}}{varios/wordlatex}
+\chapter{Instalación\label{CAP:INSTALACION}}{varios/instalacion}
+\chapter{Packetes incluidos\label{CAP:PAQUETES}}{varios/paquetes}
+\chapter{Resumen de opciones del estilo\label{CAP:OPCIONES}}{varios/opciones}
+\chapter{Funciones y entornos\label{CAP:FUNCENT}}{varios/funciones}
+
+
+\end{document}

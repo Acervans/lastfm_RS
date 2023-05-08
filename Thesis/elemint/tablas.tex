@@ -1,0 +1,45 @@
+Para realizar una tabla se puede usar cualquiera de los entornos de \LaTeX\ diseñados a tal efecto como pueden ser \textbf{tabular}, \textbf{tabbing}, \textbf{longtable}, etc. Sin embargo estas tablas tienen que ser elementos flotantes con pie de tabla, referenciables y listables. Para ello se dispone del entorno \textbf{table}{[short]}\{label\}\{caption\}. El primer parámetro es opcional y por tanto, si aparece, debe ir entre corchetes y es texto corto que aparecerá en la lista de cuadros de texto; el segundo parámetro es una etiqueta para ser referenciada y no es opcional aunque puede dejarse en blanco; y el tercero es el texto que aparecerá como pie de tabla. Ejemplo de un cuadro de tabla \ref{TB:EJEMPLO}.
+
+\begin{table}[Tabla de ejemplo]{TB:EJEMPLO}{Esta es una tabla de ejemplo en la que, internamente, se usa el entorno \textbf{tabular}.}
+  \begin{tabular}{cccc}
+    \hline
+    \textbf{no} & \textbf{puedo} & \textbf{decir} & \textbf{nada} \\
+    \hline \hline
+    1.23 & 2.32 & 1.15 & 3.5 \\
+    10.2 & 2.2 & 4.5 & 5.7 \\
+    8.3 & 1.56 & 2.78 & 8.91 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+La estética interna de las tablas es responsabilidad del autor pero se recomiendan diseños minimalistas y si se usan colores es aconsejable utilizar los colores complementarios definidos para la gama de colores correspondiente.
+
+Así mismo, muchas veces es necesario introducir varias tablas juntas con sus correspondientes subpies de tabla. Para ello se puede utilizar el comando \textbf{\textbackslash subtable} dentro del entorno \textbf{table} en el que el primer parámetro es la etiqueta para ser referenciado, el segundo el pie de la subtabla y el tercero es el elemento que se quiere presentar en la subtabla. Un ejemplo con subtablas puede verse en la tabla \ref{TB:SUBTABLAS}.
+
+\begin{table}[Tabla de ejemplo con subtablas]{TB:SUBTABLAS}{Esta es una tabla de ejemplo en la que se definen subtablas. Los pies de las subtablas no deben ser excesivos y se debe cargar toda la explicación posible en el pie de la tabla.}
+
+  \subtable{STB:EJ1}{Esta es una subtabla, y su pie no debe ser demasiado largo.}
+  {
+    \begin{tabular}{cccc}
+      \hline
+      \textbf{no} & \textbf{puedo} & \textbf{decir} & \textbf{nada} \\
+      \hline \hline
+      1.23 & 2.32 & 1.15 & 3.5 \\
+      10.2 & 2.2 & 4.5 & 5.7 \\
+      8.3 & 1.56 & 2.78 & 8.91 \\
+      \hline
+    \end{tabular}
+  }
+  \subtable{STB:EJ2}{Y este es otro ejemplo aunque con demasiado texto ambos.}
+  {
+    \begin{tabular}{cccc}
+      \hline
+      \textbf{no} & \textbf{puedo} & \textbf{decir} & \textbf{nada} \\
+      \hline \hline
+      11.39 & 1.21 & 5.15 & 2.9 \\
+      5.2 & 4.8 & 9.43 & 1.7 \\
+      7.3 & 6.35 & 0.11 & 3.13 \\
+      \hline
+    \end{tabular}
+  }
+\end{table}

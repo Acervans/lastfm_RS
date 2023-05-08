@@ -1,0 +1,60 @@
+\section{Linux}
+
+Este paquete en Linux puede instalarse de tres formas diferentes. La primera de ella es a través de los sistemas de paquetes usados habitualmente en Linux,
+para ello basta con configurar el repositorio con los siguientes comandos: \textbf{sudo deb http://metis.ii.uam.es asignaturas main}.
+Una vez configurado es necesario validarlo obteniendo la clave pública del repositorio. Para ello basta con acceder a uno de los servidores del anillo de claves de ubuntu para obtenerla. La forma de hacerlo es ejecutando como superusuario el siguiente comando: \textbf{sudo apt-key adv -{-}keyserver keyserver.ubuntu.com -{-}recv C95B8FCEC5A57017}. Para finalizar basta con ejecutar: \textbf{sudo apt-get update \&\& sudo apt-get install tfgtfmthesisuam}. Una vez realizados todos estos comandos el paquete estará instalado y funcional y con acceso a las actualizaciones que se realicen sobre el paquete. En este caso la documentación estará en el directorio /usr/share/doc/tfgtfmthesisuam.
+
+La segunda forma es descargar el fichero tfgtfmthesisuam.deb de la página moodle correspondiente e instalarlo con el comando \textbf{sudo dpkg -i tfgtfmthesisuam.deb} estando en el mismo directorio en el que se ha descargado el fichero. Sin embargo esta opción no es tan sencilla dado que si no se tienen los paquetes de los que depende este paquete producirá un error hasta que estén todos instalados. Además, si se instala de esta forma no está disponible el acceso a actualizaciones de forma automática. En este caso la documentación estará en el directorio /usr/share/doc/tfgtfmthesisuam.
+
+La tercera posibilidad consiste en descargar el fichero .tgz o el .zip del estilo y descomprimirlo en cualquier directorio. Si se ejecuta \textbf{sudo installLinux} el estilo será instalado en el sistema y estará disponible desde cualquier directorio y usuario y puede eliminarse del directorio donde ha sido descomprimido. Si no se tiene acceso como superusuario se puede no ejecutar el comando pero entonces es necesario que el estilo y el documento se encuentren en el mismo directorio y que además sea el mismo directorio desde el que se compila. Si se utiliza este método no se tiene acceso a las actualizaciones automáticas. En este caso la documentación estará en el directorio /usr/share/doc/tfgtfmthesisuam.
+
+\section{Windows\textsuperscript{\texttrademark}}
+
+Es necesario instalar MiKTeX completo e instalar manualmente algunos paquetes así como este estilo.
+
+Las indicaciones que se presentan a continuación no han sido probadas y sólo son indicaciones que teóricamente deberían funcionar pero si no lo hacen, el creador de este estilo agradecería que se comunicase qué instrucción no funciona.
+
+\begin{enumerate}
+  \item Crear el directorio c:{\textbackslash}localtexmf como administrador de Windows.
+  \item Descomprimir el estilo zip en ese directorio.
+  \item Activar dicho directorio como directorio de estilos de latex para ello es necesario utilizar una de las siguientes dos opciones:
+  \begin{enumerate}
+    \item Usando el GUI de MiKTeX:
+    \begin{enumerate}
+      \item En el menú Inicio ve a la entrada MiKTeX y abre la configuración ``Configuración (Administrador)'', por supuesto. Se abrirá la ventana ``Opciones MiKTeX''.
+      \item Ve a la pestaña ``Raíces''. Haz clic en ``Añadir'' y elije c:{\textbackslash}localtexmf.
+      \item Ahora la parte más importante: ve a la pestaña ``General'' y haz clic en ``Actualizar FNDB'' (FNDB = File Name Data Base). En algunos casos, especialmente si hay nuevas fuentes instaladas, hay que pulsar también el botón ``Actualizar Formatos''.
+    \end{enumerate}
+    \item En la línea de comandos (siempre añadiendo --admin para actuar como administrador y opcionalmente --verbose):
+    \begin{enumerate}
+      \item Ejecuta \texttt{initexmf --register-root=c:{\textbackslash}localtexmf}
+      \item Ejecuta \texttt{initexmf --update-fndb}
+    \end{enumerate}
+  \end{enumerate}
+\end{enumerate}
+
+Dado que no dispongo de ningún ordenador en este sistema operativo este apartado se actualizará adecuadamente en el momento en el que algún estudiante me comunique cómo lo ha realizado o me solicite ayuda para instalarlo.
+
+\section{Mac OS X}
+
+En el caso de querer instalar el estilo en este sistema es necesario instalar MacTex. Para ello se puede ir a la página oficial de MacTex pinchando \href{aquí}{http://tug.org/mactex} y seguir las instrucciones correspondientes con todas las actualizaciones necesarias. Dependiendo de la versión de MacTex este se instala en el directorio /usr/local/texlive/XXXX donde XXXX es el año de la versión de MacTex que se esté instalando y cuyo valor es necesario saber para instalar correctamente el estilo.
+
+En Mac OS X es necesario descargar el fichero .tgz o el .zip del estilo y descomprimirlo en cualquier directorio. Si se ejecuta \textbf{sudo installMaC XXXX} el estilo será instalado en el sistema y estará disponible desde cualquier directorio y usuario y puede eliminarse del directorio donde ha sido descomprimido. Si no se tiene acceso como superusuario se puede no ejecutar el comando pero entonces es necesario que el estilo y el documento se encuentren en el mismo directorio y que además sea el mismo directorio desde el que se compila. Cualquier actualización debe realizarse manualmente realizando el mismo procedimiento.
+
+\section{Overleaf o ShareLatex}
+
+Para utilizar este estilo en alguno de estas aplicaciones web es necesario bajarse el archivo .tgz o .zip, descomprimirlo y subir los ficheros tfgtfmthesisuam.cls, tfgtfmthesisuam.ist, y todas las imágenes. Pueden borrarse todos los logos e imágenes que no se correspondan con la escuela o facultad correspondiente. En general estos sistemas en su versión gratuita tienen limitado el número de archivos que se pueden subir por cada proyecto y por tanto es necesario no desperdiciar espacio con ficheros innecesarios, sobre todo si se va a estructurar mucho el documento o se utilizan muchas imágenes o fuentes de código. Si se dispone de una cuenta de pago en alguno de estos sistemas entonces hay muchas menos limitaciones y se pueden copiar todos los ficheros.
+
+\section{¿Dónde está el manual?}
+
+Dónde se encuentre el manual depende mucho del sistema operativo y el tipo de instalación realizada por ello se recomienda que se busque el fichero tfgtfmthesis.pdf. En ese mismo directorio se encontrarán los fuentes del manual a los que se hace referencia a lo largo de todo este documento.
+
+\section{Corrección ortográfica y codificación de caracteres}
+
+La corrección ortográfica depende exclusivamente del editor que se esté utilizando y por tanto es necesario acudir a la documentación del editor que se esté utilizando para configurarla correctamente.
+
+Por otro lado todo el estilo se ha creado utilizando la codificación UTF8 y por tanto la codificación de los fuentes debe estar también en UTF8. Debe seleccionarse dicha codificación en el editor que se esté utilizando.
+
+\section{¿Qué editor utilizo?}
+
+En todos los sistemas operativos hay múltiples editores de \LaTeXe\ e incluso algunos entornos de desarrollo integrados como eclipse o netbins así como editores como vi, emacas, sublime o atom tienen plugins o packetes que pueden ser instalados para que reconozcan la sintaxis de \LaTeXe\ y pueden compilar los documentos. La elección depende de cada uno y depende de los gustos, habilidades y conocimientos de cada uno. Lo recomendable es probar con varios hasta encontrar el adecuado.

@@ -1,37 +1,45 @@
-from recbole.config import Config
-from recbole.data import InputType, ModelType
-from recbole.model.abstract_recommender import GeneralRecommender
-import torch.nn as nn
+# -*- coding: utf-8 -*-
+# @Author : Javier Wang
+
 import torch
 
-class RandomRecommender(GeneralRecommender):
-    input_type = InputType.POINTWISE
-    type = ModelType.TRADITIONAL
+from recbole.model.abstract_recommender import GeneralRecommender
+from recbole.utils import InputType
 
-    def __init__(self, config: Config, dataset):
+
+class RandomRecommender(GeneralRecommender):
+    r""" Recommender that gives random recommendations. Baseline for performance comparison """
+
+    rand_scores: torch.Tensor
+    input_type = InputType.POINTWISE
+
+    def __init__(self, config, dataset):
         super(RandomRecommender, self).__init__(config, dataset)
-        self.embedding_size = config['embedding_size'] or 64
-        self.linear_layer = nn.Linear(self.n_items, self.embedding_size)
+
+        # Initial random scores
+        self.generate_random_scores()
+
+        # Fake loss parameter
+        self.fake_loss = torch.nn.Parameter(torch.zeros(1))
 
     def forward(self, user, item):
-        scores = torch.rand(item.shape[0], self.n_items)
-        return scores
+        pass
 
     def calculate_loss(self, interaction):
-        pos_items = interaction[self.ITEM_ID]
-        neg_items = interaction[self.NEG_ITEM_ID]
+        # Re-randomize scores
+        self.generate_random_scores()
 
-        pos_scores = self.forward(interaction[self.USER_ID], pos_items)
-        neg_scores = self.forward(interaction[self.USER_ID], neg_items)
+        return torch.nn.Parameter(torch.zeros(1))
 
-        # We use the hinge loss function to calculate the loss
-        loss = torch.nn.functional.relu(neg_scores - pos_scores + self.margin)
-        return loss.mean()
-    
     def predict(self, interaction):
-        scores = torch.rand(self.n_items)
-        return scores
+        item = interaction[self.ITEM_ID]
+        return self.rand_scores[item, :].squeeze(-1)
 
     def full_sort_predict(self, interaction):
-        scores = self.predict(interaction)
-        return torch.argsort(-scores)
+        batch_user_num = interaction[self.USER_ID].shape[0]
+        result = torch.repeat_interleave(self.rand_scores.unsqueeze(0), batch_user_num, dim=0)
+        return result.view(-1)
+
+    def generate_random_scores(self):
+        # Generate random tensor of scores
+        self.rand_scores = torch.rand(self.n_items, 1, device=self.device)

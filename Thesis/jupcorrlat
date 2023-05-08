@@ -1,0 +1,16 @@
+#!/bin/bash
+
+outputdir="."
+inputdir="."
+usage() { echo "Usage: $0 file " 1>&2; exit 1; }
+
+filename="$1"
+
+if [ $# -eq 0 ]; then usage; fi
+
+sed '1,/\maketitle/d' "$filename" | 
+    sed 's/Highligth/Highligthing/g' - |
+    sed '$d' - > ".aux.tex"
+mv ".aux.tex" "$filename"
+
+exit 0

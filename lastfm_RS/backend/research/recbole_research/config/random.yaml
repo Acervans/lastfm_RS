@@ -1,0 +1,38 @@
+data_path: ../../data/recsys_data
+dataset: lastfm_recbole
+
+use_gpu: false
+
+# Dataset config
+load_col:
+  inter: [user_id, track_id, rating, timestamp]
+  item: [track_id] # NO ADDITIONAL DATA
+  user: [user_id]
+
+USER_ID_FIELD: user_id
+ITEM_ID_FIELD: track_id
+threshold: {'rating': 3.0}
+normalize_all: True
+
+# Training and evaluation config
+epochs: 10
+train_batch_size: 4096
+eval_batch_size: 4096
+stopping_step: 2
+
+train_neg_sample_args: 
+  distribution: uniform
+
+eval_args:
+  split: {'RS': [0.8,0.1,0.1]}
+  order: RO
+  group_by: user
+  mode: uni100
+  # mode: full
+
+metrics: ['AUC', 'LogLoss', 'RMSE', 'MAE']
+valid_metric: LogLoss
+
+# metrics: [Recall, MRR, NDCG, Hit, Precision]
+# topk: 20
+# valid_metric: NDCG@20

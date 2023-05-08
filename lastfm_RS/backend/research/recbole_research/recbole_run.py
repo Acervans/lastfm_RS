@@ -73,7 +73,7 @@ def run_recbole(
 
     # model loading and initialization (modified to accept custom models)
     init_seed(config["seed"] + config["local_rank"], config["reproducibility"])
-    model = (get_model(config["model"]) if type(model) == str else model)(config, train_data._dataset).to(config["device"])
+    model = (get_model(config["model"]) if isinstance(model, str) else model)(config, train_data._dataset).to(config["device"])
     logger.info(model)
 
     transform = construct_transform(config)
@@ -135,13 +135,12 @@ if __name__ == "__main__":
     args, _ = parser.parse_known_args()
 
     model = None
-    if args.model:
-        try:
-            model = get_model(args.model)
-        except ValueError as v:
-            model = parse_custom_model(args.model)
-            if not model:
-                raise v
+    try:
+        model = get_model(args.model)
+    except ValueError as v:
+        model = parse_custom_model(args.model)
+        if not model:
+            raise v
 
     config_file_list = (
         args.config_files.strip().split(" ") if args.config_files else None

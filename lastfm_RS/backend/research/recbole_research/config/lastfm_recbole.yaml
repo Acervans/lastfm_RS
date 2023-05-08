@@ -1,0 +1,43 @@
+data_path: ../../data/recsys_data
+dataset: lastfm_recbole
+
+# Dataset config
+load_col:
+  inter: [user_id, track_id, rating, timestamp]
+  # item: [track_id] # NO ADDITIONAL DATA
+  # item: [track_id, vadst] # VADST
+  # item: [track_id, tags] # TAG SEQS
+  # item: [track_id, artist_id] # ARTIST, No sparsity since all tracks must have an artist
+  # item: [track_id, artist_id, tags] # ARTIST + TAG_SEQS
+  # item: [track_id, artist_id, album_id] # ARTIST + ALBUM, Only albums would not improve because of lack of data and sparsity
+  item: [track_id, artist_id, album_id, tags] # ARTIST + ALBUM + TAG_SEQS
+  # item: [track_id, artist_id, album_id, tags, vadst] # ARTIST + ALBUM + TAG_SEQS + VADST
+  user: [user_id]
+
+USER_ID_FIELD: user_id
+ITEM_ID_FIELD: track_id
+threshold: {'rating': 3.0}
+normalize_all: True
+
+# Training and evaluation config
+epochs: 300
+train_batch_size: 4096
+eval_batch_size: 4096
+stopping_step: 5
+
+train_neg_sample_args: 
+  distribution: uniform
+
+eval_args:
+  split: {'RS': [0.8,0.1,0.1]}
+  order: RO
+  group_by: user
+  mode: uni100
+  # mode: full
+
+# metrics: ['AUC', 'LogLoss', 'RMSE', 'MAE']
+# valid_metric: LogLoss
+
+metrics: [Recall, MRR, NDCG, Hit, Precision]
+topk: 20
+valid_metric: NDCG@20

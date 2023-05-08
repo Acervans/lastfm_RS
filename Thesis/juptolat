@@ -1,0 +1,28 @@
+#!/bin/bash
+
+outputdir="."
+inputdir="."
+usage() { echo "Usage: $0 [-o out dir] [-i indir] [-h] name-without-ext " 1>&2; exit 1; }
+
+while getopts "ho:i:" option
+do
+    case "$option" in
+        h) usage;;
+        o) outputdir="$OPTARG";;
+        i) inputdir="$OPTARG";;
+    esac
+done
+shift $(($OPTIND-1))
+
+filename="$1"
+
+inf=$inputdir"/"$filename".ipynb"
+outf=$outputdir"/"$filename".tex"
+
+
+jupyter nbconvert "$inf" --to latex --stdout | 
+    sed '1,/\maketitle/d' - | 
+    sed 's/Verbatim/Highligth/g' - |
+    sed '$d' - > "$outf"
+
+exit 0

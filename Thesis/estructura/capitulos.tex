@@ -1,0 +1,15 @@
+Las partes, capítulos, apartados, subapartados y demás elementos de este tipo pueden usarse de dos formas, una es la tradicional de \LaTeXe\ con un parámetro opcional que se corresponde con el título de la parte, capítulo o sección que aparecerá em el índice y en las cabeceras o pies de página. El primer parámetro obligatorio será el nombre completo de la parte, capítulo o sección. El parámetro opcional sólo se utilizará si el nombre completo es demasiado largo.
+
+La segunda forma de usarlo es idéntica a la tradicional pero añadiendo un segundo parámetro obligatorio en el que se pondrá el nombre del fichero (sin `.tex') en el que esté el texto de esa parte, capítulo, sección, etc.
+
+De forma resumida los comandos completos, incluyendo el segundo parámetro obligatorio son en orden decreciente:
+
+\begin{description}
+  \item [\textbackslash part[shorttitle{]}\{title\}\{file\}] Partes.
+  \item [\textbackslash chapter[shorttitle{]}\{title\}\{file\}] Capítulos.
+  \item [\textbackslash section[shorttitle{]}\{title\}\{file\}] Apartados.
+  \item [\textbackslash subsection[shorttitle{]}\{title\}\{file\}] Subapartados (nomalmente no se presenta en el índice si no se utiliza la opción de índice extendido).
+  \item [\textbackslash subsubsection[shorttitle{]}\{title\}\{file\}] Subsubapartados (no se presenta ne el índice si no se utiliza la opción de índice completo).
+  \item [\textbackslash paragraph[shorttitle{]}\{title\}\{file\}] Párrafos (no se presenta ne el índice).
+  \item [\textbackslash subparagraph[shorttitle{]}\{title\}\{file\}] Subpárrafos (no se presenta ne el índice).
+\end{description}

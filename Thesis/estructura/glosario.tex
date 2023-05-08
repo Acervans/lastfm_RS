@@ -1,0 +1,47 @@
+Tres elementos que también están disponibles para los autores son el glosario, la lista de acrónimos y la lista de definiciones.
+
+\subsection{Glosario}
+
+Para realizar el glosario y simplificar su creación se han diseñado seis comandos. En todos ellos el primer parámetro es opcional(por tanto si se indica debe hacerse entre corchetes) y representa el elemento referenciado al estilo \textit{see also}. Los comandos que empiezan por Ph (phantom), introducen la palabra en el índice pero sin escribirla en el texto mientras que los que no empiezan por Ph también escriben la palabra en el texto. La combinación de ambos comandos es imprescindible porque el diseño del glosario es muy crítico con la tipología y la misma expresión o palabra con un espacio de más o de menos o una letra en mayúsucula o sin mayúscula hacen que haya entradas distintas en el glosario.
+
+\begin{description}
+  \item [\textbackslash Index{[]}\{\}] El primer parámetro es opcional y se corresponde con el \textit{see also}. El segundo parámetro es la palabra a indexar.
+  \item [\textbackslash Subindex{[]}\{\}\{\}] El primer parámetro es opcional y se corresponde con el \textit{see also}. El segundo parámetro es la palabra sobre la que se indexa y el tercero la palabra a indexar.
+  \item [\textbackslash Subsubindex{[]}\{\}\{\}\{\}] El primer parámetro es opcional y se corresponde con el \textit{see also}. El segundo y tercer parámetro es el punto de indexación y el cuarto la palabra a indexar.
+  \item [\textbackslash PhIndex{[]}\{\}] El primer parámetro es opcional y se corresponde con el \textit{see also}. El segundo parámetro es la palabra a indexar.
+  \item [\textbackslash PhSubindex{[]}\{\}\{\}] El primer parámetro es opcional y se corresponde con el \textit{see also}. El segundo parámetro es la palabra sobre la que se indexa y el tercero la palabra a indexar.
+  \item [\textbackslash PhSubsubindex{[]}\{\}\{\}\{\}] El primer parámetro es opcional y se corresponde con el \textit{see also}. El segundo y tercer parámetro es el punto de indexación y el cuarto la palabra a indexar.
+\end{description}
+
+\subsection{Acronimos}
+
+Para definir un nuevo acrónimo se puede hacer en cualquier lugar del texto. Así, lo normal, es realizar la definición del acrónimo donde se use por primera vez, dicha definición será añadida a la sección de definiciones al final del texto. Para realizar la definición hay que utilizar el comando \textbf{\textbackslash newacronym\{label\}\{acron\}\{extended\}} donde label es la etiqueta para hacer referencia al acrónimo, acron es el acrónimo en si mismo y extended es lo que significa el acrónimo.
+
+Para hacer referencia a los acrónimos se pueden utilizar las siguientes funciones:
+\begin{description}
+  \item [\textbackslash ac\{label\}] La primera vez que se use el acrónimo en el texto aparecerá en su forma extendida y entre paréntesis el acrónimo.
+  \item [\textbackslash acs\{label\}] Se presenta el acrónimo.
+  \item [\textbackslash acl\{label\}] Se presenta la forma extendida del acrónimo.
+\end{description}
+
+\newacronym{ieee}{IEEE}{Institute of Electrical and Electronics Engineers}
+
+Un ejemplo es por ejemplo la definción de \ac{ieee}, que si repito aparece sólo como \ac{ieee} o puedo utilizar la forma extendida de esta forma: \acl{ieee}. El formato corto siempre se presentará así: \acs{ieee}. Para ver ejemplos de su uso lo mejor es ver los fuentes de este manual justo en este mismo punto.
+
+
+\subsection{Definiciones}
+
+Las definiciones se realizar de forma similar a los acrónimos. La diferencia está en los comandos utilizados. En este caso el comando tiene un parámetro más en el que se introduce el elemento definido en plural y el comando a utilizar es \textbf{\textbackslash newdefinition\{label\}\{defined\}\{plural\}\{extended\}}.  Los comandos para referenciar la definición serán:
+\begin{description}
+  \item [\textbackslash dfn\{label\}] Se pone la palabra definida.
+  \item [\textbackslash dfnpl\{label\}] Se pone la palabra definida en plural.
+  \item [\textbackslash Dfn\{label\}] Se pone la palabra definida en mayúscula.
+  \item [\textbackslash Dfnpl\{label\}] Se pone la palabra definida en plural y mayúsucula.
+\end{description}
+
+Es importante no poner un punto al final de la definición dado que se añade automáticamente al final de las definiciones.
+
+  \newdefinition{definicion}{definición}{definiciones}{Proposición que expone con claridad y exactitud los caracteres genéricos y diferenciales de algo material o inmaterial}
+  \newdefinition{acronimo}{acrónimo}{acrónimos}{Sigla cuya configuración permite su pronunciación como una palabra; por ejemplo, ovni: objeto volador no identificado; TIC, tecnologías de la información y la comunicación}
+
+Al igual que con los acrónimos voy a realizar lo mismo con las \dfnpl{definicion} incluida la \dfn{definicion} de \dfn{acronimo}. Para ver cómo se usan es importante editar los fuentes de este documento.

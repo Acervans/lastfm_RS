@@ -1,0 +1,35 @@
+Se han diseñado una serie de comandos sencillos para la creación de presupuestos. Si se necesita un diseño de presupuestos más complejo puede ser creado por el autor manteniendo una estética similar a la de los presupuestos creados con estos comandos. Normalmente esta tabla no será indexada como una tabla del documento aunque si se considera conveniente puede ser introducida dento del entorno table explicado en la sección \ref{SEC:TABLAS}.
+
+Los comandos para diseñar un presupuesto deben utilizarse dentro del entorno diseñado para el presupuesto que es el entorno \textbf{budget}. En ningún caso es necesario indicar la unidad monetaria ya que ya la añade internamente. Se dispone de los siguientes comandos:
+  \begin{description}
+    \item[{\textbackslash}\Index{budgettitle}\{titulo\}] cada una de las secciones en las que está dividido un presupuesto tiene su título y debe indicarse con este comando. El final de cada sección deberá acabar con un comando \textbf{subtotal}.
+    \item[{\textbackslash}concept\{nombre\}\{unitario\}\{cantidad\}\{total\}] permite definir cada uno de los conceptos con el texto indicado en el primer parámetro, el precio unitario en el segundo y el total en el tercero. Pueden dejarse elementos vacíos si se desea y es necesario dejar los tres últimos vacíos si el concepto está dividido en subconceptos
+    \item[{\textbackslash}subconcept\{nombre\}\{unitario\}\{cantidad\}\{total\}] funciona exactamente igual que el comando concepto pero se expresa de forma distinta en el presupuesto.
+    \item[{\textbackslash}subtotal\{valor\}] valor del subtotal.
+    \item[{\textbackslash}separator] añade una separación por motivos estéticos.
+    \item[]{\textbackslash}total\{valor\}] valor total del presupuesto.
+  \end{description}
+
+Un ejemplo de cómo puede quedar un presupuesto es el siguiente y cuyo código puede verse en los fuentes de este documento:
+
+\begin{budget}
+  \budgettitle{Materiales}
+  \concept{Hierro}{12.00}{1}{12.00}
+  \concept{Derivados del cobre}{}{}{}
+  \subconcept{Laton}{12.00}{2}{24.00}
+  \subconcept{Bronce}{12.15}{3}{36.45}
+  \concept{Estaño}{10.11}{2}{20.22}
+  \subtotal{82.67}
+  \separator
+  \budgettitle{Personal}
+  \concept{Ingenieros}{}{}{}
+  \subconcept{Informático}{45,000.00}{3}{135,000.00}
+  \subconcept{Telecomunicaciones}{45,000.00}{3}{135,000.00}
+  \concept{Técnicos}{}{}{}
+  \subconcept{Telecomunicaciones}{28,000.00}{3}{84,000.00}
+  \subconcept{Informática}{28,000.00}{3}{84,000.00}
+  \concept{Administrador}{50,000.00}{1}{50,000.00}
+  \subtotal{488,000.00}
+  \separator
+  \total{488,082.67}
+\end{budget}
