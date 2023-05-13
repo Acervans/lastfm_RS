@@ -23,3 +23,6 @@ class VADAnalysisForm(forms.Form):
     method = forms.ChoiceField(label='Analysis Method', choices=[(
         'text', 'Whole Text'), ('sentences', 'By Sentences')], widget=forms.RadioSelect, initial='text')
     lang_check = forms.BooleanField(required=False, label='Check Language')
+
+class RecommendationsForm(forms.Form):
+    pass

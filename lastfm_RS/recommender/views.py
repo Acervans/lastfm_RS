@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate
-from .forms import PreviewTrackForm, RegisterForm, VADAnalysisForm
+from .forms import PreviewTrackForm, RegisterForm, VADAnalysisForm, RecommendationsForm
 from bs4 import BeautifulSoup
 from backend.src.nrc_vad_analysis import FIELDNAMES, FIELDNAMES_LANG, analyze_string, analyze_text
 from backend.src.constants import GENIUS, PYLAST
+from backend.research.db_utils import *
 import requests
 import pylast
 
@@ -56,9 +57,6 @@ def register(request):
         'registration/registration_form.html',
         context={'form': form},
     )
-
-# Mejor idea sería que se recomiende una playlist, y al lado un botón de Preview solo cuando tenga link de youtube (o como pagina aparte)
-
 
 def lastfm_preview(request):
 
@@ -172,3 +170,26 @@ def vad_analysis(request):
         form = VADAnalysisForm()
 
     return render(request, 'vad_analysis_form.html', context={'form': form})
+
+
+# Mejor idea sería que se recomiende una playlist, 
+# y al lado un desplegable con todos los datos y link de youtube (o como pagina aparte)
+
+def recommendations(request):
+
+    if request.method == 'GET' and 'artist' in request.GET:
+        form = RecommendationsForm(request.GET)
+        if form.is_valid():
+            # artist = form.cleaned_data.get('artist')
+            # title = form.cleaned_data.get('title')
+            # do_lyrics = form.cleaned_data.get('lyrics')
+            
+
+            return render(
+                request,
+                'lastfm_recommend.html',
+                get_track_context(artist, title, do_lyrics),
+            )
+    else:
+        form = RecommendationsForm()
+        return render(request, 'lastfm_recommend_form.html', context={'form': form})

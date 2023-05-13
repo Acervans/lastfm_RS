@@ -30,9 +30,9 @@ eval_args:
   mode: uni100
   # mode: full
 
-metrics: ['AUC', 'LogLoss', 'RMSE', 'MAE']
-valid_metric: LogLoss
+# metrics: ['AUC', 'LogLoss', 'RMSE', 'MAE']
+# valid_metric: LogLoss
 
-# metrics: [Recall, MRR, NDCG, Hit, Precision]
-# topk: 20
-# valid_metric: NDCG@20
+metrics: [Recall, MRR, NDCG, Hit, Precision]
+topk: 20
+valid_metric: NDCG@20

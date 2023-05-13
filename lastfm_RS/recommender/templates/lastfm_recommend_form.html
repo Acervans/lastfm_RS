@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+{% block title %}
+    LastFM Recommendations
+{% endblock title %}
+{% block content %}
+    <h2>LastFM Recommendations</h2>
+    <br/>
+    <form method="get" class="form-group">
+        <table>
+            {{ form.as_table }}
+        </table>
+        <br/>
+        <button type="submit" class="btn btn-success">Generate Recommendations</button>
+    </form>
+{% endblock content %}
