@@ -1,69 +1,115 @@
 import torch
-import torch.nn as nn
 from recbole.utils import InputType
+from recbole.data.dataset.dataset import Dataset
 from recbole.model.abstract_recommender import GeneralRecommender
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
-from scipy.sparse import csr_matrix
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, HashingVectorizer
+from sklearn.preprocessing import normalize
+from sklearn.utils.extmath import safe_sparse_dot
 import numpy as np
+import pandas as pd
 
 class CosineSimilarityRecommender(GeneralRecommender):
     input_type = InputType.PAIRWISE
 
-    def __init__(self, config, dataset):
+    def __init__(self, config, dataset: Dataset):
         super(CosineSimilarityRecommender, self).__init__(config, dataset)
-
-        # Initialize variables
-        self.item_features = None
-        self.sim_matrix = None
-        
-        # Fake loss
-        self.fake_loss = torch.nn.Parameter(torch.zeros(1))
 
         # Set up vectorizer
         if config['Vectorizer'].lower() == 'countvectorizer':
-            self.vectorizer = CountVectorizer()
+            vectorizer = CountVectorizer
         elif config['Vectorizer'].lower() == 'tfidfvectorizer':
-            self.vectorizer = TfidfVectorizer()
+            vectorizer = TfidfVectorizer
         else:
             raise ValueError(f"Vectorizer {config['Vectorizer']} not valid.")
+        
+        self.inters = dataset.inter_feat.numpy()
+        self.knn_topk = config['knn_topk'] if config['weighted_average'] else None
 
-        # Set up columns used for vectorizer
-        self.vectorizer_columns = config['Vectorizer_Cols']
+        # Ratings as weights
+        if 'rating' in self.inters and config['weighted_average']:
+            # Avoid division by 0
+            self.sim_weights = np.add(self.inters['rating'], 1)
+        else:
+            self.sim_weights = np.ones_like(self.inters[self.USER_ID])
+
+        # Fake loss
+        self.fake_loss = torch.nn.Parameter(torch.zeros(1))
+
+        # Set up column used for similarities
+        self.vec_column = config['Vectorized_Column'] if 'Vectorized_Column' in config else 'tags'
+        
+        if dataset.field2seqlen[self.vec_column] == 1:
+            self.vectorizer = vectorizer(**config['Vectorizer_Config'], token_pattern=r"(?u)\b\w+\b", lowercase=False)
+        else:
+            self.vectorizer = vectorizer(**config['Vectorizer_Config'], analyzer=lambda x: x)
+
+        # Vectorized values from selected column
+        item_feats = dataset.get_item_feature().numpy()
+        self.vec_feat = item_feats[self.vec_column]
+
+        # Item id to idx mapping
+        self.item_to_idx = pd.Series(range(len(self.vec_feat)), index=item_feats[self.ITEM_ID])
+
+        # Item sequential token embedding
+        self.vec_matrix = normalize(self.vectorizer.fit_transform(self.vec_feat))
+
+    def forward(self, user, item):
+        pass
 
     def calculate_loss(self, interaction):
         return torch.nn.Parameter(torch.zeros(1))
 
-    def init_weight(self):
-        item_texts = [' '.join([str(self.dataset.get_item_feature(item_id, column)) for column in self.vectorizer_columns])
-                      for item_id in range(self.n_items)]
-        self.item_features = self.vectorizer.fit_transform(item_texts)
-        self.sim_matrix = csr_matrix(np.eye(self.item_features.shape[0]))
+    def cosine_similarity_scores(self, user_id):
+        # User interactions indices
+        users = self.inters[self.USER_ID]
+        user_inters_idx = users == user_id.item()
 
-    def forward(self, user, item):
-        item_indices = self.interaction_matrix[user].indices
-        item_similarities = self.sim_matrix[item_indices, item]
-        if self.ratings is not None:
-            item_ratings = self.ratings[user].toarray()[0][item_indices]
-            item_similarities *= item_ratings
-        return torch.sum(item_similarities)
+        # Weights by rating
+        weights = self.sim_weights[user_inters_idx]
 
+        # Sort by weights for cutoff
+        idx_by_weights = np.argsort(-weights)[:self.knn_topk]
+        weights = weights[idx_by_weights]
+
+        # Interacted items
+        user_items = self.inters[self.ITEM_ID][user_inters_idx][idx_by_weights]
+
+        # Features to vectorize for user items
+        items_idx = self.item_to_idx.loc[user_items.flatten()]
+        rec_items_feat = self.vec_feat[items_idx]
+        
+        return self.feature_cosine_scores(rec_items_feat, items_idx, weights)
+
+    def feature_cosine_scores(self, rec_items_feature, items_idx=None, item_weights=None):
+        # Vectorize items selected feature
+        rec_matrix = self.vectorizer.transform(rec_items_feature)
+
+        # Compute cosine similarities
+        rec_matrix_norm = normalize(rec_matrix, copy=True)
+        sims = safe_sparse_dot(self.vec_matrix, rec_matrix_norm.T, dense_output=True)
+
+        # Cancel items used for recommendation
+        if items_idx is not None:
+            sims[items_idx] = 0
+
+        # Average feature similarities (weighted if applicable)
+        scores = np.average(sims, weights=item_weights, axis=1)
+
+        return scores
+
+    # user, batch items
     def predict(self, interaction):
         user = interaction[self.USER_ID]
-        items = interaction[self.ITEM_ID]
-        scores = []
-        for item in items:
-            score = self.forward(user, item)
-            scores.append(score)
-        return torch.tensor(scores)
+        item = interaction[self.ITEM_ID]
 
+        scores = self.cosine_similarity_scores(user[0])
+        return scores[item[0].item()]
+
+    # batch users, all items
     def full_sort_predict(self, interaction):
         user = interaction[self.USER_ID]
-        items = self.dataset.item_pool
         scores = []
-        for item in items:
-            score = self.forward(user, item)
-            scores.append(score)
-        scores = torch.tensor(scores)
-        _, indices = torch.sort(scores, descending=True)
-        return indices
+        for uid in user:
+            scores.append(self.cosine_similarity_scores(uid))
+
+        return torch.Tensor(np.array(scores))

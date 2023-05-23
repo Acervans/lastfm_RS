@@ -15,6 +15,7 @@ import sys
 from recbole.quick_start import run_recboles
 from recbole.utils.utils import get_model
 from logging import getLogger
+from torch import load
 
 from recbole.config import Config
 from recbole.data import (
@@ -36,6 +37,55 @@ def parse_custom_model(model):
     if importlib.util.find_spec(model):
         module = importlib.import_module(model)
         return getattr(module, model)
+
+def load_data_and_model(model_file, update_config=None, verbose=False):
+    r"""Load filtered dataset, split dataloaders and saved model.
+
+    Args:
+        model_file (str): The path of saved model file.
+        update_config (dict): Config entries to update.
+        verbose (bool): Whether to log data preparation.
+
+    Returns:
+        tuple:
+            - config (Config): An instance object of Config, which record parameter information in :attr:`model_file`.
+            - model (AbstractRecommender): The model load from :attr:`model_file`.
+            - dataset (Dataset): The filtered dataset.
+            - train_data (AbstractDataLoader): The dataloader for training.
+            - valid_data (AbstractDataLoader): The dataloader for validation.
+            - test_data (AbstractDataLoader): The dataloader for testing.
+    """
+    checkpoint = load(model_file)
+    config = checkpoint["config"]
+    if update_config:
+        for key, value in update_config.values():
+            config[key] = value
+
+    init_seed(config["seed"], config["reproducibility"])
+    init_logger(config)
+    if verbose:
+        logger = getLogger()
+        logger.info(config)
+
+    dataset = create_dataset(config)
+    if verbose:
+        logger.info(dataset)
+    train_data, valid_data, test_data = data_preparation(config, dataset)
+
+    init_seed(config["seed"], config["reproducibility"])
+
+    try:
+        model = get_model(config["model"])
+    except ValueError as v:
+        model = parse_custom_model(config["model"])
+    if not model:
+        raise v
+
+    model = model(config, train_data._dataset).to(config["device"])
+    model.load_state_dict(checkpoint["state_dict"])
+    model.load_other_parameter(checkpoint.get("other_parameter"))
+
+    return config, model, dataset, train_data, valid_data, test_data
 
 def run_recbole(
     model=None, dataset=None, config_file_list=None, config_dict=None, saved=True
