@@ -13,8 +13,12 @@ if __name__ == "__main__":
         update_config={
             'dataset_save_path': 'saved/lastfm_recbole-dataset.pth',
             'dataloaders_save_path': 'saved/lastfm_recbole-for-CosineSimilarityRecommender-dataloader.pth',
-            # 'weighted_average': True,
-            # 'knn_topk': 5
+            'weighted_average': True,
+            # 'knn_topk': 2,
+            'Vectorizer_Config': {
+                'min_df': 1,
+                'binary': False
+            }
         },
         use_training=False,
         verbose=False,
