@@ -22,7 +22,14 @@ class CosineSimilarityRecommender(GeneralRecommender):
         else:
             raise ValueError(f"Vectorizer {config['Vectorizer']} not valid.")
         
-        self.inters = dataset.inter_feat.numpy()
+        if isinstance(dataset.inter_feat, pd.DataFrame):
+            self.inters = {col: dataset.inter_feat[col].values for col in dataset.inter_feat.columns}
+            item_feats = dataset.get_item_feature()
+            item_feats = {col: item_feats[col].values for col in item_feats.columns}
+        else:
+            self.inters = dataset.inter_feat.numpy()
+            item_feats = dataset.get_item_feature().numpy()
+            
         self.knn_topk = config['knn_topk'] if config['weighted_average'] else None
 
         # Ratings as weights
@@ -44,7 +51,6 @@ class CosineSimilarityRecommender(GeneralRecommender):
             self.vectorizer = vectorizer(**config['Vectorizer_Config'], analyzer=lambda x: x)
 
         # Vectorized values from selected column
-        item_feats = dataset.get_item_feature().numpy()
         self.vec_feat = item_feats[self.vec_column]
 
         # Item id to idx mapping

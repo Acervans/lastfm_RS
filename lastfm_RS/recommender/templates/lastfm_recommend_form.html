@@ -1,15 +1,37 @@
 {% extends "base_generic.html" %}
 {% block title %}
-    LastFM Recommendations
+    Last.FM Recommendations
 {% endblock title %}
 {% block content %}
-    <h2>LastFM Recommendations</h2>
+    <h2>Last.FM Recommender</h2>
     <br/>
     <form method="get" class="form-group">
         <table>
-            {{ form.as_table }}
+            {{ rec_form.as_table }}
         </table>
+        <div id="random" class="recommender-form">
+            <br/>
+            <h4>Random Recommender Parameters</h4>
+            <table>
+                {{ random.as_table }}
+            </table>
+        </div>
+        <div id="cosine" class="recommender-form">
+            <br/>
+            <h4>Cosine Similarities Parameters</h4>
+            <p>&nbsp;If tags are specified, recommendations will not consider user data.</p>
+            <table>
+                {{ cosine.as_table }}
+            </table>
+        </div>
         <br/>
         <button type="submit" class="btn btn-success">Generate Recommendations</button>
     </form>
+    <datalist id="usernames">
+        {% for username in usernames %}
+            <option value="{{ username }}"></option>
+        {% endfor %}
+    </datalist>
+    {% load static %}
+    <script type="text/javascript" src="{% static 'js/recommend_script.js' %}"></script>
 {% endblock content %}

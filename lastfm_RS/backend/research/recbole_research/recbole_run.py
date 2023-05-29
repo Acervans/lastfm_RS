@@ -38,12 +38,13 @@ def parse_custom_model(model):
         module = importlib.import_module(model)
         return getattr(module, model)
 
-def load_data_and_model(model_file, update_config=None, verbose=False):
+def load_data_and_model(model_file, update_config=None, use_training=False, verbose=False):
     r"""Load filtered dataset, split dataloaders and saved model.
 
     Args:
         model_file (str): The path of saved model file.
         update_config (dict): Config entries to update.
+        use_training (bool): Whether to use training set or full dataset
         verbose (bool): Whether to log data preparation.
 
     Returns:
@@ -58,7 +59,7 @@ def load_data_and_model(model_file, update_config=None, verbose=False):
     checkpoint = load(model_file)
     config = checkpoint["config"]
     if update_config:
-        for key, value in update_config.values():
+        for key, value in update_config.items():
             config[key] = value
 
     init_seed(config["seed"], config["reproducibility"])
@@ -81,7 +82,7 @@ def load_data_and_model(model_file, update_config=None, verbose=False):
     if not model:
         raise v
 
-    model = model(config, train_data._dataset).to(config["device"])
+    model = model(config, train_data._dataset if use_training else dataset).to(config["device"])
     model.load_state_dict(checkpoint["state_dict"])
     model.load_other_parameter(checkpoint.get("other_parameter"))
 

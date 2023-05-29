@@ -5,7 +5,7 @@ function toggleNav() {
     let nav = document.getElementById("sidebar"),
         content = document.getElementsByClassName("col-sm-10")[0],
         btn = document.getElementsByClassName("sidebar-btn")[0],
-        navW = nav.scrollWidth;
+        navW = nav.clientWidth;
     if (isToggled) {
         btn.style.transform = "rotate(180deg)";
         nav.style.marginLeft = `-${navW + 2}px`;

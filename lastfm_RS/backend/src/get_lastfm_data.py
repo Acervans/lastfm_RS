@@ -1,5 +1,5 @@
-from constants import *
-from nrc_vad_analysis import analyze_string
+from .constants import *
+from .nrc_vad_analysis import analyze_string
 from bs4 import BeautifulSoup
 from datetime import date
 from requests.exceptions import ConnectionError, ReadTimeout
@@ -8,6 +8,7 @@ import numpy as np
 import pylast
 import wikipedia
 import requests
+import pickle
 import json
 import sys
 
@@ -93,7 +94,7 @@ def get_tags_list(tagged_item, limit, names_only=False):
         return [tag[0] for tag in top_tags]
 
 
-def get_pylast_item(item, item_type):
+def get_pylast_item(item, item_type, split=True):
     if item_type == "Artists":
         return PYLAST.get_artist(item)
     if item_type == "Albums":
@@ -573,7 +574,7 @@ def get_user_data(username: str, filepath: str = None, verbose=False) -> dict:
 
     Args:
         username (str): Username of user to query
-        filepath (str, optional): File to save data as JSON
+        filepath (str, optional): File to save data as pickle object
         verbose (boolean, optional): Print each step
 
     Returns:
@@ -584,6 +585,13 @@ def get_user_data(username: str, filepath: str = None, verbose=False) -> dict:
         print(f"Querying all data for user '{username}':", flush=True)
 
     data = dict()
+    item_tags = {
+        'Artists': dict(), 
+        'Albums': dict(),
+        'Tracks': dict()
+    }
+    unique_tags = set()
+
     user = PYLAST.get_user(username)
 
     # Check if user still exists
@@ -609,11 +617,12 @@ def get_user_data(username: str, filepath: str = None, verbose=False) -> dict:
                 continue
             track_name, artist, album = unique_track
 
-            # Name Artist Timestamp
-            loved_tracks.append([track_name, artist, str(t[-1])])
+            # Name Artist Album Timestamp
+            loved_tracks.append((track_name, artist, album, str(t[-1])))
+            item_tags['Tracks'][unique_track] = list()
 
-    except pylast.PyLastError:
-        # TODO do something
+    except pylast.PyLastError as e:
+        print(f"API Error -> Loved tracks for {username}: {e}")
         return None
 
     if verbose:
@@ -634,17 +643,19 @@ def get_user_data(username: str, filepath: str = None, verbose=False) -> dict:
                 continue
             track_name, artist, album = unique_track
 
-            recent_tracks.append([track_name, artist, str(t[-1])])
+            # Name Artist Album Timestamp
+            recent_tracks.append((track_name, artist, album, str(t[-1])))
+            item_tags['Tracks'][unique_track] = list()
 
-    except (pylast.WSError, pylast.NetworkError):
-        # TODO do something
+    except (pylast.WSError, pylast.NetworkError) as e:
+        print(f"Network Error -> Recent tracks for {username}: {e}")
         return None
     # Recent tracks hidden by user
     except pylast.PyLastError as e:
         if e.__cause__ and str(e.__cause__) == "Login: User required to be logged in":
             pass
         else:
-            # TODO do something
+            print(f"API Error -> Recent tracks for {username}: {e}")
             return None
 
     if verbose:
@@ -665,10 +676,12 @@ def get_user_data(username: str, filepath: str = None, verbose=False) -> dict:
                 continue
             track_name, artist, album = unique_track
 
-            top_tracks.append([track_name, artist])
+            # Name Artist Album
+            top_tracks.append((track_name, artist, album))
+            item_tags['Tracks'][unique_track] = list()
 
     except pylast.PyLastError:
-        # TODO do something
+        print(f"API Error -> Top tracks for {username}: {e}")
         return None
 
     if verbose:
@@ -685,10 +698,12 @@ def get_user_data(username: str, filepath: str = None, verbose=False) -> dict:
         for artist in user.get_top_artists(limit=ARTIST_LIMIT):
             artist = artist[0]
             artist_name = artist.get_name()
-            top_artists.append(artist_name)
+
+            top_artists.append(artist_name)            
+            item_tags['Artists'][artist_name] = list()
 
     except pylast.PyLastError:
-        # TODO do something
+        print(f"API Error -> Top artists for {username}: {e}")
         return None
 
     if verbose:
@@ -706,18 +721,50 @@ def get_user_data(username: str, filepath: str = None, verbose=False) -> dict:
             album = album[0]
             artist_name = album.get_artist().get_name(properly_capitalized=True)
             album_name = album.get_name()
-            top_albums.append([album_name, artist_name])
+
+            top_albums.append((album_name, artist_name))
+            item_tags['Albums'][(album_name, artist_name)] = list()
+
     except pylast.PyLastError:
-        # TODO do something
+        print(f"API Error -> Top albums for {username}: {e}")
         return None
 
     if verbose:
         print('OK')
 
     data['TOP_ALBUMS'] = top_albums
+        
+    # ---------------------- Tags ----------------------
+    if verbose:
+        print('\t- Getting top tags for all items...', end=' ', flush=True)
+
+    for item_name in item_tags:
+        for item in item_tags[item_name]:
+            try:
+                # Obtain tags as lowercase strings
+                unique_item = SEPARATOR.join(item) if not isinstance(item, str) else item
+                tags = get_tags_list(get_pylast_item(unique_item, item_name), TAG_LIMIT, names_only=True)
+                tags = [t.lower() for t in tags]
+                # Assign tags to current item
+                item_tags[item_name][item] = tags
+                # Update unique Tags
+                unique_tags.update(tags)
+
+            except pylast.PyLastError as e:
+                if e.__cause__ and str(e.__cause__) == f"{item_name[:-1]} not found":
+                    continue
+                else:
+                    print(f"API Error -> {item} top tags for {username}: {e}")
+                    return None
+
+    if verbose:
+        print('OK')
+
+    data['ITEM_TAGS'] = item_tags
+    data['UNIQUE_TAGS'] = list(unique_tags)
 
     if filepath:
-        with open(filepath, 'w') as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
+        with open(filepath, 'wb') as f:
+            pickle.dump(data, f)
 
     return data

@@ -1,12 +1,15 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate
-from .forms import PreviewTrackForm, RegisterForm, VADAnalysisForm, RecommendationsForm
+from .forms import *
 from bs4 import BeautifulSoup
 from backend.src.nrc_vad_analysis import FIELDNAMES, FIELDNAMES_LANG, analyze_string, analyze_text
 from backend.src.constants import GENIUS, PYLAST
+from backend.src.get_lastfm_data import get_user_data
 from backend.research.db_utils import *
 import requests
 import pylast
+
+RECSYS_DATA = '../backend/data/rescys_data'
 
 # Create your views here.
 
@@ -14,24 +17,22 @@ import pylast
 def index(request):
     """View function for home page of site."""
 
-    """ EJEMPLOS DE locallibrary
-    # Generate counts of some of the main objects
-    num_books = Book.objects.all().count()
-    num_instances = BookInstance.objects.all().count()
-    # Available copies of books
-    num_instances_available = BookInstance.objects.filter(status__exact='a').count()
-    num_authors = Author.objects.count()  # The 'all()' is implied by default.
-    """
-
     # Number of visits to this view, as counted in the session variable.
     num_visits = request.session.get('num_visits', 1)
     request.session['num_visits'] = num_visits + 1
+
+    tables_count = get_tables_count()
+    tables_count['useralltracks'] = tables_count['usertoptracks'] + \
+        tables_count['userrecenttracks'] + tables_count['userlovedtracks']
 
     # Render the HTML template index.html with the data in the context variable.
     return render(
         request,
         'index.html',
-        context={'num_visits': num_visits},
+        context={
+            'num_visits': num_visits,
+            'stats': tables_count,
+        },
     )
 
 
@@ -177,19 +178,48 @@ def vad_analysis(request):
 
 def recommendations(request):
 
-    if request.method == 'GET' and 'artist' in request.GET:
-        form = RecommendationsForm(request.GET)
-        if form.is_valid():
-            # artist = form.cleaned_data.get('artist')
-            # title = form.cleaned_data.get('title')
-            # do_lyrics = form.cleaned_data.get('lyrics')
+    if request.method == 'GET' and 'recommend-model' in request.GET:
+        rec_form = RecommendationsForm(request.GET, prefix='recommend')
+        if rec_form.is_valid():
+            recsys = rec_form.cleaned_data.get('model')
+            username = rec_form.cleaned_data.get('username')
+            scrape = rec_form.cleaned_data.get('scrape')
+            cutoff = rec_form.cleaned_data.get('cutoff')
+            print(recsys)
+            match recsys:
+                case 'random':
+                    recsys_form = RandomRecommenderForm(request.GET, prefix='random')
+                case 'cosine':
+                    recsys_form = CosineRecommenderForm(request.GET, prefix='cosine')
+                    if recsys_form.is_valid():
+                        tags = recsys_form.cleaned_data.get('tags')
             
+            if scrape:
+                user_data = get_processed_user_data(username)
+                from pprint import pprint
+                pprint(user_data)
 
-            return render(
-                request,
-                'lastfm_recommend.html',
-                get_track_context(artist, title, do_lyrics),
-            )
+            return render(request, 'lastfm_recommend.html', context={
+                recommendations: [(1, 'track1context'),(2, 'track2context')], #placeholder, trackcontext would be dicts
+            })
     else:
-        form = RecommendationsForm()
-        return render(request, 'lastfm_recommend_form.html', context={'form': form})
+        rec_form = RecommendationsForm(prefix="recommend")
+        random = RandomRecommenderForm(prefix="random")
+        cosine = CosineRecommenderForm(prefix="cosine")
+
+        usernames = get_table_df('user_')['username']
+        return render(request, 'lastfm_recommend_form.html', context={
+            'rec_form': rec_form,
+            'random': random,
+            'cosine': cosine,
+            'usernames': usernames,
+        })
+
+def get_processed_user_data(username):
+    user_data = get_user_data(username)
+    # TODO preprocess, give ratings, concatenate to dataset, etc
+    
+    return user_data
+
+def get_recommendations(username):
+    pass

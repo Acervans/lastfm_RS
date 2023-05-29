@@ -31,6 +31,13 @@ USER_TOP_TRACKS = table('usertoptracks')
 USER_RECENT_TRACKS = table('userrecenttracks')
 USER_LOVED_TRACKS = table('userlovedtracks')
 
+TABLES = [
+    TAG, ALBUM, ARTIST, TRACK, USER,
+    ALBUM_TAGS, ARTIST_TAGS, TRACK_TAGS, USER_TAGS,
+    USER_TOP_ALBUMS, USER_TOP_ARTISTS, USER_TOP_TRACKS,
+    USER_RECENT_TRACKS, USER_LOVED_TRACKS
+]
+
 session = sessionmaker(db)
 
 def normalize(col, kind: str = 'minmax', usecol: pd.Series = None):
@@ -208,7 +215,7 @@ def get_track_album_tags():
 
 
 ###################################
-###### OVERALL TAG FREQUENCY ######
+####### DATABASE STATISTICS #######
 ###################################
 
 def get_tags_frequency():
@@ -230,6 +237,14 @@ def get_tags_frequency():
 
     return pd.DataFrame(tags_freq, columns=['Tag', 'Frequency']).groupby('Tag').sum().sort_values('Frequency', ascending=False).reset_index()
 
+def get_tables_count() -> dict:
+    with session.begin() as s:
+        tables_counts = [
+            (table.name, s.execute(select([func.count()]).select_from(table)).first()[0])
+            for table in TABLES
+        ]
+
+    return dict(tables_counts)
 
 #########################
 ###### ITEM'S VADS ######

@@ -9,6 +9,7 @@ th {
 
 hr {
     color: #6f9199;
+    margin-top: 10px;
     margin-bottom: 10px;
 }
 
@@ -17,8 +18,8 @@ a {
 }
 
 body {
-    background: #e7fff7;
-    background: linear-gradient(90deg, #e7fff7 0%, #e7fff7d9 75%, #ff898934 100%);
+    background: #eefff9;
+    background: linear-gradient(90deg, #eefff9 0%, #eefff9d9 75%, #da89ff34 100%);
     overflow: hidden;
 }
 
@@ -45,7 +46,7 @@ form tr {
 
 #logo h1 {
     font-size: 35pt;
-    margin: 0 20px -8px 5px;
+    margin: -5px 20px -5px 5px;
     background: linear-gradient(90deg, #29726a 25%, #6bc4afd9 75%);
 }
 
@@ -77,6 +78,41 @@ form tr {
     background-color: #59b4a8;
 }
 
+#tags{
+    float:left;
+    border:1px solid #ccc;
+    padding:5px;
+    font-family:Arial;
+  }
+  #tags > span{
+    cursor:pointer;
+    display:block;
+    float:left;
+    color:#fff;
+    background:#789;
+    padding:5px;
+    padding-right:25px;
+    margin:4px;
+  }
+  #tags > span:hover{
+    opacity:0.7;
+  }
+  #tags > span:after{
+   position:absolute;
+   content:"×";
+   border:1px solid;
+   padding:2px 5px;
+   margin-left:3px;
+   font-size:11px;
+  }
+  #tags > input{
+    background:#eee;
+    border:0;
+    margin:4px;
+    padding:7px;
+    width:auto;
+  }
+
 #sidebar-btn-row {
     margin-bottom: 8px;
 }
@@ -87,6 +123,7 @@ form tr {
     border-right: 1px #a5d1c3 solid;
     font-size: min(16pt, 1.8vw);
     z-index: 1;
+    word-break: break-word;
     overflow-x: hidden;
     /* Disable horizontal scroll */
     flex: 1 1 12%;
@@ -109,7 +146,7 @@ form tr {
 
 #sidebar li,
 .vad-analysis-desc p {
-    margin-bottom: 6px;
+    margin-bottom: 7px;
 }
 
 #sidebar,
@@ -165,4 +202,26 @@ form tr {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 40px;
+}
+
+.zoom-container input[type=checkbox] {
+    display: none;
+}
+
+.zoom-container img {
+    transition: 0.25s ease;
+    cursor: zoom-in;
+    position: relative;
+}
+
+.zoom-container input[type=checkbox]:checked~img {
+    width: 100%;
+    cursor: zoom-out;
+}
+
+.recommender-form {
+    transition: 0.5s ease-out;
+    overflow: hidden;
+    height: 0;
+    opacity: 0;
 }

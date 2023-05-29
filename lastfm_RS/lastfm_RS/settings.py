@@ -146,3 +146,5 @@ INTERNAL_IPS = [
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+USE_THOUSAND_SEPARATOR = True

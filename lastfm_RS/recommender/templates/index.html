@@ -4,39 +4,69 @@
     <p>
         Welcome to <em>LastFM RecSys</em>, a webpage to showcase the sentiment-analysing hybrid recommender system developed as my Bachelor's Degree Final Project (TFG).
     </p>
-    <h2>UML Models</h2>
-    <p>An UML diagram of the site's Django Model-View-Template structure is shown below.</p>
+    <h2>Design Diagrams</h2>
+    <p>A diagram displaying this Django application's Model-View-Template architecture is shown below.</p>
+    {% load static %}
     <div>
-        {% load static %}
         <img src="{% static "img/Django.png" %}"
-             alt="Django MVC Model"
-             width=""
-             height=""/>
+            alt="Django MVC Model"
+            width=""
+            height=""/>
+    </div>
+    <br/>
+    <p>An Entity-Relationship diagram of the LastFM database model is shown below.</p>
+    <div class="zoom-container">
+        <label>
+            <input type="checkbox">
+                <img src="{% static "img/LastFM_DB.png" %}"
+                    alt="LastFM ER Diagram"
+                    width="40%"
+                    height=""/>
+        </label>
     </div>
     <hr/>
-    <p>An Entity-Relationship diagram of the LastFM database model is shown below.</p>
+    <h2>Database Statistics</h2>
+    <p>The scraped Last.FM database has the following record counts:</p>
     <div>
-        {% load static %}
-        <img src="{% static "img/LastFM_DB.png" %}"
-             alt="LastFM ER Diagram"
-             width="90%"
-             height=""/>
+        <ul>
+            <li>
+                <strong>Tracks:</strong> {{ stats.track }}
+            </li>
+            <li>
+                <strong>Artists:</strong> {{ stats.artist }}
+            </li>
+            <li>
+                <strong>Albums:</strong> {{ stats.album }}
+            </li>
+            <li>
+                <strong>Tags:</strong> {{ stats.tag }}
+            </li>
+            <ul>
+                <li>
+                    <strong>Tag-Track Relations:</strong> {{ stats.tracktoptags }}
+                </li>
+                <li>
+                    <strong>Tag-Artist Relations:</strong> {{ stats.artisttoptags }}
+                </li>
+                <li>
+                    <strong>Tag-Album Relations:</strong> {{ stats.albumtoptags }}
+                </li>
+            </ul>
+            <li>
+                <strong>Users:</strong> {{ stats.user_ }}
+                <ul>
+                    <li>
+                        <strong>User-Track Interactions:</strong> {{ stats.useralltracks }}
+                    </li>
+                    <li>
+                        <strong>User-Artist Interactions:</strong> {{ stats.usertopartists }}
+                    </li>
+                    <li>
+                        <strong>User-Album Interactions:</strong> {{ stats.usertopalbums }}
+                    </li>
+                </ul>
+            </li>
+        </ul>
     </div>
-    {% comment %} <h2>Dynamic content</h2>
-    <p>The database has the following record counts:</p>
-    <ul>
-        <li>
-            <strong>Tracks:</strong> {{ num_tracks }}
-        </li>
-        <li>
-            <strong>Artists:</strong> {{ num_artists }}
-        </li>
-        <li>
-            <strong>Tags:</strong> {{ num_tags }}
-        </li>
-        <li>
-            <strong>Users:</strong> {{ num_users }}
-        </li>
-    </ul> {% endcomment %}
     <p>You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.</p>
 {% endblock content %}
