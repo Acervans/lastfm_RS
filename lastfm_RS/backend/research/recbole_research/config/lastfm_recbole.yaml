@@ -1,4 +1,5 @@
 data_path: ../../data/recsys_data
+dataset_save_path: saved/lastfm_recbole-dataset.pth
 dataset: lastfm_recbole
 
 # Dataset config
@@ -10,8 +11,8 @@ load_col:
   # item: [track_id, artist_id] # ARTIST, No sparsity since all tracks must have an artist
   # item: [track_id, artist_id, tags] # ARTIST + TAG_SEQS
   # item: [track_id, artist_id, album_id] # ARTIST + ALBUM, Only albums would not improve because of lack of data and sparsity
-  item: [track_id, artist_id, album_id, tags] # ARTIST + ALBUM + TAG_SEQS
-  # item: [track_id, artist_id, album_id, tags, vadst] # ARTIST + ALBUM + TAG_SEQS + VADST
+  # item: [track_id, artist_id, album_id, tags] # ARTIST + ALBUM + TAG_SEQS
+  item: [track_id, artist_id, album_id, tags, vadst] # ARTIST + ALBUM + TAG_SEQS + VADST
   user: [user_id]
 
 USER_ID_FIELD: user_id

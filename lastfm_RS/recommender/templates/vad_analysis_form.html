@@ -16,7 +16,7 @@
         <code>StSc = (<b>positive_words</b> - <b>negative_words</b>) / <b>total_found_words</b></code>
     </div>
     <br/>
-    <form method="post" class="form-group">
+    <form method="post" onsubmit="openLoader('Analyzing text...')" class="form-group">
         <table class="vad-form-table">
             {% csrf_token %}
             {{ form.as_table }}

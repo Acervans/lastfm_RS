@@ -2,19 +2,16 @@ from .constants import *
 from .nrc_vad_analysis import analyze_string
 from bs4 import BeautifulSoup
 from datetime import date
+from collections import Counter
 from requests.exceptions import ConnectionError, ReadTimeout
 from wikipedia.exceptions import WikipediaException, PageError, DisambiguationError
 import numpy as np
 import pylast
 import wikipedia
 import requests
-import pickle
 import json
 import sys
 
-
-PYLAST.enable_rate_limit()
-PYLAST.enable_caching()
 
 payload = {"username_or_email": "Test_EPS", "password": "Tfg.EPS2022"}
 
@@ -567,204 +564,255 @@ if __name__ == "__main__":
         print('SUCCESS')
 
 
-######################### GET SINGLE USER DATA - USED ON WEBPAGE #########################
+######################### GET SINGLE USER DATA #########################
 
-def get_user_data(username: str, filepath: str = None, verbose=False) -> dict:
+def get_user_data(username: str | pylast.User,
+                  filepath: str = None,
+                  use_items: dict = None,
+                  include_tracks=False,
+                  include_artists=False,
+                  include_albums=False,
+                  include_tags=False,
+                  tracks_limit=TRACK_LIMIT,
+                  artists_limit=ARTIST_LIMIT,
+                  albums_limit=ALBUM_LIMIT,
+                  tags_limit=TAG_LIMIT,
+                  verbose=True) -> dict:
     """ Gets relevant last.fm data of a user into a dictionary
 
     Args:
-        username (str): Username of user to query
+        username (str | pylast.User): User to scrape data from
         filepath (str, optional): File to save data as pickle object
+        use_items (dict, optional): Dict of pre-scraped items
+        include_tracks (boolean, optional): Whether to include tracks
+        include_artists (boolean, optional): Whether to include artists
+        include_albums (boolean, optional): Whether to include albums
+        include_tags (boolean, optional): Whether to include tags
+        tracks_limit (int, optional): Track scrape limit
+        artists_limit (int, optional): Artist scrape limit
+        albums_limit (int, optional): Album scrape limit
+        tags_limit (int, optional): Tag scrape limit
         verbose (boolean, optional): Print each step
 
     Returns:
         dict: Dictionary with all data retrieved
     """
+    query = []
+    if include_tracks:
+        query.append('tracks')
+    if include_artists:
+        query.append('artists')
+    if include_albums:
+        query.append('albums')
+    if include_tags:
+        query.append('tags')
+    query = ', '.join(query)
 
     if verbose:
-        print(f"Querying all data for user '{username}':", flush=True)
+        print(f"Querying {query} from user '{username}':", flush=True)
 
-    data = dict()
-    item_tags = {
-        'Artists': dict(), 
+    data = use_items or dict()
+    item_tags = data.get('ITEM_TAGS') or {
+        'Artists': dict(),
         'Albums': dict(),
         'Tracks': dict()
     }
-    unique_tags = set()
 
-    user = PYLAST.get_user(username)
+    if isinstance(username, str):
+        user = PYLAST.get_user(username)
 
-    # Check if user still exists
-    try:
-        user.get_registered()
-    except pylast.WSError as e:
-        if str(e) == "User not found":
-            print(f"\t- User '{user}' not found :(")
-            return None
-        else:
-            pass
+        # Check if user still exists
+        try:
+            user.get_registered()
+        except pylast.WSError as e:
+            if str(e) == "User not found":
+                print(f"\t- User '{user}' not found :(")
+                return {'ERROR': f'User {username} does not exist in Last.FM'}
 
-    # ---------------------- Loved Tracks ----------------------
-    if verbose:
-        print('\t- Getting loved tracks...', end=' ', flush=True)
+        data['USER'] = username
+    else:
+        user = username
 
-    loved_tracks = list()
-    try:
-        for t in user.get_loved_tracks(limit=TRACK_LIMIT):
-            track = t[0]
-            unique_track = get_track_info(track)
-            if not unique_track:
-                continue
-            track_name, artist, album = unique_track
+    # ---------------------- Tracks ----------------------
 
-            # Name Artist Album Timestamp
-            loved_tracks.append((track_name, artist, album, str(t[-1])))
-            item_tags['Tracks'][unique_track] = list()
+    if include_tracks:
 
-    except pylast.PyLastError as e:
-        print(f"API Error -> Loved tracks for {username}: {e}")
-        return None
+        # ----------- Loved Tracks -----------
 
-    if verbose:
-        print('OK')
+        if verbose:
+            print('\t- Getting loved tracks...', end=' ', flush=True)
 
-    data['LOVED_TRACKS'] = loved_tracks
+        loved_tracks = list()
+        try:
+            for t in user.get_loved_tracks(limit=tracks_limit or TRACK_LIMIT):
+                track = t[0]
+                unique_track = get_track_info(track)
+                if not unique_track:
+                    continue
+                track_name, artist, album = unique_track
 
-    # ---------------------- Recent Tracks ----------------------
-    if verbose:
-        print('\t- Getting recent tracks...', end=' ', flush=True)
+                # Name Artist Album Timestamp
+                loved_tracks.append((track_name, artist, album, str(t[-1])))
+                item_tags['Tracks'][unique_track] = list()
 
-    recent_tracks = list()
-    try:
-        for t in user.get_recent_tracks(limit=TRACK_LIMIT):
-            track = t[0]
-            unique_track = get_track_info(track)
-            if not unique_track:
-                continue
-            track_name, artist, album = unique_track
+        except pylast.PyLastError as e:
+            print(f"API Error -> Loved tracks for {username}: {e}")
 
-            # Name Artist Album Timestamp
-            recent_tracks.append((track_name, artist, album, str(t[-1])))
-            item_tags['Tracks'][unique_track] = list()
+        if verbose:
+            print('OK')
 
-    except (pylast.WSError, pylast.NetworkError) as e:
-        print(f"Network Error -> Recent tracks for {username}: {e}")
-        return None
-    # Recent tracks hidden by user
-    except pylast.PyLastError as e:
-        if e.__cause__ and str(e.__cause__) == "Login: User required to be logged in":
-            pass
-        else:
-            print(f"API Error -> Recent tracks for {username}: {e}")
-            return None
+        data['LOVED_TRACKS'] = loved_tracks
 
-    if verbose:
-        print('OK')
+        # ----------- Recent Tracks -----------
 
-    data['RECENT_TRACKS'] = recent_tracks
+        if verbose:
+            print('\t- Getting recent tracks...', end=' ', flush=True)
 
-    # ---------------------- Top Tracks ----------------------
-    if verbose:
-        print('\t- Getting top tracks...', end=' ', flush=True)
+        recent_tracks = list()
+        try:
+            for t in user.get_recent_tracks(limit=tracks_limit or TRACK_LIMIT):
+                track = t[0]
+                unique_track = get_track_info(track)
+                if not unique_track:
+                    continue
+                track_name, artist, album = unique_track
 
-    top_tracks = list()
-    try:
-        for t in user.get_top_tracks(limit=TRACK_LIMIT):
-            track = t[0]
-            unique_track = get_track_info(track)
-            if not unique_track:
-                continue
-            track_name, artist, album = unique_track
+                # Name Artist Album Timestamp
+                recent_tracks.append((track_name, artist, album, str(t[-1])))
+                item_tags['Tracks'][unique_track] = list()
 
-            # Name Artist Album
-            top_tracks.append((track_name, artist, album))
-            item_tags['Tracks'][unique_track] = list()
+        except (pylast.WSError, pylast.NetworkError) as e:
+            print(f"Network Error -> Recent tracks for {username}: {e}")
+        # Recent tracks hidden by user
+        except pylast.PyLastError as e:
+            if e.__cause__ and str(e.__cause__) == "Login: User required to be logged in":
+                pass
+            else:
+                print(f"API Error -> Recent tracks for {username}: {e}")
 
-    except pylast.PyLastError:
-        print(f"API Error -> Top tracks for {username}: {e}")
-        return None
+        if verbose:
+            print('OK')
 
-    if verbose:
-        print('OK')
+        data['RECENT_TRACKS'] = recent_tracks
 
-    data['TOP_TRACKS'] = top_tracks
+        # ----------- Top Tracks -----------
+
+        if verbose:
+            print('\t- Getting top tracks...', end=' ', flush=True)
+
+        top_tracks = list()
+        try:
+            for t in user.get_top_tracks(limit=tracks_limit or TRACK_LIMIT):
+                track = t[0]
+                unique_track = get_track_info(track)
+                if not unique_track:
+                    continue
+                track_name, artist, album = unique_track
+
+                # Name Artist Album
+                top_tracks.append((track_name, artist, album))
+                item_tags['Tracks'][unique_track] = list()
+
+        except pylast.PyLastError as e:
+            print(f"API Error -> Top tracks for {username}: {e}")
+
+        if verbose:
+            print('OK')
+
+        data['TOP_TRACKS'] = top_tracks
 
     # ---------------------- Artists ----------------------
-    if verbose:
-        print('\t- Getting top artists...', end=' ', flush=True)
 
-    top_artists = list()
-    try:
-        for artist in user.get_top_artists(limit=ARTIST_LIMIT):
-            artist = artist[0]
-            artist_name = artist.get_name()
+    if include_artists:
 
-            top_artists.append(artist_name)            
-            item_tags['Artists'][artist_name] = list()
+        if verbose:
+            print('\t- Getting top artists...', end=' ', flush=True)
 
-    except pylast.PyLastError:
-        print(f"API Error -> Top artists for {username}: {e}")
-        return None
+        top_artists = list()
+        try:
+            for artist in user.get_top_artists(limit=artists_limit or ARTIST_LIMIT):
+                artist = artist[0]
+                artist_name = artist.get_name()
 
-    if verbose:
-        print('OK')
+                top_artists.append(artist_name)
+                item_tags['Artists'][artist_name] = list()
 
-    data['TOP_ARTISTS'] = top_artists
+        except pylast.PyLastError as e:
+            print(f"API Error -> Top artists for {username}: {e}")
+
+        if verbose:
+            print('OK')
+
+        data['TOP_ARTISTS'] = top_artists
 
     # ---------------------- Albums ----------------------
-    if verbose:
-        print('\t- Getting top albums...', end=' ', flush=True)
 
-    top_albums = list()
-    try:
-        for album in user.get_top_albums(limit=ALBUM_LIMIT):
-            album = album[0]
-            artist_name = album.get_artist().get_name(properly_capitalized=True)
-            album_name = album.get_name()
+    if include_albums:
 
-            top_albums.append((album_name, artist_name))
-            item_tags['Albums'][(album_name, artist_name)] = list()
+        if verbose:
+            print('\t- Getting top albums...', end=' ', flush=True)
 
-    except pylast.PyLastError:
-        print(f"API Error -> Top albums for {username}: {e}")
-        return None
+        top_albums = list()
+        try:
+            for album in user.get_top_albums(limit=albums_limit or ALBUM_LIMIT):
+                album = album[0]
+                artist_name = album.get_artist().get_name(properly_capitalized=True)
+                album_name = (album.get_name(), artist_name)
 
-    if verbose:
-        print('OK')
+                top_albums.append(album_name)
+                item_tags['Albums'][album_name] = list()
 
-    data['TOP_ALBUMS'] = top_albums
-        
+        except pylast.PyLastError as e:
+            print(f"API Error -> Top albums for {username}: {e}")
+
+        if verbose:
+            print('OK')
+
+        data['TOP_ALBUMS'] = top_albums
+
     # ---------------------- Tags ----------------------
-    if verbose:
-        print('\t- Getting top tags for all items...', end=' ', flush=True)
 
-    for item_name in item_tags:
-        for item in item_tags[item_name]:
-            try:
-                # Obtain tags as lowercase strings
-                unique_item = SEPARATOR.join(item) if not isinstance(item, str) else item
-                tags = get_tags_list(get_pylast_item(unique_item, item_name), TAG_LIMIT, names_only=True)
-                tags = [t.lower() for t in tags]
-                # Assign tags to current item
-                item_tags[item_name][item] = tags
-                # Update unique Tags
-                unique_tags.update(tags)
+    if include_tags:
+        tags_count = Counter()
 
-            except pylast.PyLastError as e:
-                if e.__cause__ and str(e.__cause__) == f"{item_name[:-1]} not found":
-                    continue
-                else:
-                    print(f"API Error -> {item} top tags for {username}: {e}")
-                    return None
+        if verbose:
+            print('\t- Getting top tags for all items...', end=' ', flush=True)
 
-    if verbose:
-        print('OK')
+        for item_type in item_tags:
+            for item in item_tags[item_type]:
+                try:
+                    # Obtain tags as lowercase strings
+                    unique_item = SEPARATOR.join(
+                        item) if not isinstance(item, str) else item
+                    pylast_item = get_pylast_item(unique_item, item_type)
+                    tags = get_tags_list(
+                        pylast_item, limit=tags_limit or TAG_LIMIT, names_only=True)
+
+                    # Assign tags to current item
+                    item_tags[item_type][item] = tags
+                    # Update unique Tags counts
+                    tags_count.update(tags)
+
+                except pylast.PyLastError as e:
+                    if e.__cause__ and str(e.__cause__) == f"{item_type[:-1]} not found":
+                        continue
+                    else:
+                        print(
+                            f"API Error -> {item} top tags for {username}: {e}")
+                        continue
+
+        for item_type in item_tags.keys():
+            item_tags[item_type] = list(item_tags[item_type].items())
+
+        if verbose:
+            print('OK')
+
+        data['TAGS_COUNT'] = tags_count.most_common(None)
 
     data['ITEM_TAGS'] = item_tags
-    data['UNIQUE_TAGS'] = list(unique_tags)
 
     if filepath:
-        with open(filepath, 'wb') as f:
-            pickle.dump(data, f)
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
 
     return data

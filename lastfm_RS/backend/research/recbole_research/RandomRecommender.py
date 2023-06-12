@@ -31,11 +31,17 @@ class RandomRecommender(GeneralRecommender):
 
         return torch.nn.Parameter(torch.zeros(1))
 
-    def predict(self, interaction):
+    def predict(self, interaction, generate_new=False):
+        if generate_new:
+            self.generate_random_scores()
+
         item = interaction[self.ITEM_ID]
         return self.rand_scores[item, :].squeeze(-1)
 
-    def full_sort_predict(self, interaction):
+    def full_sort_predict(self, interaction, generate_new=False):
+        if generate_new:
+            self.generate_random_scores()
+
         batch_user_num = interaction[self.USER_ID].shape[0]
         result = torch.repeat_interleave(self.rand_scores.unsqueeze(0), batch_user_num, dim=0)
         return result.view(-1)

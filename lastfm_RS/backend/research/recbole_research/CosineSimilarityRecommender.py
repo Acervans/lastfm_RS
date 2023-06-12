@@ -1,15 +1,16 @@
-import torch
-from recbole.utils import InputType
+from recbole.utils import InputType, ModelType
 from recbole.data.dataset.dataset import Dataset
 from recbole.model.abstract_recommender import GeneralRecommender
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, HashingVectorizer
 from sklearn.preprocessing import normalize
 from sklearn.utils.extmath import safe_sparse_dot
-import numpy as np
 import pandas as pd
+import numpy as np
+import torch
 
 class CosineSimilarityRecommender(GeneralRecommender):
     input_type = InputType.PAIRWISE
+    type = ModelType.TRADITIONAL
 
     def __init__(self, config, dataset: Dataset):
         super(CosineSimilarityRecommender, self).__init__(config, dataset)
@@ -37,7 +38,7 @@ class CosineSimilarityRecommender(GeneralRecommender):
             # Avoid division by 0
             self.sim_weights = np.add(self.inters['rating'], 1)
         else:
-            self.sim_weights = np.ones_like(self.inters[self.USER_ID])
+            self.sim_weights = None
 
         # Fake loss
         self.fake_loss = torch.nn.Parameter(torch.zeros(1))
@@ -54,7 +55,7 @@ class CosineSimilarityRecommender(GeneralRecommender):
         self.vec_feat = item_feats[self.vec_column]
 
         # Item id to idx mapping
-        self.item_to_idx = pd.Series(range(len(self.vec_feat)), index=item_feats[self.ITEM_ID])
+        self.item_to_idx = pd.Series(range(len(item_feats[self.ITEM_ID])), index=item_feats[self.ITEM_ID])
 
         # Item sequential token embedding
         self.vec_matrix = normalize(self.vectorizer.fit_transform(self.vec_feat))
@@ -69,16 +70,21 @@ class CosineSimilarityRecommender(GeneralRecommender):
         # User interactions indices
         users = self.inters[self.USER_ID]
         user_inters_idx = users == user_id.item()
+        
+        # Interacted items
+        user_items = self.inters[self.ITEM_ID][user_inters_idx]
 
         # Weights by rating
-        weights = self.sim_weights[user_inters_idx]
+        if self.sim_weights is not None:
+            weights = self.sim_weights[user_inters_idx]
 
-        # Sort by weights for cutoff
-        idx_by_weights = np.argsort(-weights)[:self.knn_topk]
-        weights = weights[idx_by_weights]
+            # Sort by weights for cutoff
+            idx_by_weights = np.argsort(-weights)[:self.knn_topk]
+            weights = weights[idx_by_weights]
 
-        # Interacted items
-        user_items = self.inters[self.ITEM_ID][user_inters_idx][idx_by_weights]
+            user_items = user_items[idx_by_weights]
+        else:
+            weights = None
 
         # Features to vectorize for user items
         items_idx = self.item_to_idx.loc[user_items.flatten()]

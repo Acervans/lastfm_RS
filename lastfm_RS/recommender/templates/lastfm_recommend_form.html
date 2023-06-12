@@ -5,7 +5,7 @@
 {% block content %}
     <h2>Last.FM Recommender</h2>
     <br/>
-    <form method="get" class="form-group">
+    <form method="get" onsubmit="openLoader('Generating recommendations...') & replaceTags()" class="form-group">
         <table>
             {{ rec_form.as_table }}
         </table>
@@ -25,11 +25,17 @@
             </table>
         </div>
         <br/>
-        <button type="submit" class="btn btn-success">Generate Recommendations</button>
+        <button type="submit" class="btn btn-success">Recommend</button>
     </form>
+    <br/>
     <datalist id="usernames">
         {% for username in usernames %}
             <option value="{{ username }}"></option>
+        {% endfor %}
+    </datalist>
+    <datalist id="tags_list">
+        {% for tag in tags %}
+            <option value="{{ tag }}"></option>
         {% endfor %}
     </datalist>
     {% load static %}

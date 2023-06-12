@@ -1,17 +1,19 @@
 data_path: ../../data/recsys_data
+dataset_save_path: saved/lastfm_recbole-dataset.pth
 dataset: lastfm_recbole
 
 use_gpu: false
+device: cpu
 
 # Dataset config
 load_col:
   inter: [user_id, track_id, rating, timestamp]
-  item: [track_id] # NO ADDITIONAL DATA
+  item: [track_id, artist_id, album_id, tags, vadst] # ARTIST + ALBUM + TAG_SEQS + VADST
+  # item: [track_id] # NO ADDITIONAL DATA
   user: [user_id]
 
 USER_ID_FIELD: user_id
 ITEM_ID_FIELD: track_id
-threshold: {'rating': 3.0}
 normalize_all: True
 
 # Training and evaluation config
@@ -27,8 +29,8 @@ eval_args:
   split: {'RS': [0.8,0.1,0.1]}
   order: RO
   group_by: user
-  mode: uni100
-  # mode: full
+  # mode: uni100
+  mode: full
 
 # metrics: ['AUC', 'LogLoss', 'RMSE', 'MAE']
 # valid_metric: LogLoss

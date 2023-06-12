@@ -6,10 +6,12 @@
     <h2>Text Sentiment Analysis Results</h2>
     <br/>
     <div class="vad-results">
-        <table>
-            <tr>
-                {% for f in fieldnames %}<th>{{ f }}</th>{% endfor %}
-            </tr>
+        <table class="table table-light table-bordered vad-table">
+            <thead class="table-light">
+                <tr>
+                    {% for f in fieldnames %}<th>{{ f }}</th>{% endfor %}
+                </tr>
+            </thead>
             {% if method == 'text' %}
                 <tr>
                     {% for val in results %}<td>{{ val }}</td>{% endfor %}

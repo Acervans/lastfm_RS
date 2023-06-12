@@ -35,7 +35,7 @@ form tr {
 
 #logo {
     padding: 10px;
-    margin-bottom: -10px;
+    margin-bottom: -5px;
     overflow-x: scroll;
 }
 
@@ -78,47 +78,129 @@ form tr {
     background-color: #59b4a8;
 }
 
-#tags{
-    float:left;
-    border:1px solid #ccc;
-    padding:5px;
-    font-family:Arial;
-  }
-  #tags > span{
-    cursor:pointer;
-    display:block;
-    float:left;
-    color:#fff;
-    background:#789;
-    padding:5px;
-    padding-right:25px;
-    margin:4px;
-  }
-  #tags > span:hover{
-    opacity:0.7;
-  }
-  #tags > span:after{
-   position:absolute;
-   content:"×";
-   border:1px solid;
-   padding:2px 5px;
-   margin-left:3px;
-   font-size:11px;
-  }
-  #tags > input{
-    background:#eee;
-    border:0;
-    margin:4px;
-    padding:7px;
-    width:auto;
-  }
+#index-tools li {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#loading-modal {
+    position: fixed;
+    transition: 0.3s ease-out;
+    opacity: 0;
+    top: 100px;
+    right: 40px;
+}
+
+#tags {
+    float: left;
+    border: 1px solid #ccc;
+    padding: 5px;
+    font-family: Arial;
+}
+
+#tags>span {
+    cursor: pointer;
+    display: block;
+    float: left;
+    color: #fff;
+    background: #789;
+    padding: 5px;
+    padding-right: 25px;
+    margin: 4px;
+}
+
+#tags>span:hover {
+    opacity: 0.7;
+}
+
+#tags>span:after {
+    position: absolute;
+    content: "×";
+    border: 1px solid;
+    padding: 2px 5px;
+    margin-left: 3px;
+    font-size: 11px;
+}
+
+#tags>input {
+    background: #eee;
+    border: 0;
+    margin: 4px;
+    padding: 7px;
+    width: auto;
+}
+
+#tags {
+    float: left;
+    border: 1px solid #d4d4d4;
+    padding: 5px;
+    font-family: Arial;
+}
+
+#tags>span {
+    cursor: pointer;
+    display: block;
+    float: left;
+    color: #fff;
+    background: rgb(100, 113, 139);
+    padding: 5px;
+    padding-right: 25px;
+    margin: 4px;
+}
+
+#tags>span:hover {
+    opacity: 0.7;
+}
+
+#tags>span:after {
+    position: absolute;
+    content: "×";
+    border: 1px solid;
+    padding: 2px 5px;
+    margin-left: 3px;
+    font-size: 11px;
+}
+
+#tags>input {
+    background: #ffffff;
+    border: 1px solid #ececec;
+    margin: 4px;
+    padding: 7px;
+    width: auto;
+}
+
+#scrape-tracks,
+#scrape-artists,
+#scrape-albums,
+#scrape-tags {
+    height: 0;
+    opacity: 0;
+    margin: 30px 20px 10px 20px;
+    overflow: hidden;
+    transition: 0.5s ease-out;
+}
+
+#tags-piechart {
+    height: 0;
+    margin-top: 30px;
+    max-height: 100vmin;
+}
+
+#user-scraper input[type=number] {
+    width: 70px;
+}
+
+#user-scraper td {
+    padding-right: 30px;
+}
 
 #sidebar-btn-row {
-    margin-bottom: 8px;
+    max-height: 0;
 }
 
 /* The sidebar menu */
 #sidebar {
+    padding-top: 32px;
     max-width: none;
     border-right: 1px #a5d1c3 solid;
     font-size: min(16pt, 1.8vw);
@@ -144,15 +226,16 @@ form tr {
     color: #ecbaa5;
 }
 
+#sidebar,
+#sidebar-btn-row,
+.sidebar-btn {
+    transition: 0.5s;
+    /* Sidebar transition */
+}
+
 #sidebar li,
 .vad-analysis-desc p {
     margin-bottom: 7px;
-}
-
-#sidebar,
-.sidebar-btn {
-    transition: 0.5s;
-    /* 0.5 second transition effect to slide in the sidebar */
 }
 
 .sidebar-nav {
@@ -162,11 +245,13 @@ form tr {
 
 .sidebar-btn {
     top: 0;
-    margin-left: 13px;
+    margin-left: 12px;
+    margin-bottom: 8px;
     width: fit-content;
     padding: 0px 4px 2px 4px;
     border-radius: 4px;
     position: relative;
+    z-index: 2;
 }
 
 .sidebar-btn:hover {
@@ -192,6 +277,11 @@ form tr {
 
 .vad-form-table ul {
     list-style-type: none;
+}
+
+.genius-lyrics {
+    max-height: calc(100vh - 215px);
+    overflow-y: auto;
 }
 
 .genius-lyrics span {
@@ -224,4 +314,62 @@ form tr {
     overflow: hidden;
     height: 0;
     opacity: 0;
+}
+
+.recommendations {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.recommendation-card {
+    padding: 15px;
+    height: 170px;
+    overflow-y: auto;
+    border-radius: 5px 5px 0 0;
+    background-color: #1d8577;
+    color: whitesmoke;
+    position: relative;
+}
+
+.recommendation-card a {
+    color: inherit;
+}
+
+.card-top {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0;
+}
+
+.card-body {
+    height: 120px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.card-body p {
+    word-break: break-word;
+    white-space: pre-wrap;
+    margin-left: 10px
+}
+
+.card-btn-group {
+    margin: 10px 0 15px 15px;
+}
+
+.score-block {
+    border-radius: 10px;
+    background-color: #1d8577;
+    color: whitesmoke;
+    text-align: center;
+    padding: 5px;
+    font-weight: bold;
+}
+
+.vadst-wc-container {
+    text-align: center;
+    margin-left: inherit;
 }

@@ -11,9 +11,9 @@
         <meta name="description" content="Base template for the project"/>
         <meta name="keywords"
               content="lastfm,recommender system,sentiment analysis,mood analysis,api,pylast"/>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
               rel="stylesheet"
-              integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
+              integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
               crossorigin="anonymous"/>
         <!-- Add additional CSS in static file -->
         {% load static %}
@@ -21,6 +21,8 @@
         <link rel="shortcut icon"
               type="image/png"
               href="{% static 'img/favicon.ico' %}"/>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+        {% block scripts %}{% endblock scripts %}
     </head>
     <body>
         <div id="logo">
@@ -76,6 +78,9 @@
                                 <a href="{% url 'vad_analysis' %}">Text VAD Analyzer</a>
                             </li>
                             <li>
+                                <a href="{% url 'user_scraper' %}">User Scraper</a>
+                            </li>
+                            <li>
                                 <a href="{% url 'recommendations' %}">Recommendations</a>
                             </li>
                         </ul>
@@ -114,6 +119,12 @@
                     {% endblock pagination %}
                 </div>
             </div>
+        </div>
+        <div id="loading-modal">
+            <button class="btn btn-primary" type="button" disabled>
+                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                Loading...
+            </button>
         </div>
         <script type="text/javascript" src="{% static 'js/base_script.js' %}"></script>
     </body>

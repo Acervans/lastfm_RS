@@ -1,27 +1,46 @@
 {% extends "base_generic.html" %}
 {% block content %}
     <h1>LastFM Recommender System</h1>
+    <br />
     <p>
-        Welcome to <em>LastFM RecSys</em>, a webpage to showcase the sentiment-analysing hybrid recommender system developed as my Bachelor's Degree Final Project (TFG).
+        Welcome to <em>LastFM RecSys</em>, a webpage to showcase the sentiment-aware hybrid recommender system developed as my Bachelor's Degree Final Project (TFG).
     </p>
+    <p>
+        The webpage has the following apps and tools:
+    </p>
+    <ul id="index-tools">
+        <li>
+            <a href="{% url 'lastfm_preview' %}">LastFM Previewer</a>, a tool to preview Last.FM tracks with YouTube and Spotify, as well as to scrape lyrics from Genius
+        </li>
+        <li>
+            <a href="{% url 'vad_analysis' %}">Text VAD Analyzer</a>, a text analyzer that extracts a given input's sentiment attributes (VAD, Sentiment Score)
+        </li>
+        <li>
+            <a href="{% url 'user_scraper' %}">User Scraper</a>, a utility to scrape data from a Last.FM user, as an example of the web-scraper developed to generate the dataset
+        </li>
+        <li>
+            <a href="{% url 'recommendations' %}">Recommendations</a>, an app that generates track recommendations from the database, with the best tested models
+        </li>
+    </ul>
+    <hr />
     <h2>Design Diagrams</h2>
-    <p>A diagram displaying this Django application's Model-View-Template architecture is shown below.</p>
+    <p>Diagram displaying this Django application's Model-View-Template architecture:</p>
     {% load static %}
     <div>
         <img src="{% static "img/Django.png" %}"
-            alt="Django MVC Model"
-            width=""
-            height=""/>
+             alt="Django MVC Model"
+             width=""
+             height=""/>
     </div>
     <br/>
-    <p>An Entity-Relationship diagram of the LastFM database model is shown below.</p>
+    <p>Entity-Relationship diagram of the LastFM database model:</p>
     <div class="zoom-container">
         <label>
             <input type="checkbox">
                 <img src="{% static "img/LastFM_DB.png" %}"
-                    alt="LastFM ER Diagram"
-                    width="40%"
-                    height=""/>
+                     alt="LastFM ER Diagram"
+                     width="40%"
+                     height=""/>
         </label>
     </div>
     <hr/>
@@ -68,5 +87,54 @@
             </li>
         </ul>
     </div>
+    <hr />
+    <h2>WordClouds</h2>
+    <p>WordCloud representing tag frequency in the Last.FM database, where the most common tags appear the largest:</p>
+    <div class="zoom-container">
+        <label>
+            <input type="checkbox">
+                <img src="{% static "img/Frequency-WordCloud.png" %}"
+                     alt="Tag Frequency WordCloud"
+                     width="60%"
+                     height=""/>
+        </label>
+    </div>
+    <br />
+    <p>WordClouds generated from the Valence, Arousal, Dominance & Sentiment Score attributes in the Last.FM database:</p>
+    <div class="container vadst-wc-container">
+        <div class="row">
+            <div class="col">
+                <img src="{% static 'img/Valence-WordCloud.png' %}"
+                     height=""
+                     width="100%"
+                     alt="Valence WordCloud"/>
+                <figcaption>Valence</figcaption>
+            </div>
+            <div class="col">
+                <img src="{% static 'img/Arousal-WordCloud.png' %}"
+                     height=""
+                     width="100%"
+                     alt="Arousal WordCloud"/>
+                <figcaption>Arousal</figcaption>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <img src="{% static 'img/Dominance-WordCloud.png' %}"
+                     height=""
+                     width="100%"
+                     alt="Dominance WordCloud"/>
+                <figcaption>Dominance</figcaption>
+            </div>
+            <div class="col">
+                <img src="{% static 'img/SentimentScore-WordCloud.png' %}"
+                     height=""
+                     width="100%"
+                     alt="SentimentScore WordCloud"/>
+                <figcaption>Sentiment Score</figcaption>
+            </div>
+        </div>
+    </div>
+    <br />
     <p>You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.</p>
 {% endblock content %}

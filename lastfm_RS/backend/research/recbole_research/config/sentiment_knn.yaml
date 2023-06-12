@@ -5,20 +5,15 @@ dataset: lastfm_recbole
 use_gpu: False
 device: cpu
 
-Vectorizer: TfIdfVectorizer
-Vectorized_Column: tags
-Vectorizer_Config:
-  min_df: 1
-  binary: True
-
+# V A D StSc
+use_vadst_cols: [0,1,2,3]
 weighted_average: False
-knn_topk: ~
+knn_topk: 2
 
 # Dataset config
 load_col:
   inter: [user_id, track_id, rating, timestamp]
   item: [track_id, artist_id, album_id, tags, vadst] # ARTIST + ALBUM + TAG_SEQS + VADST
-  # item: [track_id, tags] # Include tags
   user: [user_id]
 
 USER_ID_FIELD: user_id
@@ -41,5 +36,5 @@ eval_args:
   mode: full
 
 metrics: [Recall, MRR, NDCG, Hit, Precision]
-topk: 20
-valid_metric: NDCG@20
+topk: 100
+valid_metric: NDCG@100

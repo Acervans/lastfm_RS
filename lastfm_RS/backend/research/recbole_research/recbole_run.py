@@ -10,6 +10,8 @@
 
 import argparse
 import importlib
+import pathlib
+import json
 import sys
 
 from recbole.quick_start import run_recboles
@@ -33,18 +35,29 @@ from recbole.utils import (
     get_flops,
 )
 
-def parse_custom_model(model):
-    if importlib.util.find_spec(model):
-        module = importlib.import_module(model)
-        return getattr(module, model)
 
-def load_data_and_model(model_file, update_config=None, use_training=False, verbose=False):
+def parse_model(model):
+    try:
+        model_class = get_model(model)
+    except ValueError as v:
+        # Import from current directory
+        if importlib.util.find_spec(model):
+            module = importlib.import_module(model)
+            model_class = getattr(module, model)
+        if not model_class:
+            raise v
+
+    return model_class
+
+
+def load_data_and_model(load_model, preload_dataset=None, update_config=None, use_training=False, verbose=False):
     r"""Load filtered dataset, split dataloaders and saved model.
 
     Args:
-        model_file (str): The path of saved model file.
+        load_model (dict | str): Preloaded checkpoint or path to saved model.
+        preload_dataset (Dataset): Preloaded dataset.
         update_config (dict): Config entries to update.
-        use_training (bool): Whether to use training set or full dataset
+        use_training (bool): Whether to use training set or full dataset.
         verbose (bool): Whether to log data preparation.
 
     Returns:
@@ -56,7 +69,12 @@ def load_data_and_model(model_file, update_config=None, use_training=False, verb
             - valid_data (AbstractDataLoader): The dataloader for validation.
             - test_data (AbstractDataLoader): The dataloader for testing.
     """
-    checkpoint = load(model_file)
+    sys.path.insert(1, str(pathlib.Path(__file__).parent.resolve()))
+
+    checkpoint = load_model
+    if isinstance(load_model, str):
+        checkpoint = load(load_model)
+
     config = checkpoint["config"]
     if update_config:
         for key, value in update_config.items():
@@ -68,25 +86,58 @@ def load_data_and_model(model_file, update_config=None, use_training=False, verb
         logger = getLogger()
         logger.info(config)
 
-    dataset = create_dataset(config)
+    config_seed = config['seed']
+    config['seed'] = 2020
+
+    dataset = preload_dataset or create_dataset(config)
+
+    config['seed'] = config_seed
+
     if verbose:
         logger.info(dataset)
-    train_data, valid_data, test_data = data_preparation(config, dataset)
 
     init_seed(config["seed"], config["reproducibility"])
 
-    try:
-        model = get_model(config["model"])
-    except ValueError as v:
-        model = parse_custom_model(config["model"])
-    if not model:
-        raise v
+    model = parse_model(config["model"])
 
-    model = model(config, train_data._dataset if use_training else dataset).to(config["device"])
+    train_data = valid_data = test_data = None
+    if use_training:
+        train_data, valid_data, test_data = data_preparation(config, dataset)
+        model = model(config, train_data._dataset).to(config["device"])
+    else:
+        model = model(config, dataset).to(config["device"])
+
     model.load_state_dict(checkpoint["state_dict"])
     model.load_other_parameter(checkpoint.get("other_parameter"))
 
     return config, model, dataset, train_data, valid_data, test_data
+
+
+def evaluate_saved_model(saved_model, update_config=None, evaluation_mode='full'):
+    load_model = load(saved_model)
+    eval_args = load_model["config"]["eval_args"]
+
+    if eval_args:
+        eval_args["mode"] = evaluation_mode
+    else:
+        config["eval_args"] = {"mode": evaluation_mode}
+
+    config, model, _, _, _, test_data = load_data_and_model(load_model,
+                                                            update_config=update_config,
+                                                            use_training=True,
+                                                            verbose=True)
+
+    # trainer loading and initialization
+    trainer = get_trainer(config["MODEL_TYPE"], config["model"])(config, model)
+
+    # model evaluation
+    test_result = trainer.evaluate(test_data,
+                                   load_best_model=False,
+                                   show_progress=config["show_progress"],
+                                   model_file=saved_model)
+
+    getLogger().info(set_color("test result", "yellow") + f": {test_result}")
+
 
 def run_recbole(
     model=None, dataset=None, config_file_list=None, config_dict=None, saved=True
@@ -124,7 +175,8 @@ def run_recbole(
 
     # model loading and initialization (modified to accept custom models)
     init_seed(config["seed"] + config["local_rank"], config["reproducibility"])
-    model = (get_model(config["model"]) if isinstance(model, str) else model)(config, train_data._dataset).to(config["device"])
+    model = (get_model(config["model"]) if isinstance(model, str) else model)(
+        config, train_data._dataset).to(config["device"])
     logger.info(model)
 
     transform = construct_transform(config)
@@ -154,16 +206,28 @@ def run_recbole(
         "test_result": test_result,
     }
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", "-m", type=str, default="BPR", help="name of models")
+    parser.add_argument("--model", "-m", type=str,
+                        default="BPR", help="name of models")
+    parser.add_argument(
+        "--evaluate_model", "-e", type=str, default=None, help="path to saved model to evaluate"
+    )
+    parser.add_argument(
+        "--evaluation_mode", "-em", type=str, default='full', help="evaluation mode (e.g: full, uni100, pop100)"
+    )
+    parser.add_argument(
+        "--config_dict", "-c", type=str, default=None, help="JSON dict to update config"
+    )
     parser.add_argument(
         "--dataset", "-d", type=str, default="ml-100k", help="name of datasets"
     )
     parser.add_argument(
         "--save", "-s", action='store_true', default=False, help="save the trained model"
     )
-    parser.add_argument("--config_files", type=str, default=None, help="config files")
+    parser.add_argument("--config_files", type=str,
+                        default=None, help="config files")
     parser.add_argument(
         "--nproc", type=int, default=1, help="the number of process in this group"
     )
@@ -185,22 +249,23 @@ if __name__ == "__main__":
 
     args, _ = parser.parse_known_args()
 
-    model = None
-    try:
-        model = get_model(args.model)
-    except ValueError as v:
-        model = parse_custom_model(args.model)
-        if not model:
-            raise v
+    model = parse_model(args.model)
 
     config_file_list = (
         args.config_files.strip().split(" ") if args.config_files else None
     )
 
+    if args.config_dict:
+        args.config_dict = json.loads(args.config_dict)
+
     if args.nproc == 1 and args.world_size <= 0:
-        run_recbole(
-            model=model, dataset=args.dataset, config_file_list=config_file_list, saved=args.save
-        )
+        if args.evaluate_model:
+            evaluate_saved_model(
+                args.evaluate_model, update_config=args.config_dict, evaluation_mode=args.evaluation_mode)
+        else:
+            run_recbole(
+                model=model, dataset=args.dataset, config_file_list=config_file_list, saved=args.save, config_dict=args.config_dict
+            )
     else:
         if args.world_size == -1:
             args.world_size = args.nproc

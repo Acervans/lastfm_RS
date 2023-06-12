@@ -1,7 +1,6 @@
-import torch
-
-from recbole.model.context_aware_recommender import FFM
+from recbole.utils import InputType, ModelType
 from recbole.data.dataset.dataset import Dataset
+from recbole.model.abstract_recommender import GeneralRecommender
 from sklearn.preprocessing import normalize
 from scipy.spatial.distance import cdist
 import pandas as pd
@@ -9,10 +8,12 @@ import numpy as np
 import torch
 import tqdm
 
-class LastFMRecommender(FFM):
+class SentimentKNNRecommender(GeneralRecommender):
+    type = ModelType.TRADITIONAL
+    input_type = InputType.PAIRWISE
 
     def __init__(self, config, dataset: Dataset):
-        super(LastFMRecommender, self).__init__(config, dataset)
+        super(SentimentKNNRecommender, self).__init__(config, dataset)
 
         if isinstance(dataset.inter_feat, pd.DataFrame):
             self.inters = {col: dataset.inter_feat[col].values for col in dataset.inter_feat.columns}
@@ -49,13 +50,10 @@ class LastFMRecommender(FFM):
         self.vadst = normalize(self.vadst)
         self.sentiment_centroids = None
 
-        if hasattr(self, "other_parameter_name") and isinstance(self.other_parameter_name, list):
-            self.other_parameter_name += ["sentiment_centroids"]
-        else:
-            self.other_parameter_name = ["sentiment_centroids"]
+        self.other_parameter_name = ["sentiment_centroids"]
 
     def forward(self, user, item):
-        super().forward(user, item)
+        pass
 
     def train(self, mode: bool = True):
         if self.sentiment_centroids is None:
@@ -91,7 +89,7 @@ class LastFMRecommender(FFM):
         self.sentiment_centroids = np.array(sentiment_centroids)
 
     def calculate_loss(self, interaction):
-        super().calculate_loss(interaction)
+        return torch.nn.Parameter(torch.zeros(1))
 
     def sentiment_knn_scores(self, user_id, item_id=None):
         # User centroid
@@ -101,7 +99,7 @@ class LastFMRecommender(FFM):
         if not item_id:
             distances = cdist(self.vadst, [user_centroid], 'seuclidean')
         else:
-            distances = cdist([self.vadst[item_id]], [user_centroid], 'seuclidean')
+            distances = cdist([self.vadst[item_id.item()]], [user_centroid], 'seuclidean')
 
         # Inverted average euclidean distances as similarities (weighted if applicable)
         scores = 1 / (1 + distances)
@@ -110,34 +108,17 @@ class LastFMRecommender(FFM):
 
     # user, batch items
     def predict(self, interaction):
-        model_scores = super().predict(interaction)
-
         user = interaction[self.USER_ID]
         item = interaction[self.ITEM_ID]
 
         scores = self.sentiment_knn_scores(user[0], item[0])
-        scores = self.hybrid_scores(model_scores, scores)
-
         return torch.Tensor(scores)
 
     # batch users, all items
     def full_sort_predict(self, interaction):
-        model_scores = super().full_sort_predict(interaction)
-
         user = interaction[self.USER_ID]
         scores = []
         for uid in user:
             scores.append(self.sentiment_knn_scores(uid))
 
-        scores = np.array(scores)
-        return torch.Tensor(self.hybrid_scores(model_scores, scores))
-
-    def hybrid_scores(self, model_scores: np.array | torch.Tensor, scores: np.array | torch.Tensor):
-        model_scores = normalize(model_scores)
-        scores       = normalize(scores)
-
-        # Score similarities between both models
-        sims = 1 / (1 + np.abs(scores - model_scores))
-
-        # Add scores buffing similar ones
-        return model_scores + (sims * scores)
+        return torch.Tensor(np.array(scores))

@@ -1,5 +1,7 @@
+from collections import Counter
 import pandas as pd
 import numpy as np
+import json
 
 from sqlalchemy import create_engine, select, MetaData, Table, func
 from sqlalchemy.orm import sessionmaker
@@ -10,8 +12,10 @@ db = create_engine(
 metadata = MetaData()
 metadata.reflect(bind=db)
 
+
 def table(name) -> Table:
     return metadata.tables[name]
+
 
 TAG = table('tag')
 ALBUM = table('album')
@@ -22,7 +26,7 @@ USER = table('user_')
 ALBUM_TAGS = table('albumtoptags')
 ARTIST_TAGS = table('artisttoptags')
 TRACK_TAGS = table('tracktoptags')
-USER_TAGS = table('usertoptags') # Empty, use most frequent?
+USER_TAGS = table('usertoptags')  # Empty, use most frequent?
 
 USER_TOP_ALBUMS = table('usertopalbums')
 USER_TOP_ARTISTS = table('usertopartists')
@@ -39,6 +43,7 @@ TABLES = [
 ]
 
 session = sessionmaker(db)
+
 
 def normalize(col, kind: str = 'minmax', usecol: pd.Series = None):
     if usecol is None:
@@ -102,13 +107,15 @@ def merge_tracks(track_dfs: list, min_playcount: int = None) -> pd.DataFrame:
         DataFrame: Merged tracks
     """
     merged_track_ratings = pd.concat(track_dfs, ignore_index=True)
-    merged_track_ratings['rating'] = merged_track_ratings['rating'].astype(np.float32)
+    merged_track_ratings['rating'] = merged_track_ratings['rating'].astype(
+        np.float32)
 
     # Discard tracks with less than min_playcount total listens
     if min_playcount is not None:
         listen_count = merged_track_ratings['track_id'].value_counts()
         discard_ids = listen_count[listen_count < min_playcount].index
-        merged_track_ratings = merged_track_ratings.loc[~merged_track_ratings.track_id.isin(discard_ids)]
+        merged_track_ratings = merged_track_ratings.loc[~merged_track_ratings.track_id.isin(
+            discard_ids)]
 
     # Sort by desc. rating and drop duplicates while keeping highest rating
     final_ratings = merged_track_ratings.sort_values('rating', ascending=False).drop_duplicates(
@@ -118,68 +125,79 @@ def merge_tracks(track_dfs: list, min_playcount: int = None) -> pd.DataFrame:
 
 
 ###########################
-###### USER'S TRACKS ######
+###### USER'S ITEMS ######
 ###########################
 
 def get_user_id(username):
     stmt = (select(USER.c.id)
             .filter(USER.c.username == username))
-    
+
     with session.begin() as s:
-        q = s.execute(stmt).first()[0]
-    return q
+        q = s.execute(stmt).first()
+    return q[0] if q else None
 
 
-def user_recent_tracks(username):
-    stmt = (select(USER_RECENT_TRACKS.c.track_id)
+def user_recent_tracks(username, id_only=False):
+    stmt = (select(USER_RECENT_TRACKS.c.track_id, USER_RECENT_TRACKS.c.listen_at)
             .join(USER, USER.c.id == USER_RECENT_TRACKS.c.user_id)
             .filter(USER.c.username == username)
             .order_by(USER_RECENT_TRACKS.c.listen_at))
 
     with session.begin() as s:
         q = s.execute(stmt).all()
-    return pd.DataFrame(q, columns=['track_id'])['track_id']
+    df = pd.DataFrame(q, columns=['track_id', 'listen_at'])
+    return df['track_id'] if id_only else df
 
 
-def user_top_tracks(username):
-    stmt = (select(USER_TOP_TRACKS.c.track_id)
+def user_top_tracks(username, id_only=False):
+    stmt = (select(USER_TOP_TRACKS.c.track_id, USER_TOP_TRACKS.c.rank)
             .join(USER, USER.c.id == USER_TOP_TRACKS.c.user_id)
             .filter(USER.c.username == username).
             order_by(USER_TOP_TRACKS.c.rank))
 
     with session.begin() as s:
         q = s.execute(stmt).all()
-    return pd.DataFrame(q, columns=['track_id'])['track_id']
+    df = pd.DataFrame(q, columns=['track_id', 'rank'])
+    return df['track_id'] if id_only else df
 
 
-def user_loved_tracks(username):
-    stmt = (select(USER_LOVED_TRACKS.c.track_id)
+def user_loved_tracks(username, id_only=False):
+    stmt = (select(USER_LOVED_TRACKS.c.track_id, USER_LOVED_TRACKS.c.love_at)
             .join(USER, USER.c.id == USER_LOVED_TRACKS.c.user_id)
             .filter(USER.c.username == username)
             .order_by(USER_LOVED_TRACKS.c.love_at))
 
     with session.begin() as s:
         q = s.execute(stmt).all()
-    return pd.DataFrame(q, columns=['track_id'])['track_id']
+    df = pd.DataFrame(q, columns=['track_id', 'love_at'])
+    return df['track_id'] if id_only else df
 
 
-###################################
-###### TRACK'S NAME & ARTIST ######
-###################################
-
-def get_track_name(id):
-    stmt = (select(TRACK.c.name, ARTIST.c.name)
-            .join(ARTIST, ARTIST.c.id == TRACK.c.artist_id)
-            .filter(TRACK.c.id == id))
+def user_top_artists(username):
+    stmt = (select(USER_TOP_ARTISTS.c.artist_id)
+            .join(USER, USER.c.id == USER_TOP_ARTISTS.c.user_id)
+            .filter(USER.c.username == username)
+            .order_by(USER_TOP_ARTISTS.c.rank))
 
     with session.begin() as s:
-        q = s.execute(stmt).all()[0]
-    return ' - '.join(q)
+        q = s.execute(stmt).all()
+    return pd.DataFrame(q, columns=['artist_id'])['artist_id']
 
+
+def user_top_albums(username):
+    stmt = (select(USER_TOP_ALBUMS.c.album_id)
+            .join(USER, USER.c.id == USER_TOP_ALBUMS.c.user_id)
+            .filter(USER.c.username == username)
+            .order_by(USER_TOP_ALBUMS.c.rank))
+
+    with session.begin() as s:
+        q = s.execute(stmt).all()
+    return pd.DataFrame(q, columns=['album_id'])['album_id']
 
 #####################################
 ###### TRACK + TRACK-ITEM TAGS ######
 #####################################
+
 
 def get_track_own_tags():
     stmt = (select(TRACK.c.id, TAG.c.name, TRACK_TAGS.c.rank)
@@ -237,10 +255,12 @@ def get_tags_frequency():
 
     return pd.DataFrame(tags_freq, columns=['Tag', 'Frequency']).groupby('Tag').sum().sort_values('Frequency', ascending=False).reset_index()
 
+
 def get_tables_count() -> dict:
     with session.begin() as s:
         tables_counts = [
-            (table.name, s.execute(select([func.count()]).select_from(table)).first()[0])
+            (table.name, s.execute(
+                select([func.count()]).select_from(table)).first()[0])
             for table in TABLES
         ]
 
@@ -250,21 +270,22 @@ def get_tables_count() -> dict:
 ###### ITEM'S VADS ######
 #########################
 
+
 def split_vad_stsc(df):
     # Separate VAD & StSc into different columns
     df[['V', 'A', 'D', 'StSc']] = pd.DataFrame(
-    df['VAD'].apply(lambda x: x if x else [np.nan] * 4).tolist())
+        df['VAD'].apply(lambda x: x if x else [np.nan] * 4).tolist())
 
     # Drop column of lists
     df.drop(columns='VAD', inplace=True)
-    
-    
+
+
 def get_item_vad(item_table, col_name):
     stmt = (select(item_table.c.id, item_table.c.name, item_table.c.vad))
 
     with session.begin() as s:
         item_vads = s.execute(stmt).all()
-        
+
     item_vads = pd.DataFrame(item_vads, columns=[col_name, 'Name', 'VAD'])
 
     split_vad_stsc(item_vads)
@@ -275,7 +296,7 @@ def get_item_vad(item_table, col_name):
 #############################
 ###### TRACK-ITEM VADS ######
 #############################
-    
+
 def get_track_artist_vads():
     stmt = (select(TRACK.c.id, ARTIST.c.vad)
             .join(ARTIST, ARTIST.c.id == TRACK.c.artist_id))
@@ -295,8 +316,232 @@ def get_track_album_vads():
 
     with session.begin() as s:
         album_vads = s.execute(stmt).all()
-    
+
     album_vads = pd.DataFrame(album_vads, columns=['Track', 'VAD'])
     split_vad_stsc(album_vads)
 
     return album_vads
+
+###################################
+########## GENERAL UTILS ##########
+###################################
+
+
+def get_track_name(id):
+    stmt = (select(TRACK.c.name, ARTIST.c.name)
+            .join(ARTIST, ARTIST.c.id == TRACK.c.artist_id)
+            .filter(TRACK.c.id == id))
+
+    with session.begin() as s:
+        q = s.execute(stmt).all()[0]
+    return ' - '.join(q)
+
+
+def get_item(table, id):
+    stmt = (select(['*']).filter(table.c.id == str(id)))
+
+    try:
+        with session.begin() as s:
+            return s.execute(stmt).one()
+    except Exception as e:
+        return None
+
+
+def get_track(id):
+    return get_item(TRACK, id)
+
+
+def get_artist(id):
+    return get_item(ARTIST, id)
+
+
+def get_album(id):
+    return get_item(ALBUM, id)
+
+
+def get_track_tags(id):
+    stmt = (select(TAG.c.name)
+            .join(TRACK_TAGS, TRACK_TAGS.c.tag_id == TAG.c.id)
+            .join(TRACK, TRACK.c.id == TRACK_TAGS.c.track_id)
+            .filter(TRACK.c.id == id)
+            .order_by(TRACK_TAGS.c.rank))
+
+    with session.begin() as s:
+        q = s.execute(stmt).all()
+    return np.array(q).flatten().tolist()
+
+
+def get_artist_tags(id):
+    stmt = (select(TAG.c.name)
+            .join(ARTIST_TAGS, ARTIST_TAGS.c.tag_id == TAG.c.id)
+            .join(ARTIST, ARTIST.c.id == ARTIST_TAGS.c.artist_id)
+            .filter(ARTIST.c.id == id)
+            .order_by(ARTIST_TAGS.c.rank))
+
+    with session.begin() as s:
+        q = s.execute(stmt).all()
+    return np.array(q).flatten().tolist()
+
+
+def get_album_tags(id):
+    stmt = (select(TAG.c.name)
+            .join(ALBUM_TAGS, ALBUM_TAGS.c.tag_id == TAG.c.id)
+            .join(ALBUM, ALBUM.c.id == ALBUM_TAGS.c.album_id)
+            .filter(ALBUM.c.id == id)
+            .order_by(ALBUM_TAGS.c.rank))
+
+    with session.begin() as s:
+        q = s.execute(stmt).all()
+    return np.array(q).flatten().tolist()
+
+
+def get_track_context(track_id):
+    unique_track = get_track(track_id)[:-1]
+    if not unique_track:
+        return None
+    track_id, track_name, artist_id, album_id = unique_track
+    _, artist, _ = get_artist(artist_id)
+    album = ''
+    if album_id:
+        _, album, _, _ = get_album(album_id)
+    return track_id, track_name, artist, album
+
+
+def get_db_user_data(username: str,
+                     filepath: str = None,
+                     use_items: dict = None,
+                     include_tracks=False,
+                     include_artists=False,
+                     include_albums=False,
+                     include_tags=False,
+                     tracks_limit=None,
+                     artists_limit=None,
+                     albums_limit=None,
+                     tags_limit=None) -> dict:
+
+    data = use_items or dict()
+    item_tags = data.get('ITEM_TAGS') or {
+        'Artists': dict(),
+        'Albums': dict(),
+        'Tracks': dict()
+    }
+
+    # Check if user still exists
+    if not get_user_id(username):
+        return {'ERROR': f'User {username} does not exist in database'}
+
+    data['USER'] = username
+
+    # ---------------------- Tracks ----------------------
+
+    if include_tracks:
+
+        # ----------- Loved Tracks -----------
+
+        loved_tracks = list()
+        for t, love_at in user_loved_tracks(username).values[:tracks_limit]:
+            unique_track = get_track_context(t)
+            if not unique_track:
+                continue
+            _, track, artist, album = unique_track
+
+            # Name Artist Album Timestamp
+            loved_tracks.append(
+                (track, artist, album, str(love_at.timestamp())))
+            item_tags['Tracks'][unique_track] = list()
+
+        data['LOVED_TRACKS'] = loved_tracks
+
+        # ----------- Recent Tracks -----------
+
+        recent_tracks = list()
+        for t, listen_at in user_recent_tracks(username).values[:tracks_limit]:
+            unique_track = get_track_context(t)
+            if not unique_track:
+                continue
+            _, track, artist, album = unique_track
+
+            # Name Artist Album Timestamp
+            recent_tracks.append(
+                (track, artist, album, str(listen_at.timestamp())))
+            item_tags['Tracks'][unique_track] = list()
+
+        data['RECENT_TRACKS'] = recent_tracks
+
+        # ----------- Top Tracks -----------
+
+        top_tracks = list()
+        for t in user_top_tracks(username, id_only=True).values[:tracks_limit]:
+            unique_track = get_track_context(t)
+            if not unique_track:
+                continue
+            _, track, artist, album = unique_track
+
+            # Name Artist Album
+            top_tracks.append((track, artist, album))
+            item_tags['Tracks'][unique_track] = list()
+
+        data['TOP_TRACKS'] = top_tracks
+
+    # ---------------------- Artists ----------------------
+
+    if include_artists:
+
+        top_artists = list()
+        for artist_id in user_top_artists(username)[:artists_limit]:
+            artist = get_artist(artist_id)
+
+            top_artists.append(artist[1])
+            item_tags['Artists'][artist[:-1]] = list()
+
+        data['TOP_ARTISTS'] = top_artists
+
+    # ---------------------- Albums ----------------------
+
+    if include_albums:
+
+        top_albums = list()
+        for album_id in user_top_albums(username)[:albums_limit]:
+            album = get_album(album_id)
+            artist_name = get_artist(album[2])[1]
+            album_name = (album[1], artist_name)
+
+            top_albums.append(album_name)
+            item_tags['Albums'][(album[0],) + album_name] = list()
+
+        data['TOP_ALBUMS'] = top_albums
+
+    # ---------------------- Tags ----------------------
+
+    if include_tags:
+        tags_count = Counter()
+
+        for item_type in item_tags:
+            for item in list(item_tags[item_type].keys()):
+                match item_type:
+                    case 'Tracks':
+                        fun = get_track_tags
+                    case 'Artists':
+                        fun = get_artist_tags
+                    case 'Albums':
+                        fun = get_album_tags
+                tags = fun(item[0])[:tags_limit]
+
+                # Assign tags to current item
+                item_tags[item_type][item[1:]] = tags
+                del item_tags[item_type][item]
+                # Update unique Tags counts
+                tags_count.update(tags)
+
+        for item_type in item_tags.keys():
+            item_tags[item_type] = list(item_tags[item_type].items())
+
+        data['TAGS_COUNT'] = tags_count.most_common(None)
+
+    data['ITEM_TAGS'] = item_tags
+
+    if filepath:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+
+    return data
