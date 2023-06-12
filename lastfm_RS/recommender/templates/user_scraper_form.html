@@ -6,6 +6,13 @@
     <h2>Last.FM User Scraper</h2>
     <br />
     <form method="get" class="form-group">
+        {% if form.non_field_errors %}
+            <ul class="errorlist">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         <table>
             <tr>
                 <th>{{ form.username.label }}:</th>

@@ -326,6 +326,12 @@ def get_track_album_vads():
 ########## GENERAL UTILS ##########
 ###################################
 
+def get_username(id):
+    stmt = (select(USER.c.username)
+            .filter(USER.c.id == id))
+
+    with session.begin() as s:
+        return s.execute(stmt).one()[0]
 
 def get_track_name(id):
     stmt = (select(TRACK.c.name, ARTIST.c.name)

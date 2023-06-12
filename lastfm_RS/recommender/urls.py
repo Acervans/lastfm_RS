@@ -7,6 +7,7 @@ urlpatterns = [
     path('lastfm_preview', views.lastfm_preview, name='lastfm_preview'),
     path('vad_analysis', views.vad_analysis, name='vad_analysis'),
     path('recommendations', views.recommendations, name='recommendations'),
+
     path('user_scraper', views.user_scraper, name='user_scraper'),
     path('user_scraper/tracks', views.scrape_tracks, name='scrape_tracks'),
     path('user_scraper/artists', views.scrape_artists, name='scrape_artists'),

@@ -209,7 +209,7 @@ def user_scraper(request):
                 form.add_error(None, 'Select at least one (non-tag) option')
             else:
                 scrape = [[item, form.cleaned_data.get(
-                    f'{item}_limit', 0)] for i, item in enumerate(items) if do_items[i]]
+                    f'{item}_limit') or 'null'] for i, item in enumerate(items) if do_items[i]]
                 return render(
                     request,
                     'user_scraper.html',
@@ -226,15 +226,16 @@ def user_scraper(request):
 
 def scrape_items(request, keys, include):
     global user_data
+
     if request.method == 'GET':
         username = request.GET.get('user')
-        limit = int(request.GET.get('limit'))
+        limit = request.GET.get('limit')
         use_db = request.GET.get('use_db') == 'True'
 
         args = {
             'use_items': user_data,
             f'include_{include}': True,
-            f'{include}_limit': limit
+            f'{include}_limit': int(limit) if limit != 'null' else None
         }
         if use_db:
             user_data = get_db_user_data(username, **args)
@@ -288,10 +289,11 @@ def recommendations(request):
         rec_form = RecommendationsForm(request.GET, prefix='recommend')
         if rec_form.is_valid():
             recsys = rec_form.cleaned_data.get('model')
-            username = rec_form.cleaned_data.get('username')
+            username = url_user = rec_form.cleaned_data.get('username')
             cutoff = rec_form.cleaned_data.get('cutoff')
             non_personalized = recsys in ('random', 'pop')
             predict_args = dict()
+            scraper_url = None
 
             if any(request.GET[field] for field in ('recommend-username', 'cosine-tags')) or non_personalized:
 
@@ -346,11 +348,24 @@ def recommendations(request):
                         cutoff=cutoff
                     )
 
-                    if not uid and not non_personalized:
-                        username = 'Default User'
+                    if not uid:
+                        if non_personalized:
+                            url_user = None
+                        else:
+                            username = 'Default User'
+                            url_user = get_username(1)
+
+                    if url_user:
+                        scraper_url = f"{reverse('user_scraper')}?username={quote(url_user)}" \
+                            "&use_database=on" \
+                            "&include_tracks=on" \
+                            "&include_artists=on" \
+                            "&include_albums=on" \
+                            "&include_tags=on"
 
                 return render(request, 'lastfm_recommend.html', context={
                     'username': username or 'Anyone',
+                    'scraper_url': scraper_url,
                     'model': dict(rec_form.fields['model'].choices)[recsys],
                     'recommendations': get_recommendations_context(recs)
                 })
