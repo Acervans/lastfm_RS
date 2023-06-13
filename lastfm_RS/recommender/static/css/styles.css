@@ -323,7 +323,7 @@ form tr {
 
 .recommendation-card {
     padding: 15px;
-    height: 170px;
+    height: 160px;
     overflow-y: auto;
     border-radius: 5px 5px 0 0;
     background-color: #1d8577;
@@ -357,7 +357,7 @@ form tr {
 }
 
 .card-btn-group {
-    margin: 10px 0 15px 15px;
+    margin: 5px 0 15px 15px;
 }
 
 .score-block {
@@ -372,4 +372,8 @@ form tr {
 .vadst-wc-container {
     text-align: center;
     margin-left: inherit;
+}
+
+.pagination {
+    margin: 30px 30px 20px 0;
 }

@@ -8,15 +8,16 @@
 {% endblock scripts %}
 {% block content %}
     <h2>
-        Recommendations for 
+        Recommendations for
         {% if scraper_url %}
             <a href="{{ scraper_url }}" target="_blank">{{ username }}</a>
         {% else %}
             {{ username }}
-        {% endif %} by {{ model }} Recommender
+        {% endif %}
+        by {{ model }} Recommender
     </h2>
     <br />
-    <div class="recommendations row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-md-4 row-cols-md-5 g-3">
+    <div class="recommendations row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3">
         {% for rec in recommendations %}
             <div class="col">
                 <div class="card shadow-sm">
@@ -45,11 +46,13 @@
                     </div>
                     <div class="card-btn-group d-flex justify-content-between align-items-center">
                         <div class="btn-group">
-                            <a href="{{ rec.preview_url }}" target="_blank">
-                                <button type="button" class="btn btn-sm btn-secondary">Preview</button>
-                            </a>
+                            <a href="{{ rec.preview_url }}"
+                               class="btn btn-sm btn-outline-success"
+                               target="_blank"
+                               role="button"
+                               aria-pressed="true">Preview</a>
                             <button type="button"
-                                    class="btn btn-sm btn btn-primary"
+                                    class="btn btn-sm btn-outline-primary"
                                     data-bs-toggle="modal"
                                     data-bs-target="#rec-{{ rec.id }}">View details</button>
                         </div>

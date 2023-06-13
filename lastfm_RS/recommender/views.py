@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate
 from django.urls import reverse
+from django.core.paginator import Paginator
 
 from .forms import *
 from bs4 import BeautifulSoup
@@ -30,6 +31,10 @@ RECSYS_MODELS = {
     'pop':     [f'{SAVED_PATH}/Pop.pth', None],
     'itemknn': [f'{SAVED_PATH}/ItemKNNRecommender.pth', None]
 }
+
+# GLOBAL STORAGE
+recs_context = dict()
+user_data = dict()
 
 
 def index(request):
@@ -92,9 +97,9 @@ def lastfm_preview(request):
                 'lastfm_preview.html',
                 get_track_context(artist, title, do_lyrics),
             )
-    else:
-        form = PreviewTrackForm()
-        return render(request, 'lastfm_preview_form.html', context={'form': form})
+
+    form = PreviewTrackForm()
+    return render(request, 'lastfm_preview_form.html', context={'form': form})
 
 
 def get_track_context(artist, title, do_lyrics):
@@ -194,7 +199,8 @@ def vad_analysis(request):
 
 def user_scraper(request):
     global user_data
-    user_data = dict()
+
+    user_data[request.session._get_or_create_session_key()] = dict()
 
     form = UserScraperForm()
     if request.method == 'GET' and 'username' in request.GET:
@@ -227,25 +233,25 @@ def user_scraper(request):
 def scrape_items(request, keys, include):
     global user_data
 
+    session_key = request.session._get_or_create_session_key()
+
     if request.method == 'GET':
         username = request.GET.get('user')
         limit = request.GET.get('limit')
         use_db = request.GET.get('use_db') == 'True'
 
         args = {
-            'use_items': user_data,
+            'use_items': user_data[session_key],
             f'include_{include}': True,
             f'{include}_limit': int(limit) if limit != 'null' else None
         }
         if use_db:
-            user_data = get_db_user_data(username, **args)
+            user_data[session_key] = data = get_db_user_data(username, **args)
         else:
-            user_data = get_user_data(username, **args)
+            user_data[session_key] = data = get_user_data(username, **args)
 
-        if 'ERROR' in user_data:
-            data = user_data
-        else:
-            data = {k.lower(): user_data[k.upper()] for k in keys}
+        if 'ERROR' not in user_data[session_key]:
+            data = {k.lower(): user_data[session_key][k.upper()] for k in keys}
         return JsonResponse(data)
 
 
@@ -282,20 +288,35 @@ def scrape_tags(request):
 
 
 def recommendations(request):
-    rec_form = RecommendationsForm(prefix="recommend")
+    global recs_context
 
-    if request.method == 'GET' and 'recommend-model' in request.GET:
+    rec_form = RecommendationsForm()
+    session_key = request.session._get_or_create_session_key()
+
+    page = request.GET.get('page')
+
+    if page and session_key in recs_context:
+        page = page.replace(',', '')
+        context = recs_context[session_key]
+        new_page = context['page_obj'] = context['paginator'].page(page)
+        context['page_range'] = context['paginator'].get_elided_page_range(page)
+        context['recommendations'] = get_recommendations_context(new_page.object_list, new_page.start_index())
+
+        return render(request, 'lastfm_recommend.html', context=context)
+
+    if request.method == 'GET' and 'model' in request.GET:
         recs = list()
-        rec_form = RecommendationsForm(request.GET, prefix='recommend')
+        rec_form = RecommendationsForm(request.GET)
         if rec_form.is_valid():
             recsys = rec_form.cleaned_data.get('model')
             username = url_user = rec_form.cleaned_data.get('username')
             cutoff = rec_form.cleaned_data.get('cutoff')
+            limit = rec_form.cleaned_data.get('limit')
             non_personalized = recsys in ('random', 'pop')
             predict_args = dict()
             scraper_url = None
 
-            if any(request.GET[field] for field in ('recommend-username', 'cosine-tags')) or non_personalized:
+            if any(request.GET[field] for field in ('username', 'cosine-tags')) or non_personalized:
 
                 match recsys:
                     case 'random':
@@ -363,12 +384,24 @@ def recommendations(request):
                             "&include_albums=on" \
                             "&include_tags=on"
 
-                return render(request, 'lastfm_recommend.html', context={
+                if not limit:
+                    limit = cutoff
+
+                p = Paginator(recs, limit)
+                first_page = p.page(1)
+
+                recs_context[session_key] = {
                     'username': username or 'Anyone',
                     'scraper_url': scraper_url,
                     'model': dict(rec_form.fields['model'].choices)[recsys],
-                    'recommendations': get_recommendations_context(recs)
-                })
+                    'recommendations': get_recommendations_context(first_page.object_list),
+                    'is_paginated': limit and limit < cutoff,
+                    'paginator': p,
+                    'page_obj': first_page,
+                    'page_range': p.get_elided_page_range(1)
+                }
+
+                return render(request, 'lastfm_recommend.html', context=recs_context[session_key])
             else:
                 rec_form.add_error(
                     'username', 'Fill either username or tags (cosine)')
@@ -393,7 +426,7 @@ def set_seed(seed: int = 2020) -> None:
     torch.cuda.manual_seed(seed)
 
 
-def get_recommendations_context(recommendations):
+def get_recommendations_context(recommendations, start_rank=1):
     rec_context = list()
 
     def round_list(float_list, to=5):
@@ -415,7 +448,7 @@ def get_recommendations_context(recommendations):
         r_data = {
             'id':             rec_id,
             'title':          title,
-            'rank':           rank + 1,
+            'rank':           start_rank + rank,
             'score':          round(float(score), 4),
             'artist':         [artist, artist_tags, round_list(artist_vadst) or placeholder],
             'album':          [album,  album_tags,  round_list(album_vadst) or placeholder] if album_id else None,
@@ -449,7 +482,6 @@ def get_user_recommendations(username, model, predict_args=dict(), cutoff=10):
         {RECSYS_DATASET.uid_field: uid_series}, **predict_args)
     recs = scores_to_recommendations(scores, cutoff)
 
-    print(recs)
     return original_id, recs
 
 

@@ -11,8 +11,8 @@ class RegisterForm(UserCreationForm):
 
 
 class PreviewTrackForm(forms.Form):
-    artist = forms.CharField(max_length=100)
-    title = forms.CharField(max_length=100)
+    artist = forms.CharField(max_length=1000)
+    title = forms.CharField(max_length=1000)
     lyrics = forms.BooleanField(required=False, label='Lyrics from Genius')
 
 
@@ -47,10 +47,10 @@ class RecommendationsForm(forms.Form):
         ('pnn', 'PNN'),
     ], widget=forms.RadioSelect, initial='random')
     username = forms.CharField(
-        label='Username', max_length=100, required=False)
+        label='Username', max_length=1000, required=False)
     username.widget.attrs['list'] = 'usernames'
     cutoff = forms.IntegerField(label='Cutoff', min_value=1, initial=10)
-
+    limit = forms.IntegerField(label='Per Page', min_value=1, required=False, initial=10)
 
 class RandomRecommenderForm(forms.Form):
     seed = forms.IntegerField(label="Random Seed", required=False, min_value=0)
@@ -68,7 +68,7 @@ class CosineRecommenderForm(forms.Form):
 
 class UserScraperForm(forms.Form):
     username = forms.CharField(
-        label='Last.FM Username', max_length=100, required=True)
+        label='Last.FM Username', max_length=1000, required=True)
     use_database = forms.BooleanField(
         label='Use Database?', required=False, initial=False)
 

@@ -30,7 +30,8 @@ function copyEvent(id) {
     selectText(copyText);
 
     // Copy the text inside the element
-    navigator.clipboard.writeText(copyText.textContent);
+    if (navigator.clipboard)
+        navigator.clipboard.writeText(copyText.textContent);
 }
 
 /* Select an element's content */
@@ -96,5 +97,5 @@ function scrollToBottom() {
 
 document.querySelector("#sidebar").addEventListener('webkitTransitionEnd', setContentHeight);
 
-window.onload = setContentHeight;
+window.addEventListener('load'  , setContentHeight);
 window.addEventListener('resize', setContentHeight);

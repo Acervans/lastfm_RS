@@ -1,16 +1,16 @@
 function show(element) {
     if (element) {
         element.style.overflow = 'auto'
-        element.style.height = 'auto';
-        element.style.opacity = '1';
+        element.style.height   = 'auto';
+        element.style.opacity  = '1';
     }
 }
 
 function hide(element) {
     if (element) {
         element.style.overflow = 'hidden';
-        element.style.height = '0';
-        element.style.opacity = '0';
+        element.style.height   = '0';
+        element.style.opacity  = '0';
     }
 }
 
@@ -27,7 +27,10 @@ function replaceTags() {
     tags_input.value = tags_values;
 }
 
-var rad = document.getElementsByClassName('form-group')[0]['recommend-model'];
+const tags = new Set(Array.from(document.querySelectorAll('#tags_list option')).
+    map((tag) => tag.value));
+
+var rad = document.getElementsByClassName('form-group')[0]['model'];
 var prev = rad[0];
 
 for (var i = 0; i < rad.length; i++) {
@@ -43,9 +46,6 @@ for (var i = 0; i < rad.length; i++) {
         }
     });
 }
-
-const tags = new Set(Array.from(document.querySelectorAll('#tags_list option')).
-                    map((tag) => tag.value));
 
 jQuery($ => {
     // Tags separated by comma

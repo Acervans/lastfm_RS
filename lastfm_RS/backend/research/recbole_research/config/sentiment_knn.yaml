@@ -8,7 +8,7 @@ device: cpu
 # V A D StSc
 use_vadst_cols: [0,1,2,3]
 weighted_average: False
-knn_topk: 2
+knn_topk: ~
 
 # Dataset config
 load_col:

@@ -1,20 +1,20 @@
 $(document).ready(function () {
     if (scrape) {
         openLoader(`Scraping ${scrape[0][0]}...`);
-        requestItems(scrape, 0);
+        requestItems(0);
     }
 })
 
-function requestItems(scrape, index) {
-    const item = scrape[index][0],
-        limit = scrape[index][1];
+function requestItems(index) {
+    const item  = scrape[index][0],
+          limit = scrape[index][1];
 
     $.ajax({
         url: `user_scraper/${item}`,
         type: "GET",
         data: {
-            'user': user,
-            'limit': limit,
+            'user':   user,
+            'limit':  limit,
             'use_db': useDb
         },
         cache: true,
@@ -31,7 +31,7 @@ function requestItems(scrape, index) {
 
             if (index + 1 < scrape.length) {
                 openLoader(`Scraping ${scrape[index + 1][0]}...`);
-                requestItems(scrape, index + 1);
+                requestItems(index + 1);
             } else {
                 openLoader('Done!');
                 setTimeout(() => hideLoader(), 1500);
@@ -46,7 +46,8 @@ function requestItems(scrape, index) {
 
 function error(msg) {
     const div = document.querySelector("#scrape-tracks");
-    div.innerHTML = `<h4>${msg}</h4>`
+
+    div.innerHTML   = `<h4>${msg}</h4>`;
     div.style.color = 'darkred';
     showElement("#scrape-tracks");
 }
@@ -74,8 +75,9 @@ function loadItems(item, partialData) {
 
 function showElement(className) {
     const elementStyle = document.querySelector(className).style;
-    elementStyle.height = 'auto';
-    elementStyle.opacity = 1;
+
+    elementStyle.height   = 'auto';
+    elementStyle.opacity  = 1;
     elementStyle.overflow = 'auto';
 }
 
