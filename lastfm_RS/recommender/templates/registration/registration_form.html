@@ -5,11 +5,11 @@
 {% block content %}
     <h2>Register a new account</h2>
     <br/>
+    {% load django_bootstrap5 %}
+    {% bootstrap_messages %}
     <form method="post" class="form-group">
-        <table>
             {% csrf_token %}
-            {{ form.as_table }}
-        </table>
+            {% bootstrap_form form %}
         <button type="submit" class="btn btn-success">Register</button>
     </form>
 {% endblock content %}

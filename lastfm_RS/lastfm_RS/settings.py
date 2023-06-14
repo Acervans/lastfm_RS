@@ -40,8 +40,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'recommender'
+    'django_bootstrap5',
+    'recommender',
 ]
+
+BOOTSTRAP5 = {
+    # Set placeholder attributes to label if no placeholder is provided.
+    'set_placeholder': False,
+
+    # Wrapper class for non-inline fields.
+    # The default value "mb-3" is the spacing as used by Bootstrap 5 example code.
+    'wrapper_class': 'mb-2',
+
+    # Label class to use in horizontal forms.
+    'horizontal_label_class': 'col-sm-2',
+
+    # Field class to use in horizontal forms.
+    'horizontal_field_class': 'col',
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

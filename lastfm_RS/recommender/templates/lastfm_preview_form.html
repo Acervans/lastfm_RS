@@ -5,10 +5,10 @@
 {% block content %}
     <h2>LastFM Track Previewer</h2>
     <br/>
+    {% load django_bootstrap5 %}
+    {% bootstrap_messages %}
     <form method="get" onsubmit="openLoader('Loading preview...')" class="form-group">
-        <table>
-            {{ form.as_table }}
-        </table>
+        {% bootstrap_form form %}
         <br/>
         <button type="submit" class="btn btn-success">Search</button>
     </form>

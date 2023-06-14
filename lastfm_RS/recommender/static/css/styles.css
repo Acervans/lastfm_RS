@@ -93,45 +93,6 @@ form tr {
 
 #tags {
     float: left;
-    border: 1px solid #ccc;
-    padding: 5px;
-    font-family: Arial;
-}
-
-#tags>span {
-    cursor: pointer;
-    display: block;
-    float: left;
-    color: #fff;
-    background: #789;
-    padding: 5px;
-    padding-right: 25px;
-    margin: 4px;
-}
-
-#tags>span:hover {
-    opacity: 0.7;
-}
-
-#tags>span:after {
-    position: absolute;
-    content: "×";
-    border: 1px solid;
-    padding: 2px 5px;
-    margin-left: 3px;
-    font-size: 11px;
-}
-
-#tags>input {
-    background: #eee;
-    border: 0;
-    margin: 4px;
-    padding: 7px;
-    width: auto;
-}
-
-#tags {
-    float: left;
     border: 1px solid #d4d4d4;
     padding: 5px;
     font-family: Arial;
@@ -144,7 +105,6 @@ form tr {
     color: #fff;
     background: rgb(100, 113, 139);
     padding: 5px;
-    padding-right: 25px;
     margin: 4px;
 }
 
@@ -153,17 +113,18 @@ form tr {
 }
 
 #tags>span:after {
-    position: absolute;
+    position: relative;
     content: "×";
     border: 1px solid;
     padding: 2px 5px;
-    margin-left: 3px;
+    bottom: 2px;
+    margin-left: 5px;
     font-size: 11px;
 }
 
 #tags>input {
     background: #ffffff;
-    border: 1px solid #ececec;
+    border: 1px solid #e2e2e2;
     margin: 4px;
     padding: 7px;
     width: auto;
@@ -275,10 +236,6 @@ form tr {
     background-color: #dbd5ff;
 }
 
-.vad-form-table ul {
-    list-style-type: none;
-}
-
 .genius-lyrics {
     max-height: calc(100vh - 215px);
     overflow-y: auto;
@@ -376,4 +333,53 @@ form tr {
 
 .pagination {
     margin: 30px 30px 20px 0;
+}
+
+.alert {
+    max-width: fit-content;
+    background-color: #29726a;
+    color: whitesmoke;
+    border-radius: 8px;
+    padding: 5px;
+    word-break: break-word;
+}
+
+.model-parameters {
+    margin-bottom: .75em;
+}
+
+.col-form-label,
+.form-label {
+    font-weight: bold;
+}
+
+.form-control, .form-check-input {
+    border-color: #aba5b3;
+}
+
+.form-check-input:checked {
+    background-color: #59b4a8;
+    border-color: #59b4a8;
+}
+
+.form-group {
+    width: 80%;
+}
+
+.form-group .row {
+    margin-right: auto;
+    align-items: center;
+}
+
+.form-group .col {
+    max-width: max-content;
+}
+
+input.form-control {
+    max-width: 12em;
+}
+
+
+textarea.form-control {
+    width: fit-content;
 }

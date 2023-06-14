@@ -14,11 +14,11 @@
             </p>
         {% endif %}
     {% endif %}
-    <form method="post" action="{% url 'login' %}">
-        <table>
-            {% csrf_token %}
-            {{ form.as_table }}
-        </table>
+    {% load django_bootstrap5 %}
+    {% bootstrap_messages %}
+    <form method="post" action="{% url 'login' %}" class="form-group">
+        {% csrf_token %}
+        {% bootstrap_form form %}
         <br/>
         <button type="submit" class="btn btn-success">Login</button>
     </form>

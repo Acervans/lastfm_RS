@@ -5,51 +5,121 @@
 {% block content %}
     <h2>Last.FM User Scraper</h2>
     <br />
+    {% load django_bootstrap5 %}
+    {% bootstrap_messages %}
     <form method="get" class="form-group">
         {% if form.non_field_errors %}
             <ul class="errorlist">
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
+                {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
             </ul>
         {% endif %}
-        <table>
-            <tr>
-                <th>{{ form.username.label }}:</th>
-                <td>{{ form.username }}</td>
-            </tr>
-            <tr>
-                <th>{{ form.use_database.label }}</th>
-                <td>{{ form.use_database }}</td>
-            </tr>
-        </table>
+        <div class="row mb-2">
+            <label class="col-sm-2 col-form-label" for="id_username">{{ form.username.label }}</label>
+            <div class="col">
+                <input type="text"
+                       name="username"
+                       maxlength="1000"
+                       class="form-control"
+                       required=""
+                       id="id_username">
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col offset-sm-2">
+                <div class="form-check">
+                    <input type="checkbox"
+                           name="use_database"
+                           class="form-check-input"
+                           id="id_use_database">
+                    <label class="form-check-label" for="id_use_database">{{ form.use_database.label }}</label>
+                </div>
+            </div>
+        </div>
         <br />
-        <table id="user-scraper">
-            <tr>
-                <th>{{ form.include_tracks.label }}</th>
-                <td>{{ form.include_tracks }}</td>
-                <th>{{ form.tracks_limit.label }}:</th>
-                <td>{{ form.tracks_limit }}</td>
-            </tr>
-            <tr>
-                <th>{{ form.include_artists.label }}</th>
-                <td>{{ form.include_artists }}</td>
-                <th>{{ form.artists_limit.label }}:</th>
-                <td>{{ form.artists_limit }}</td>
-            </tr>
-            <tr>
-                <th>{{ form.include_albums.label }}</th>
-                <td>{{ form.include_albums }}</td>
-                <th>{{ form.albums_limit.label }}:</th>
-                <td>{{ form.albums_limit }}</td>
-            </tr>
-            <tr>
-                <th>{{ form.include_tags.label }}</th>
-                <td>{{ form.include_tags }}</td>
-                <th>{{ form.tags_limit.label }}:</th>
-                <td>{{ form.tags_limit }}</td>
-            </tr>
-        </table>
+        <div class="row mb-2">
+            <label class="col-sm-2 col-form-label" for="id_tracks_limit">{{ form.tracks_limit.label }}</label>
+            <div class="col">
+                <input type="number"
+                       name="tracks_limit"
+                       value="20"
+                       min="1"
+                       class="form-control"
+                       id="id_tracks_limit">
+            </div>
+            <div class="col sm-2">
+                <div class="form-check">
+                    <input type="checkbox"
+                           name="include_tracks"
+                           class="form-check-input"
+                           id="id_include_tracks"
+                           checked="">
+                    <label class="form-check-label" for="id_include_tracks">{{ form.include_tracks.label }}</label>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label class="col-sm-2 col-form-label" for="id_artists_limit">{{ form.artists_limit.label }}</label>
+            <div class="col">
+                <input type="number"
+                       name="artists_limit"
+                       value="20"
+                       min="1"
+                       class="form-control"
+                       id="id_artists_limit">
+            </div>
+            <div class="col sm-2">
+                <div class="form-check">
+                    <input type="checkbox"
+                           name="include_artists"
+                           class="form-check-input"
+                           id="id_include_artists"
+                           checked="">
+                    <label class="form-check-label" for="id_include_artists">{{ form.include_artists.label }}</label>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label class="col-sm-2 col-form-label" for="id_albums_limit">{{ form.albums_limit.label }}</label>
+            <div class="col">
+                <input type="number"
+                       name="albums_limit"
+                       value="20"
+                       min="1"
+                       class="form-control"
+                       id="id_albums_limit">
+            </div>
+            <div class="col sm-2">
+                <div class="form-check">
+                    <input type="checkbox"
+                           name="include_albums"
+                           class="form-check-input"
+                           id="id_include_albums"
+                           checked="">
+                    <label class="form-check-label" for="id_include_albums">{{ form.include_albums.label }}</label>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label class="col-sm-2 col-form-label" for="id_tags_limit">{{ form.tags_limit.label }}</label>
+            <div class="col">
+                <input type="number"
+                       name="tags_limit"
+                       value="20"
+                       min="1"
+                       class="form-control"
+                       id="id_tags_limit">
+            </div>
+            <div class="col sm-2">
+                <div class="form-check">
+                    <input type="checkbox"
+                           name="include_tags"
+                           class="form-check-input"
+                           id="id_include_tags"
+                           checked="">
+                    <label class="form-check-label" for="id_include_tags">{{ form.include_tags.label }}</label>
+                </div>
+            </div>
+        </div>
         <br>
         <button type="submit" class="btn btn-success">Scrape Data</button>
     </form>

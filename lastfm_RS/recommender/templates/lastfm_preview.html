@@ -9,7 +9,7 @@
             <a href="{{ track_url }}" target="_blank">{{ title }}</a>
         </h2>
         <h4>
-            By <a href="{{ artist_url }}" target="_blank">{{ artist }}</a> (mbid: {{ id }})
+            By <a href="{{ artist_url }}" target="_blank">{{ artist }}</a> {% if id %}(mbid: {{ id }}){% endif %}
         </h4>
         <hr/>
         <div class="{% if do_lyrics %}grid-container{% endif %}">

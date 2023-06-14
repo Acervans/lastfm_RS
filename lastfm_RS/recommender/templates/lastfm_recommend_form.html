@@ -5,24 +5,30 @@
 {% block content %}
     <h2>Last.FM Recommender</h2>
     <br/>
+    {% load django_bootstrap5 %}
+    {% bootstrap_messages %}
     <form method="get" onsubmit="openLoader('Generating recommendations...') & replaceTags()" class="form-group">
-        <table>
-            {{ rec_form.as_table }}
-        </table>
+        {% bootstrap_form rec_form layout="horizontal" %}
         <div id="random" class="recommender-form">
             <br/>
-            <h4>Random Recommender Parameters</h4>
-            <table>
-                {{ random.as_table }}
-            </table>
+            <h4 class="model-parameters">Random Recommender Parameters</h4>
+            {% bootstrap_form random layout="horizontal" %}
         </div>
         <div id="cosine" class="recommender-form">
             <br/>
-            <h4>Cosine Similarities Parameters</h4>
-            <p>&nbsp;If tags are specified, recommendations will not consider user data.</p>
-            <table>
-                {{ cosine.as_table }}
-            </table>
+            <h4 class="model-parameters">Cosine Similarities Parameters</h4>
+            <div class="alert" role="alert">
+                If tags are specified, recommendations will not consider user data
+            </div>
+            {% bootstrap_form cosine layout="horizontal" %}
+        </div>
+        <div id="search" class="recommender-form">
+            <br/>
+            <h4 class="model-parameters">Search Parameters</h4>
+            <div class="alert" role="alert">
+                Use '%' as wildcard and '\' as escape character
+            </div>
+            {% bootstrap_form search layout="horizontal" %}
         </div>
         <br/>
         <button type="submit" class="btn btn-success">Recommend</button>

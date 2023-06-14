@@ -16,11 +16,11 @@
         <code>StSc = (<b>positive_words</b> - <b>negative_words</b>) / <b>total_found_words</b></code>
     </div>
     <br/>
+    {% load django_bootstrap5 %}
+    {% bootstrap_messages %}
     <form method="post" onsubmit="openLoader('Analyzing text...')" class="form-group">
-        <table class="vad-form-table">
-            {% csrf_token %}
-            {{ form.as_table }}
-        </table>
+        {% csrf_token %}
+        {% bootstrap_form form layout="horizontal" %}
         <br/>
         <button type="submit" class="btn btn-success">Analyze</button>
     </form>

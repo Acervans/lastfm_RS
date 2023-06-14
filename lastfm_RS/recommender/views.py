@@ -35,6 +35,7 @@ RECSYS_MODELS = {
 # GLOBAL STORAGE
 recs_context = dict()
 user_data = dict()
+inters = None
 
 
 def index(request):
@@ -299,20 +300,22 @@ def recommendations(request):
         page = page.replace(',', '')
         context = recs_context[session_key]
         new_page = context['page_obj'] = context['paginator'].page(page)
-        context['page_range'] = context['paginator'].get_elided_page_range(page)
-        context['recommendations'] = get_recommendations_context(new_page.object_list, new_page.start_index())
+        context['page_range'] = context['paginator'].get_elided_page_range(
+            page)
+        context['recommendations'] = get_recommendations_context(
+            new_page.object_list, new_page.start_index())
 
         return render(request, 'lastfm_recommend.html', context=context)
 
     if request.method == 'GET' and 'model' in request.GET:
-        recs = list()
+        recs = None
         rec_form = RecommendationsForm(request.GET)
         if rec_form.is_valid():
             recsys = rec_form.cleaned_data.get('model')
             username = url_user = rec_form.cleaned_data.get('username')
             cutoff = rec_form.cleaned_data.get('cutoff')
             limit = rec_form.cleaned_data.get('limit')
-            non_personalized = recsys in ('random', 'pop')
+            non_personalized = recsys in ('random', 'pop', 'search')
             predict_args = dict()
             scraper_url = None
 
@@ -353,16 +356,27 @@ def recommendations(request):
                             })
 
                             if tags:
-                                recs = get_tags_recommendations(
+                                recs = get_recommendations_by_tags(
                                     tags.split(','), cutoff)
+
+                    case 'search':
+                        recsys_form = SearchForm(
+                            request.GET, prefix='search')
+                        if recsys_form.is_valid():
+                            by = recsys_form.cleaned_data.get('by')
+                            query = recsys_form.cleaned_data.get('query')
+                            username = f"{by[0].upper() + by[1:]} Query \'{query}\'"
+
+                            recs = get_recommendations_by_search(
+                                by, query, min(cutoff, 2**63 - 1))
 
                     case _:
                         if not RECSYS_MODELS[recsys][1]:
                             RECSYS_MODELS[recsys][1] = load_model(
                                 RECSYS_MODELS[recsys][0])
 
-                if not recs:
-                    uid, recs = get_user_recommendations(
+                if recs is None:
+                    uid, recs = get_recommendations_by_user(
                         username=username,
                         model=RECSYS_MODELS[recsys][1],
                         predict_args=predict_args,
@@ -408,6 +422,7 @@ def recommendations(request):
 
     random = RandomRecommenderForm(prefix="random")
     cosine = CosineRecommenderForm(prefix="cosine")
+    search = SearchForm(prefix="search")
     usernames = get_table_df('user_')['username']
     tags = get_table_df('tag')['name']
 
@@ -415,6 +430,7 @@ def recommendations(request):
         'rec_form': rec_form,
         'random': random,
         'cosine': cosine,
+        'search': search,
         'usernames': usernames,
         'tags': tags
     })
@@ -427,13 +443,16 @@ def set_seed(seed: int = 2020) -> None:
 
 
 def get_recommendations_context(recommendations, start_rank=1):
+    global inters
     rec_context = list()
 
     def round_list(float_list, to=5):
         return [round(num, to) for num in float_list]
 
-    inters = pd.read_csv(
-        f"{RECSYS_DATA}/lastfm_recbole/lastfm_recbole.inter", sep='\t')
+    if inters is None:
+        inters = dict(zip(*np.unique(pd.read_csv(f"{RECSYS_DATA}/lastfm_recbole/lastfm_recbole.inter", sep='\t')[
+                      'track_id:token'], return_counts=True)))
+
     for rank, (score, rec_id) in enumerate(recommendations):
         placeholder = 4 * ['']
         track = get_track(rec_id)
@@ -449,12 +468,12 @@ def get_recommendations_context(recommendations, start_rank=1):
             'id':             rec_id,
             'title':          title,
             'rank':           start_rank + rank,
-            'score':          round(float(score), 4),
+            'score':          round(float(score), 5) if score else 'None',
             'artist':         [artist, artist_tags, round_list(artist_vadst) or placeholder],
             'album':          [album,  album_tags,  round_list(album_vadst) or placeholder] if album_id else None,
             'tags':           track_tags,
             'vadst':          round_list(vadst) or placeholder,
-            'users_listened': (inters['track_id:token'] == int(rec_id)).sum(),
+            'users_listened': inters[int(rec_id)],
             'preview_url':    f"{reverse('lastfm_preview')}?artist={quote(artist)}&title={quote(title)}&lyrics=on"
         }
         rec_context.append(r_data)
@@ -472,7 +491,7 @@ def scores_to_recommendations(scores, cutoff):
     return list(zip(scores[sorted_idx], item_ids[sorted_idx]))[:cutoff]
 
 
-def get_user_recommendations(username, model, predict_args=dict(), cutoff=10):
+def get_recommendations_by_user(username, model, predict_args=dict(), cutoff=10):
     original_id = get_user_id(username)
     uid = original_id or "1"
 
@@ -485,7 +504,7 @@ def get_user_recommendations(username, model, predict_args=dict(), cutoff=10):
     return original_id, recs
 
 
-def get_tags_recommendations(tags, cutoff):
+def get_recommendations_by_tags(tags, cutoff):
     def process_tag(tag):
         # Strip spaces and hyphens
         tag = tag.replace(' ', '').replace('-', '')
@@ -505,8 +524,21 @@ def get_tags_recommendations(tags, cutoff):
 
     recs = scores_to_recommendations(scores, cutoff)
 
-    print(recs)
     return recs
+
+
+def get_recommendations_by_search(by='track', search='', cutoff=10):
+    match by:
+        case 'track':
+            tracks = search_tracks_by_name(search, cutoff)
+        case 'artist':
+            tracks = search_tracks_by_artist(search, cutoff)
+        case 'album':
+            tracks = search_tracks_by_album(search, cutoff)
+        case _:
+            return []
+
+    return list(map(lambda t: (None, t), tracks))
 
 
 def load_model(model, config=dict(), use_training=False):
