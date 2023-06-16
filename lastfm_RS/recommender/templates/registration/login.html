@@ -5,7 +5,7 @@
 {% block content %}
     <h2>Log in with an existing account</h2>
     <br/>
-    {% if form.errors %}<p>Your username and password didn't match. Please try again.</p>{% endif %}
+    {% if form.errors %}<p>Your username and password didn't match.</p>{% endif %}
     {% if next %}
         {% if user.is_authenticated %}
             <p>

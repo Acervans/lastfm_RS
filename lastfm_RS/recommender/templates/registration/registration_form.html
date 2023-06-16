@@ -8,8 +8,8 @@
     {% load django_bootstrap5 %}
     {% bootstrap_messages %}
     <form method="post" class="form-group">
-            {% csrf_token %}
-            {% bootstrap_form form %}
+        {% csrf_token %}
+        {% bootstrap_form form %}
         <button type="submit" class="btn btn-success">Register</button>
     </form>
 {% endblock content %}
