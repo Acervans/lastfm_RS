@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 from django import forms
 from backend.src.constants import TRACK_LIMIT, ARTIST_LIMIT, ALBUM_LIMIT, TAG_LIMIT
 
+MAX_LENGTH = 1000
 
 class RegisterForm(UserCreationForm):
     class Meta:
@@ -13,8 +14,8 @@ class RegisterForm(UserCreationForm):
 
 
 class PreviewTrackForm(forms.Form):
-    artist = forms.CharField(max_length=1000)
-    title = forms.CharField(max_length=1000)
+    artist = forms.CharField(max_length=MAX_LENGTH)
+    title = forms.CharField(max_length=MAX_LENGTH)
     lyrics = forms.BooleanField(required=False, label='Lyrics by Genius')
 
 
@@ -55,7 +56,7 @@ class RecommendationsForm(forms.Form):
         ('search', 'Search'),
     ], widget=forms.RadioSelect, initial='random')
     username = forms.CharField(
-        label='Username', max_length=1000, required=False)
+        label='Username', max_length=MAX_LENGTH, required=False)
     username.widget.attrs['list'] = 'usernames'
     cutoff = forms.IntegerField(label='Cutoff', min_value=1, initial=10)
     limit = forms.IntegerField(
@@ -76,21 +77,29 @@ class CosineRecommenderForm(forms.Form):
                               required=False, min_value=1)
 
 
+def create_input(placeholder, hidden=True):
+    input_type = forms.HiddenInput if hidden else forms.TextInput
+    return forms.CharField(
+        label='Query', required=False, strip=False, widget=input_type(attrs={
+        'placeholder': placeholder,
+        'class': 'form-control',
+        'maxlength': MAX_LENGTH
+    }))
+
 class SearchForm(forms.Form):
     by = forms.ChoiceField(label='Search by', choices=[
         ('track', 'Track'),
         ('artist', 'Artist'),
         ('album', 'Album'),
     ], widget=forms.RadioSelect, initial='track')
-    query = forms.CharField(
-        label='Query', max_length=1000, required=False, widget=forms.TextInput(attrs={
-            'placeholder': 'Search by name'
-        }), strip=False)
+    query_track = create_input('Track name', False)
+    query_artist = create_input('Artist name')
+    query_album = create_input('Album name')
 
 
 class UserScraperForm(forms.Form):
     username = forms.CharField(
-        label='Last.FM Username', max_length=1000, required=True)
+        label='Last.FM Username', max_length=MAX_LENGTH, required=True)
     use_database = forms.BooleanField(
         label='Use Database', required=False, initial=False)
 

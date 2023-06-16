@@ -401,32 +401,18 @@ def get_album_tags(id):
     return np.array(q).flatten().tolist()
 
 
-def search_tracks_by_name(query, cutoff):
-    stmt = (select(TRACK.c.id)
-            .filter(TRACK.c.name.ilike(f'%{query}%'))
-            .limit(cutoff))
+def search_tracks(track_query='', artist_query='', album_query='', cutoff=10):
+    stmt = select(TRACK.c.id)
 
-    with session.begin() as s:
-        q = s.execute(stmt).all()
-    return np.array(q).flatten().tolist()
-
-
-def search_tracks_by_artist(query, cutoff):
-    stmt = (select(TRACK.c.id)
-            .join(ARTIST, ARTIST.c.id == TRACK.c.artist_id)
-            .filter(ARTIST.c.name.ilike(f'%{query}%'))
-            .limit(cutoff))
-
-    with session.begin() as s:
-        q = s.execute(stmt).all()
-    return np.array(q).flatten().tolist()
-
-
-def search_tracks_by_album(query, cutoff):
-    stmt = (select(TRACK.c.id)
-            .join(ALBUM, ALBUM.c.id == TRACK.c.album_id)
-            .filter(ALBUM.c.name.ilike(f'%{query}%'))
-            .limit(cutoff))
+    if track_query:
+        stmt = stmt.filter(TRACK.c.name.ilike(f'%{track_query}%'))
+    if artist_query:
+        stmt = (stmt.join(ARTIST, ARTIST.c.id == TRACK.c.artist_id)
+                .filter(ARTIST.c.name.ilike(f'%{artist_query}%')))
+    if album_query:
+        stmt = (stmt.join(ALBUM, ALBUM.c.id == TRACK.c.album_id)
+                .filter(ALBUM.c.name.ilike(f'%{album_query}%')))
+    stmt = stmt.limit(cutoff)
 
     with session.begin() as s:
         q = s.execute(stmt).all()

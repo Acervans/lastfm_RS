@@ -1,3 +1,10 @@
+var rad;
+var searchInputs;
+var prevForm, prevInput;
+
+const tags = new Set(Array.from(document.querySelectorAll("#tags_list option")).
+    map((tag) => tag.value));
+
 function show(element) {
     if (element) {
         element.style.overflow = 'auto'
@@ -15,35 +22,67 @@ function hide(element) {
 }
 
 function replaceTags() {
-    const tags_input  = document.querySelector("#id_cosine-tags"),
-          dummy_input = document.querySelector("#tags-placeholder"),
-          tags_spans  = document.querySelectorAll("#tags span");
+    const tagsInput  = document.querySelector("#id_cosine-tags"),
+          dummyInput = document.querySelector("#tags-placeholder"),
+          tagsSpans  = document.querySelectorAll("#tags span");
 
-    var tags_values = Object.values(tags_spans).map((span) => span.innerText || span.textContent);
+    var tagsValues = Object.values(tagsSpans).map((span) => span.innerText || span.textContent);
 
-    if (tags.has(dummy_input.value))
-        tags_values.push(dummy_input.value);
+    if (tags.has(dummyInput.value))
+        tagsValues.push(dummyInput.value);
 
-    tags_input.value = tags_values;
+    tagsInput.value = tagsValues;
 }
 
-const tags = new Set(Array.from(document.querySelectorAll('#tags_list option')).
-    map((tag) => tag.value));
+function swap(node1, node2) {
+    const afterNode2 = node2.nextElementSibling;
+    const parent     = node2.parentNode;
 
-var rad = document.getElementsByClassName('form-group')[0]['model'];
-var prev = rad[0];
+    node1.replaceWith(node2);
+    parent.insertBefore(node1, afterNode2);
+}
 
-for (var i = 0; i < rad.length; i++) {
-    if (rad[i].checked) {
-        prev = rad[i];
-        show(document.getElementById(rad[i].value));
+function swapInputs(visibleInput) {
+    if (visibleInput.id !== prevInput.id) {
+        visibleInput.type = 'text';
+        prevInput.type = 'hidden';
+        swap(prevInput, visibleInput);
+        prevInput = visibleInput;
     }
-    rad[i].addEventListener('change', function () {
-        if (this !== prev) {
-            hide(document.getElementById(prev.value));
-            show(document.getElementById(this.value));
-            prev = this;
+}
+
+function init_forms() {
+    rad = document.getElementsByClassName('form-group')[0]['model'];
+    prevForm = rad[0];
+
+    Array.from(rad).forEach((r, i) => {
+        if (r.checked) {
+            prevForm = rad[i];
+            show(document.getElementById(rad[i].value));
         }
+        rad[i].addEventListener('change', function () {
+            if (this !== prevForm) {
+                hide(document.getElementById(prevForm.value));
+                show(document.getElementById(this.value));
+                prevForm = this;
+            }
+        });
+    });
+}
+
+function init_search() {
+    const searchDiv = document.querySelector("#search");
+    searchInputs = searchDiv.querySelectorAll("input[type=text], input[type=hidden]");
+    prevInput = searchInputs[0];
+
+    searchDiv.querySelectorAll("input[type=radio]").forEach((searchBy, i) => {
+        if (searchBy.checked)
+            swapInputs(searchInputs[i]);
+        searchBy.addEventListener('change', () => {
+            if (!prevInput.value)
+                prevInput.removeAttribute('value');
+            swapInputs(searchInputs[i]);
+        });
     });
 }
 
@@ -51,11 +90,15 @@ jQuery($ => {
     // Tags separated by comma
     $("#tags-placeholder").on({
         focusout() {
-            var txt = this.value.replace(/(^,)|(,$)/g, '');
-            if (txt && tags.has(txt)) {
-                $("<span/>", { text: txt.toLowerCase(), insertBefore: this });
+            const inputTags = this.value.replace(/,\s*$/g, '');
+            this.value = '';
+
+            if (inputTags.length > 0) {
+                inputTags.split(/\s*,\s*/g).forEach((txt) => {
+                    if (txt && tags.has(txt))
+                        $("<span/>", { text: txt.toLowerCase(), insertBefore: this });
+                });
             }
-            this.value = "";
         },
         keyup(ev) {
             if (/(,|Enter)/.test(ev.key))
@@ -67,3 +110,6 @@ jQuery($ => {
         $(this).remove();
     });
 });
+
+init_forms();
+init_search();

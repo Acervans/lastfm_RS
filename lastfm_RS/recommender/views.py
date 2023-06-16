@@ -363,12 +363,16 @@ def recommendations(request):
                         recsys_form = SearchForm(
                             request.GET, prefix='search')
                         if recsys_form.is_valid():
-                            by = recsys_form.cleaned_data.get('by')
-                            query = recsys_form.cleaned_data.get('query')
-                            username = f"{by[0].upper() + by[1:]} Query \'{query}\'"
+                            by = ('Track', 'Artist', 'Album')
+                            track_query, artist_query, album_query = queries = [
+                                recsys_form.cleaned_data.get(f'query_{x.lower()}') for x in by]
+                            by_labels = [f"{x} Query \'{q}\'" for i,
+                                         x in enumerate(by) if (q := queries[i])]
+                            username = ' + '.join(by_labels)
 
-                            recs = get_recommendations_by_search(
-                                by, query, min(cutoff, 2**63 - 1))
+                            tracks = search_tracks(
+                                track_query, artist_query, album_query, min(cutoff, 2**63 - 1))
+                            recs = list(map(lambda t: (None, t), tracks))
 
                     case _:
                         if not RECSYS_MODELS[recsys][1]:
@@ -525,20 +529,6 @@ def get_recommendations_by_tags(tags, cutoff):
     recs = scores_to_recommendations(scores, cutoff)
 
     return recs
-
-
-def get_recommendations_by_search(by='track', search='', cutoff=10):
-    match by:
-        case 'track':
-            tracks = search_tracks_by_name(search, cutoff)
-        case 'artist':
-            tracks = search_tracks_by_artist(search, cutoff)
-        case 'album':
-            tracks = search_tracks_by_album(search, cutoff)
-        case _:
-            return []
-
-    return list(map(lambda t: (None, t), tracks))
 
 
 def load_model(model, config=dict(), use_training=False):
