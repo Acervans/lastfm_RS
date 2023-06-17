@@ -120,3 +120,5 @@ class UserScraperForm(forms.Form):
         label='Albums limit', required=False, initial=ALBUM_LIMIT, min_value=1)
     tags_limit = forms.IntegerField(
         label='Tags limit', required=False, initial=TAG_LIMIT, min_value=1)
+
+    item_fields = [(f'{i}_limit', f'include_{i}') for i in ('tracks', 'artists', 'albums', 'tags')]
