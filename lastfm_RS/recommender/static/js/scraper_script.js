@@ -79,6 +79,7 @@ function showElement(className) {
     elementStyle.height   = 'auto';
     elementStyle.opacity  = 1;
     elementStyle.overflow = 'auto';
+    elementStyle.margin   = '30px 20px 10px 20px';
 }
 
 function insertTagCell(cell, item, itemType) {

@@ -17,10 +17,10 @@
             <label class="col-sm-2 col-form-label" for="id_username">{{ form.username.label }}</label>
             <div class="col">
                 <input type="text"
-                       name="username"
+                       name="{{ form.username.name }}"
                        maxlength="1000"
                        class="form-control"
-                       required=""
+                       required="True"
                        id="id_username">
             </div>
         </div>
@@ -28,7 +28,7 @@
             <div class="col offset-sm-2">
                 <div class="form-check">
                     <input type="checkbox"
-                           name="use_database"
+                           name="{{ form.use_database.name }}"
                            class="form-check-input"
                            id="id_use_database">
                     <label class="form-check-label" for="id_use_database">{{ form.use_database.label }}</label>
@@ -40,8 +40,8 @@
             <label class="col-sm-2 col-form-label" for="id_tracks_limit">{{ form.tracks_limit.label }}</label>
             <div class="col">
                 <input type="number"
-                       name="tracks_limit"
-                       value="20"
+                       name="{{ form.tracks_limit.name }}"
+                       value="{{ form.tracks_limit.value }}"
                        min="1"
                        class="form-control"
                        id="id_tracks_limit">
@@ -49,7 +49,7 @@
             <div class="col sm-2">
                 <div class="form-check">
                     <input type="checkbox"
-                           name="include_tracks"
+                           name="{{ form.include_tracks.name }}"
                            class="form-check-input"
                            id="id_include_tracks"
                            checked="">
@@ -61,8 +61,8 @@
             <label class="col-sm-2 col-form-label" for="id_artists_limit">{{ form.artists_limit.label }}</label>
             <div class="col">
                 <input type="number"
-                       name="artists_limit"
-                       value="20"
+                       name="{{ form.artists_limit.name }}"
+                       value="{{ form.artists_limit.value }}"
                        min="1"
                        class="form-control"
                        id="id_artists_limit">
@@ -70,7 +70,7 @@
             <div class="col sm-2">
                 <div class="form-check">
                     <input type="checkbox"
-                           name="include_artists"
+                           name="{{ form.include_artists.name }}"
                            class="form-check-input"
                            id="id_include_artists"
                            checked="">
@@ -82,8 +82,8 @@
             <label class="col-sm-2 col-form-label" for="id_albums_limit">{{ form.albums_limit.label }}</label>
             <div class="col">
                 <input type="number"
-                       name="albums_limit"
-                       value="20"
+                       name="{{ form.albums_limit.name }}"
+                       value="{{ form.albums_limit.value }}"
                        min="1"
                        class="form-control"
                        id="id_albums_limit">
@@ -91,7 +91,7 @@
             <div class="col sm-2">
                 <div class="form-check">
                     <input type="checkbox"
-                           name="include_albums"
+                           name="{{ form.include_albums.name }}"
                            class="form-check-input"
                            id="id_include_albums"
                            checked="">
@@ -103,8 +103,8 @@
             <label class="col-sm-2 col-form-label" for="id_tags_limit">{{ form.tags_limit.label }}</label>
             <div class="col">
                 <input type="number"
-                       name="tags_limit"
-                       value="20"
+                       name="{{ form.tags_limit.name }}"
+                       value="{{ form.tags_limit.value }}"
                        min="1"
                        class="form-control"
                        id="id_tags_limit">
@@ -112,7 +112,7 @@
             <div class="col sm-2">
                 <div class="form-check">
                     <input type="checkbox"
-                           name="include_tags"
+                           name="{{ form.include_tags.name }}"
                            class="form-check-input"
                            id="id_include_tags"
                            checked="">
