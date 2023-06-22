@@ -4,7 +4,7 @@
 import torch
 
 from recbole.model.abstract_recommender import GeneralRecommender
-from recbole.utils import InputType
+from recbole.utils import InputType, ModelType
 
 
 class RandomRecommender(GeneralRecommender):
@@ -12,6 +12,7 @@ class RandomRecommender(GeneralRecommender):
 
     rand_scores: torch.Tensor
     input_type = InputType.POINTWISE
+    type = ModelType.TRADITIONAL
 
     def __init__(self, config, dataset):
         super(RandomRecommender, self).__init__(config, dataset)

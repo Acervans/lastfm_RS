@@ -2,6 +2,11 @@ data_path: ../../data/recsys_data
 dataset_save_path: saved/lastfm_recbole-dataset.pth
 dataset: lastfm_recbole
 
+# V A D StSc
+use_vadst_cols: [0,1,2,3]
+weighted_average: False
+knn_topk: ~
+
 # Dataset config
 load_col:
   inter: [user_id, track_id, rating, timestamp]
@@ -12,12 +17,13 @@ load_col:
   # item: [track_id, artist_id, tags] # ARTIST + TAG_SEQS
   # item: [track_id, artist_id, album_id] # ARTIST + ALBUM, Only albums would not improve because of lack of data and sparsity
   # item: [track_id, artist_id, album_id, tags] # ARTIST + ALBUM + TAG_SEQS
-  item: [track_id, artist_id, album_id, tags, vadst] # ARTIST + ALBUM + TAG_SEQS + VADST
+  item: [track_id, artist_id, album_id, tags, v, a, d, stsc] # ARTIST + ALBUM + TAG_SEQS + VADST
   user: [user_id]
+
+numerical_features: [v, a, d, stsc]
 
 USER_ID_FIELD: user_id
 ITEM_ID_FIELD: track_id
-threshold: {'rating': 3.0}
 normalize_all: True
 
 # Training and evaluation config
@@ -28,6 +34,7 @@ stopping_step: 5
 
 train_neg_sample_args: 
   distribution: uniform
+  sample_num: 1
 
 eval_args:
   split: {'RS': [0.8,0.1,0.1]}

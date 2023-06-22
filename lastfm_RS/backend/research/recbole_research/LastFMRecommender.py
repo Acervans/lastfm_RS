@@ -1,6 +1,5 @@
-import torch
-
-from recbole.model.context_aware_recommender import FFM
+from recbole.model.context_aware_recommender import PNN
+from ItemKNNRecommender import ItemKNNRecommender
 from recbole.data.dataset.dataset import Dataset
 from sklearn.preprocessing import normalize
 from scipy.spatial.distance import cdist
@@ -9,10 +8,20 @@ import numpy as np
 import torch
 import tqdm
 
-class LastFMRecommender(FFM):
+class LastFMRecommender(PNN):
 
     def __init__(self, config, dataset: Dataset):
-        super(LastFMRecommender, self).__init__(config, dataset)
+        super().__init__(config, dataset)
+
+        # load dataset info
+        self.USER_ID = config["USER_ID_FIELD"]
+        self.ITEM_ID = config["ITEM_ID_FIELD"]
+        self.NEG_ITEM_ID = config["NEG_PREFIX"] + self.ITEM_ID
+        self.n_users = dataset.num(self.USER_ID)
+        self.n_items = dataset.num(self.ITEM_ID)
+
+        # load parameters info
+        self.device = config["device"]
 
         if isinstance(dataset.inter_feat, pd.DataFrame):
             self.inters = {col: dataset.inter_feat[col].values for col in dataset.inter_feat.columns}
@@ -31,14 +40,11 @@ class LastFMRecommender(FFM):
         else:
             self.sim_weights = None
 
-        # Fake loss
-        self.fake_loss = torch.nn.Parameter(torch.zeros(1))
-
         # Item id to idx mapping
         self.item_to_idx = pd.Series(range(len(item_feats[self.ITEM_ID])), index=item_feats[self.ITEM_ID])
 
         # Item VADSt features
-        self.vadst = item_feats['vadst']
+        self.vadst = np.column_stack([item_feats['v'], item_feats['a'], item_feats['d'], item_feats['stsc']], axis=0)
         if config['use_vadst_cols']:
             self.vadst = self.vadst[:, config['use_vadst_cols']]
 
@@ -53,9 +59,6 @@ class LastFMRecommender(FFM):
             self.other_parameter_name += ["sentiment_centroids"]
         else:
             self.other_parameter_name = ["sentiment_centroids"]
-
-    def forward(self, user, item):
-        super().forward(user, item)
 
     def train(self, mode: bool = True):
         if self.sentiment_centroids is None:
@@ -90,18 +93,16 @@ class LastFMRecommender(FFM):
 
         self.sentiment_centroids = np.array(sentiment_centroids)
 
-    def calculate_loss(self, interaction):
-        super().calculate_loss(interaction)
 
     def sentiment_knn_scores(self, user_id, item_id=None):
         # User centroid
         user_centroid = self.sentiment_centroids[user_id.item()]
 
         # VADSt euclidean distances
-        if not item_id:
-            distances = cdist(self.vadst, [user_centroid], 'seuclidean')
+        if item_id is None:
+            distances = cdist(self.vadst, user_centroid.reshape(1, -1), 'seuclidean')
         else:
-            distances = cdist([self.vadst[item_id]], [user_centroid], 'seuclidean')
+            distances = cdist(self.vadst[item_id.cpu().numpy()], user_centroid.reshape(1, -1), 'seuclidean')
 
         # Inverted average euclidean distances as similarities (weighted if applicable)
         scores = 1 / (1 + distances)
@@ -110,15 +111,15 @@ class LastFMRecommender(FFM):
 
     # user, batch items
     def predict(self, interaction):
-        model_scores = super().predict(interaction)
+        model_scores = super().predict(interaction).cpu()
 
         user = interaction[self.USER_ID]
         item = interaction[self.ITEM_ID]
 
-        scores = self.sentiment_knn_scores(user[0], item[0])
+        scores = self.sentiment_knn_scores(user[0], item)
         scores = self.hybrid_scores(model_scores, scores)
 
-        return torch.Tensor(scores)
+        return torch.Tensor(np.array(scores)).to(self.device)
 
     # batch users, all items
     def full_sort_predict(self, interaction):
@@ -130,11 +131,14 @@ class LastFMRecommender(FFM):
             scores.append(self.sentiment_knn_scores(uid))
 
         scores = np.array(scores)
-        return torch.Tensor(self.hybrid_scores(model_scores, scores))
+        return torch.Tensor(self.hybrid_scores(model_scores, scores)).to(self.device)
 
-    def hybrid_scores(self, model_scores: np.array | torch.Tensor, scores: np.array | torch.Tensor):
-        model_scores = normalize(model_scores)
-        scores       = normalize(scores)
+    def hybrid_scores(self, model_scores, scores):
+        model_scores = normalize(model_scores.cpu().detach().numpy().reshape(1, -1))
+        scores = normalize(scores.reshape(1, -1))
+
+        nan_idx = np.isnan(model_scores)
+        model_scores[nan_idx] = scores[nan_idx]
 
         # Score similarities between both models
         sims = 1 / (1 + np.abs(scores - model_scores))
