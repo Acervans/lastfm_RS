@@ -7,7 +7,7 @@ It consists of various recommendation techniques (collaborative filtering and co
 
 - To set up the required environment modules and libraries, run `./setup.sh`.
 - To set up the database:
-  1. Install PostgreSQL
+  1. Install PostgreSQL.
   2. Go to `/lastfm_RS` and run `make restore_db`. This creates _lastfm\_db_'s tables and loads all the necessary data.
 - To start the application on localhost, go to `/lastfm_RS` and run `python3 manage.py runserver`. It will be hosted at http://localhost:8000.
 
