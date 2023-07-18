@@ -35,6 +35,7 @@ function requestItems(index) {
             } else {
                 openLoader('Done!');
                 setTimeout(() => hideLoader(), 1500);
+                scrollToBottom();
             }
         },
         error: function () {
@@ -70,7 +71,6 @@ function loadItems(item, partialData) {
             console.warn(`Unknown item: ${item}`);
             break;
     }
-    scrollToBottom();
 }
 
 function showElement(className) {

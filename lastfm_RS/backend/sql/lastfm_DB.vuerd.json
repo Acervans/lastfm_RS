@@ -3,8 +3,8 @@
     "version": "2.2.11",
     "width": 2500,
     "height": 2500,
-    "scrollTop": -702,
-    "scrollLeft": -591,
+    "scrollTop": -911,
+    "scrollLeft": -438,
     "zoomLevel": 1,
     "show": {
       "tableComment": true,
@@ -120,7 +120,7 @@
           "active": false,
           "left": 869.3673,
           "top": 1084.8717,
-          "zIndex": 14,
+          "zIndex": 10,
           "widthName": 60,
           "widthComment": 60
         },
@@ -251,7 +251,7 @@
           "active": false,
           "left": 869.337,
           "top": 814.5479,
-          "zIndex": 11,
+          "zIndex": 7,
           "widthName": 60,
           "widthComment": 60
         },
@@ -591,7 +591,7 @@
           "active": false,
           "left": 1378.1934,
           "top": 920.3664,
-          "zIndex": 9,
+          "zIndex": 6,
           "widthName": 105.1680908203125,
           "widthComment": 60
         },
@@ -676,7 +676,7 @@
           "active": false,
           "left": 1378.8595,
           "top": 778.5316,
-          "zIndex": 8,
+          "zIndex": 5,
           "widthName": 110.53709411621094,
           "widthComment": 60
         },
@@ -761,7 +761,7 @@
           "active": false,
           "left": 1386.5232,
           "top": 1064.4196,
-          "zIndex": 7,
+          "zIndex": 4,
           "widthName": 90.99807739257812,
           "widthComment": 60
         },
@@ -846,7 +846,7 @@
           "active": false,
           "left": 870.0397,
           "top": 1458.972,
-          "zIndex": 13,
+          "zIndex": 9,
           "widthName": 98.68109130859375,
           "widthComment": 60
         },
@@ -931,97 +931,12 @@
           "active": false,
           "left": 869.5315,
           "top": 1315.9939,
-          "zIndex": 12,
+          "zIndex": 8,
           "widthName": 91.47908020019531,
           "widthComment": 60
         },
         "visible": true,
         "id": "09c0cd63-2cf8-4010-a3bb-8989721138bb"
-      },
-      {
-        "name": "UserTopTags",
-        "comment": "",
-        "columns": [
-          {
-            "name": "user_id",
-            "comment": "",
-            "dataType": "integer",
-            "default": "",
-            "option": {
-              "autoIncrement": false,
-              "primaryKey": true,
-              "unique": false,
-              "notNull": true
-            },
-            "ui": {
-              "active": false,
-              "pk": false,
-              "fk": false,
-              "pfk": true,
-              "widthName": 60,
-              "widthComment": 60,
-              "widthDataType": 60,
-              "widthDefault": 60
-            },
-            "id": "8b1522b8-d4b3-43de-b706-16790e234a0c"
-          },
-          {
-            "name": "tag_id",
-            "comment": "",
-            "dataType": "integer",
-            "default": "",
-            "option": {
-              "autoIncrement": false,
-              "primaryKey": true,
-              "unique": false,
-              "notNull": true
-            },
-            "ui": {
-              "active": false,
-              "pk": false,
-              "fk": false,
-              "pfk": true,
-              "widthName": 60,
-              "widthComment": 60,
-              "widthDataType": 60,
-              "widthDefault": 60
-            },
-            "id": "2adf290a-235b-42fb-a6ba-78b5e8ed65ad"
-          },
-          {
-            "name": "rank",
-            "comment": "",
-            "dataType": "integer",
-            "default": "",
-            "option": {
-              "autoIncrement": false,
-              "primaryKey": false,
-              "unique": false,
-              "notNull": true
-            },
-            "ui": {
-              "active": false,
-              "pk": false,
-              "fk": false,
-              "pfk": false,
-              "widthName": 60,
-              "widthComment": 60,
-              "widthDataType": 60,
-              "widthDefault": 60
-            },
-            "id": "338f11f9-45b4-4b3e-a5c4-2c14f05a9ce1"
-          }
-        ],
-        "ui": {
-          "active": false,
-          "left": 1816.9741,
-          "top": 371.6057,
-          "zIndex": 30,
-          "widthName": 80.31207275390625,
-          "widthComment": 60
-        },
-        "visible": true,
-        "id": "99fbd0c5-75b8-479e-925f-56e4953efb40"
       },
       {
         "name": "ArtistTopTags",
@@ -1101,7 +1016,7 @@
           "active": false,
           "left": 1382.4285,
           "top": 581.4376,
-          "zIndex": 26,
+          "zIndex": 13,
           "widthName": 84.52409362792969,
           "widthComment": 60
         },
@@ -1186,7 +1101,7 @@
           "active": false,
           "left": 869.6427,
           "top": 570.5241,
-          "zIndex": 22,
+          "zIndex": 12,
           "widthName": 84.0430908203125,
           "widthComment": 60
         },
@@ -1271,7 +1186,7 @@
           "active": false,
           "left": 440.5497,
           "top": 338.906,
-          "zIndex": 18,
+          "zIndex": 11,
           "widthName": 91.72610473632812,
           "widthComment": 60
         },
@@ -1363,32 +1278,6 @@
         "constraintName": "fk_user_to_usertopalbums",
         "visible": true,
         "id": "4b3f3406-975d-4abb-9df8-01cb64a86d6b"
-      },
-      {
-        "identification": true,
-        "relationshipType": "ZeroN",
-        "startRelationshipType": "Dash",
-        "start": {
-          "tableId": "ab4e2c09-47e9-405e-825e-ebc0774e04b9",
-          "columnIds": [
-            "3506d7cd-dfd8-4d48-bded-55fbd54719b5"
-          ],
-          "x": 1982.1918233764648,
-          "y": 1243.9167,
-          "direction": "top"
-        },
-        "end": {
-          "tableId": "99fbd0c5-75b8-479e-925f-56e4953efb40",
-          "columnIds": [
-            "8b1522b8-d4b3-43de-b706-16790e234a0c"
-          ],
-          "x": 1981.4741,
-          "y": 502.1057,
-          "direction": "bottom"
-        },
-        "constraintName": "fk_user_to_usertoptags",
-        "visible": true,
-        "id": "e2d13a74-402a-4da5-8a45-da6182e7ccbd"
       },
       {
         "identification": true,
@@ -1597,32 +1486,6 @@
         "constraintName": "fk_album_to_usertopalbums",
         "visible": true,
         "id": "ee042f29-5afe-4bdd-8b3a-370273b1d594"
-      },
-      {
-        "identification": true,
-        "relationshipType": "ZeroN",
-        "startRelationshipType": "Dash",
-        "start": {
-          "tableId": "bea2083b-f5e8-43ce-8cd3-f54d6cd25675",
-          "columnIds": [
-            "294bf549-0b65-478e-aa65-279102213645"
-          ],
-          "x": 1198.9342000000001,
-          "y": 436.5312,
-          "direction": "right"
-        },
-        "end": {
-          "tableId": "99fbd0c5-75b8-479e-925f-56e4953efb40",
-          "columnIds": [
-            "2adf290a-235b-42fb-a6ba-78b5e8ed65ad"
-          ],
-          "x": 1816.9741,
-          "y": 436.8557,
-          "direction": "left"
-        },
-        "constraintName": "fk_tag_to_usertoptags",
-        "visible": true,
-        "id": "6f98fac2-89b6-44a8-9f30-66a48272b03f"
       },
       {
         "identification": false,

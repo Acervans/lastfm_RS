@@ -37,6 +37,6 @@ eval_args:
 # metrics: ['AUC', 'LogLoss', 'RMSE', 'MAE']
 # valid_metric: LogLoss
 
-metrics: [Recall, MRR, NDCG, Hit, Precision]
+metrics: [Recall, MRR, NDCG, MAP, Precision]
 topk: 20
 valid_metric: NDCG@20

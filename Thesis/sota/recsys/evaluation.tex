@@ -1,0 +1,73 @@
+Evaluating recommender systems is essential to assess their utility and accuracy, and involves comparing the system's output recommendations with some ground truth data, such as user ratings, implicit feedback, or user interactions. Several evaluation metrics have been developed to measure different aspects of recommender system performance, tightly related to \ac{ir} evaluation.
+
+Among them, some of the most popular metrics include Precision, Recall, F1 score, \acl{map}, \acl{ndcg} and \acl{mrr}. Moreover, a cutoff is typically given to test with the top K results, since in the vast majority of cases the most interesting results are those shown first to the user.
+
+\subsubsection{Precision, Recall \& F1 Score}
+
+Precision [\ref{EQ:Precision}] is a metric that measures the proportion of relevant items among the recommended items. It focuses on the accuracy of the system by calculating the ratio of true positives (relevant items recommended) to the total recommended items.
+
+However, precision alone does not consider the number of relevant items that were not recommended, which is where Recall comes into play. Recall [\ref{EQ:Recall}] measures the proportion of relevant items that were actually recommended, providing insights into the system's coverage of relevant items. The F1 score [\ref{EQ:FScore}] combines Precision and Recall into a single metric, providing a balanced measure of both metrics.
+
+\begin{multicols}{2}
+    \begin{subequations}
+        \begin{equation}[EQ:Precision]{Precision}
+            P=\frac{\lvert Relevant \cap Returned \rvert}{\lvert Returned \rvert}
+        \end{equation}
+        \begin{equation}[EQ:Recall]{Recall}
+            R=\frac{\lvert Relevant \cap Returned \rvert}{\lvert Relevant \rvert}
+        \end{equation}
+        \begin{equation}[EQ:FScore]{F1-Score}
+            F_1=\frac{2\cdot PR}{P + R}
+        \end{equation}
+    \end{subequations}
+\end{multicols}
+
+\subsubsection{Mean Average Precision}
+
+\ac{map} is a widely used metric in recommender systems evaluation, especially in \acs{ir} scenarios [\ref{EQ:MAP}]. It measures the \ac{ap} across different recall levels and is particularly useful when dealing with varying lengths of recommendation lists. \acs{map} takes into account the position of relevant items in the ranked list of recommendations, penalizing systems that place relevant items lower in the list.
+
+\begin{multicols}{2}
+    \begin{subequations}
+        \begin{equation}[EQ:AP]{Average Precision (AP)}
+            AP_k=\frac{1}{|Rel@k|}\sum_{k\in relevant}P@k
+        \end{equation}
+        \begin{equation}[EQ:MAP]{Mean Average Precision (mAP)}
+            mAP=\frac{1}{|Rel|}\sum_{i=1}^{|Rel|}AP_i
+        \end{equation}
+    \end{subequations}
+\end{multicols}
+
+\subsubsection{Normalized Discounted Cumulative Gain}
+
+\ac{ndcg} is another popular metric in \acs{ir} or recommender systems evaluation [\ref{EQ:NDCG}]. It considers both the relevance and the rank of recommended items, and stems from the normalization of the \ac{dcg} [\ref{EQ:DCG}], with the ideally ordered \acs{dcg} or \acs{idcg} [\ref{EQ:IDCG}]. Higher scores are assigned to relevant items that are ranked higher in the recommendation list, applying a discount based on the position in the list. By considering the graded relevance of items, \acs{ndcg} provides a more fine-grained evaluation of the system's performance.
+
+\begin{multicols}{2}
+    \begin{subequations}
+        \begin{equation}[EQ:DCG]{Discounted Cumulative Gain (DCG)}
+            DCG=\sum_{k=1}^{|Rel|}\frac{Relevance(d_k)}{\log_{2}(k + 1)}
+        \end{equation}
+        \begin{equation}[EQ:IDCG]{Ideal Discounted Cumulative Gain (IDCG)}
+            IDCG=DCG_{Ideal\;order}
+        \end{equation}
+        \begin{equation}[EQ:NDCG]{Normalized Discounted Cumulative Gain (NDCG)}
+            NDCG=\frac{DCG}{IDCG} \in [0, 1]
+        \end{equation}
+    \end{subequations}
+\end{multicols}
+
+\subsubsection{Mean Reciprocal Rank}
+
+\ac{rr} takes into account the rank of the first relevant item in the recommendation list [\ref{EQ:RR}]. Likewise, the \ac{mrr} averages the \acl{rr} from the results of several queries [\ref{EQ:MRR}]. These metrics are most useful to assess systems where the user requires just one relevant item from the recommendation list.
+
+\begin{multicols}{2}
+    \begin{subequations}
+        \begin{equation}[EQ:RR]{Reciprocal Rank (RR)}
+            RR=\frac{1}{\min\{k\in relevant\}}
+        \end{equation}
+        \begin{equation}[EQ:MRR]{Mean Reciprocal Rank (MRR)}
+            MRR=\frac{1}{|Q|}\sum_{i=1}^{|Q|}RR_i
+        \end{equation}
+    \end{subequations}
+\end{multicols}
+
+It is important to note that the choice of evaluation metrics depends on the specific application domain, the nature of the recommendation problem, and the available ground truth data. Different metrics provide insights into different aspects of the recommender system's performance, and multiple metrics are usually applied to obtain a comprehensive evaluation.

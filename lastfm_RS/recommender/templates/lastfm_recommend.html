@@ -1,6 +1,6 @@
 {% extends "base_generic.html" %}
 {% block title %}
-    LastFM Recommendations for {{ username }}
+    Last.FM Recommendations for {{ username }}
 {% endblock title %}
 {% block scripts %}
     <script type="text/javascript"
@@ -8,11 +8,14 @@
 {% endblock scripts %}
 {% block content %}
     <h2>
-        Recommendations for
-        {% if scraper_url %}
-            <a href="{{ scraper_url }}" target="_blank">{{ username }}</a>
-        {% else %}
-            {{ username }}
+        Recommendations
+        {% if username %}
+            for
+            {% if scraper_url %}
+                <a href="{{ scraper_url }}" target="_blank">{{ username }}</a>
+            {% else %}
+                {{ username }}
+            {% endif %}
         {% endif %}
         by {{ model }} Recommender
     </h2>
@@ -132,7 +135,7 @@
                                                 Dominance
                                             </th>
                                             <th>
-                                                Sentiment Score
+                                                Sentiment Ratio
                                             </th>
                                         </tr>
                                     </thead>

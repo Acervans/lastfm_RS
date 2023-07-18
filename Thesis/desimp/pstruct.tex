@@ -1,0 +1,19 @@
+The project is divided into three core modules:
+
+\begin{compactitem}[\textbullet]
+    \item \emph{Web application}. System that provides a user interface to illustrate the tools used thoughout the project, as well as the final recommendation models.
+    \begin{compactitem}[$\circ$]
+        \item \emph{Recommendation models}. Trained on the collected dataset, they were provided by \emph{RecBole}, a library which will be described in following sections.
+    \end{compactitem}
+    \item \emph{Dataset}. Data scraped from Last.fm and complemented with sentiment analysis, in order to have the experimental data for model training. This chapter will detail the process of obtaining such dataset.
+    \begin{compactitem}[$\circ$]
+        \item \emph{Data scraper}. Script that handles data collection through \acs{api} calls, web scraping from Last.fm, and generation of sentiment attributes.
+        \item \emph{Sentiment analyzer}. Script that analyzes textual content and generates sentiment scores, using the \acs{nrc}-\acs{vad} lexicon and optimized \acs{nlp} libraries such as spaCy and \acs{nltk}.
+    \end{compactitem}
+    \item \emph{Database}. Storage system into which the dataset is inserted, in order to maintain an organized, stable and efficient way of accessing the data used by the recommendation models.
+\end{compactitem}
+
+The web application serves as a link between all modules due to the tools interacting actively with each one, as outlined in Figure~\ref{FIG:WEBARCH}, which are explained in more detail in Section~\ref{SS:WEBAPP_DES}. Even though dataset acquirement is a one-time procedure, some intermediate steps, specifically user data scraping and sentiment analysis, are showcased as well.
+
+\begin{figure}[Web application architecture]{FIG:WEBARCH}{Web application architecture}\includesvg[inkscapelatex=false,width=0.8\textwidth]{WebArch}
+\end{figure}

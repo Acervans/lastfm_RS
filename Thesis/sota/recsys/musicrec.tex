@@ -1,0 +1,47 @@
+Music recommendation is a specialized domain of recommender systems that focuses on providing personalized music suggestions to users. Modern day advancements on music recommendation involve sophisticated algorithms and machine learning models, as well as rich music data to enhance recommendation accuracy and user satisfaction~\cite{CHAPTER:RS-HANDBOOK-MUSIC}.
+
+\subsubsection{Collaborative and Content-based filtering}
+
+Two popular techniques applied to music recommender systems are collaborative filtering and content-based filtering:
+
+\begin{compactitem}[\textbullet]
+\item \textbf{Collaborative Filtering}: This technique analyzes user behavior and preferences to identify similarities between users or items. It recommends music that is popular among users with similar tastes, enabling the discovery of new songs or artists based on collective preferences~\cite[Chapter 3.1]{CHAPTER:RS-HANDBOOK-MUSIC}.
+
+\item \textbf{Content-Based Filtering}: To find similar songs, this technique utilizes user-specific features, such as listening history, favorite genres or preferred artists; music-specific features, such as genre, tempo, acoustic properties or lyrics; and contextual features, such as time of day, location or mood. It tailors recommendations based on the attributes of the music that the user has enjoyed, providing songs that align with their individual tastes~\cite[Chapter 3.2]{CHAPTER:RS-HANDBOOK-MUSIC}.
+
+\end{compactitem}
+
+Both techniques are often based on similarities between users or items and common interactions or characteristics, which can be obtained from metrics such as Euclidean distance or cosine similarity. In the context of recommendation, cosine similarity is a popular choice for content-based systems, as the content usually consists of tokens or pieces of text (e.g., summaries, comments, tags). First, however, these texts need to be vectorized, using methods like \acs{tf}-\acs{idf} or count vectorization.
+
+\subsubsection{Cosine similarity}
+
+Cosine similarity is an effective measure for assessing text similarity in recommendation systems. It operates on vector representations of texts, capturing the semantic similarity between them by comparing the orientation of the vectors and their angle. It is robust to variations in text length, focusing on semantic content rather than the absolute magnitude of vectors, and also computationally efficient, making it suitable for large-scale datasets.
+
+\begin{equation}[EQ:COSINE]{Cosine similarity}
+    \cos(A, B)=\frac{\sum_{i=1}^{n} A_i \cdot B_i}{|A| \cdot |B|}
+\end{equation}
+Where $A$ and $B$ are vectors, with $|A|$ being the vector magnitude of $A$.
+
+\subsubsection{\acs{tf}-\acs{idf}}
+
+\acl{tf}-\acl{idf} (\acs{tf}-\acs{idf}) [\ref{EQ:TF-IDF}] is a text vectorization technique that assigns weights to words in a document based on their importance in the document and the corpus as a whole. It calculates a score by multiplying the \ac{tf}, which measures how frequently a term appears in a document, with the \ac{idf}, which measures the rarity of a term across the entire corpus. By highlighting terms that are both frequent within a specific document and relatively rare in the overall corpus, it allows for the identification of more important and discriminative terms.
+
+\begin{subequations}
+    \begin{equation}[EQ:TF]{Term Frequency (TF)}
+        tf(t, d) = \begin{cases}
+            1 + \log{freq(t, d)}, & \text{if} freq(t, d) > 0 \\
+            0, & \text{otherwise}
+        \end{cases}
+    \end{equation}\\
+    \begin{equation}[EQ:IDF]{Inverse Document Frequency (IDF)}
+        idf(t) = \log{\frac{|\mathcal{D}|}{|\mathcal{D}_t|}}
+    \end{equation}
+    \begin{equation}[EQ:TF-IDF]{TF-IDF vectorization}
+        tf{\text{-}}idf(t, d) = tf(t, d) \cdot idf(t)
+    \end{equation}
+\end{subequations}\\
+Where $|\mathcal{D}|$ denotes the total number of documents in the corpus, and $|\mathcal{D}_t|$ the number of documents containing the term $t$.
+
+\subsubsection{Music datasets and \acs{api}s}
+
+To test and evaluate music recommendation models, researchers and developers often utilize popular datasets available in the field, such as the Million Song Dataset, which provides a vast collection of audio features and metadata for a million songs. Furthermore, platforms like Spotify and Last.fm offer \acs{api}s that allow access to music data, user listening history, and other relevant information, enabling researchers to experiment and assess their approaches with diverse and representative real-world data. In this project, sentiment attributes were extracted from Last.fm's tags associated with tracks, artists and albums, with the resulting dataset being evaluated on different models.

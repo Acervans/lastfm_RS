@@ -26,7 +26,6 @@ USER = table('user_')
 ALBUM_TAGS = table('albumtoptags')
 ARTIST_TAGS = table('artisttoptags')
 TRACK_TAGS = table('tracktoptags')
-USER_TAGS = table('usertoptags')  # Empty, use most frequent?
 
 USER_TOP_ALBUMS = table('usertopalbums')
 USER_TOP_ARTISTS = table('usertopartists')
@@ -37,7 +36,7 @@ USER_LOVED_TRACKS = table('userlovedtracks')
 
 TABLES = [
     TAG, ALBUM, ARTIST, TRACK, USER,
-    ALBUM_TAGS, ARTIST_TAGS, TRACK_TAGS, USER_TAGS,
+    ALBUM_TAGS, ARTIST_TAGS, TRACK_TAGS,
     USER_TOP_ALBUMS, USER_TOP_ARTISTS, USER_TOP_TRACKS,
     USER_RECENT_TRACKS, USER_LOVED_TRACKS
 ]
@@ -271,9 +270,9 @@ def get_tables_count() -> dict:
 #########################
 
 
-def split_vad_stsc(df):
-    # Separate VAD & StSc into different columns
-    df[['V', 'A', 'D', 'StSc']] = pd.DataFrame(
+def split_vad_str(df):
+    # Separate VAD & StR into different columns
+    df[['V', 'A', 'D', 'StR']] = pd.DataFrame(
         df['VAD'].apply(lambda x: x if x else [np.nan] * 4).tolist())
 
     # Drop column of lists
@@ -288,7 +287,7 @@ def get_item_vad(item_table, col_name):
 
     item_vads = pd.DataFrame(item_vads, columns=[col_name, 'Name', 'VAD'])
 
-    split_vad_stsc(item_vads)
+    split_vad_str(item_vads)
 
     return item_vads
 
@@ -305,7 +304,7 @@ def get_track_artist_vads():
         artist_vads = s.execute(stmt).all()
 
     artist_vads = pd.DataFrame(artist_vads, columns=['Track', 'VAD'])
-    split_vad_stsc(artist_vads)
+    split_vad_str(artist_vads)
 
     return artist_vads
 
@@ -318,7 +317,7 @@ def get_track_album_vads():
         album_vads = s.execute(stmt).all()
 
     album_vads = pd.DataFrame(album_vads, columns=['Track', 'VAD'])
-    split_vad_stsc(album_vads)
+    split_vad_str(album_vads)
 
     return album_vads
 

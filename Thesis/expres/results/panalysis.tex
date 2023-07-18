@@ -1,0 +1,51 @@
+\subsubsection{Preliminary results}
+
+First, the models were tested without any features. In this scenario, the general models performed the best, as they are specialized in working only with user-item interactions; whilst context-aware recommenders, which depend on context to extract similarities from, yielded worse results. From this point on, only context-aware recommenders will be considered, as general recomenders make no use of feature embeddings.
+
+Afterwards, with the inclusion of artists, the accuracy from context-aware recommenders matched those from general recommendation. When albums were then embedded, most models did not improve, and some even worsened, probably due to sparsity as 25\% of tracks lacked an album. After tags were embedded, all recommenders improved by 3\% to 9\% in \acs{ndcg}, thanks to the role they play as categorizers of tracks, proven efficient for recommendation; also, it was tested that using artists and tags without albums bore better results overall. Therefore, the best setting without sentiment attributes would be using \textbf{artists and tags} as embeddings.
+
+\subsubsection{Optimal sentiment features}
+
+A similar approach was conducted with sentiment features, by testing with several combinations for the purpose of finding the best possible embedding set from valence, arousal, dominance, and sentiment ratio. These tests revealed that using only one attribute as embedding did not lead to significant improvements; however, using two showed better results, the best choice being valence and arousal, which improved some models by nearly 10\% in \acs{ndcg}, again due probably to both being the most uncorrelated in the \acs{vad} spectrum, and therefore showing potential for additional significance.
+
+Interestingly, sentiment ratio and arousal did not contribute much improvement to the models, indicating that they might not effectively represent emotions. On the other hand, using valence, arousal, and sentiment ratio together did lead to some enhancements, suggesting that this combination might allow for a better balance between the subjective and objective aspects of the extracted sentiment.
+
+Following the evaluation of all possible options, the optimal one included all four attributes: \acs{vad} and sentiment ratio, although using only \acs{vad} was close behind. Notably, the independence of these attributes in some combination or another seemed to be inferable by the models, further substantiating the findings from Section~\ref{SEC:DATANAL}. From these results, the final feature combination would consist of \textbf{artists, tags, valence, arousal, dominance and sentiment ratio}.
+
+\subsubsection{Final results}
+
+After preliminary testing, only the best context-aware models were evaluated, even though others improved substantially more, for the sake of simplicity. Upon testing with the best possible feature settings, both preliminary and final results are summarized in Table~\ref{TB:Results}.
+
+\begin{table}[Testing results]{TB:Results}{Preliminary and final testing results.}
+    \small
+      \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+        \hline
+        \multicolumn{2}{|c|}{} & \multicolumn{10}{c|}{\textbf{Testing Results @ 20}} \\
+        \cline{3-12}
+
+        \multicolumn{2}{|c|}{\textbf{Model}} & \multicolumn{5}{c|}{\textbf{Preliminary (Artists + Tags)}} & \multicolumn{5}{c|}{\textbf{Final (Artists + Tags + \acs{vad} + St.Ratio)}} \\
+        \cline{3-12}
+
+        \multicolumn{2}{|c|}{} & \multicolumn{1}{c|}{\textbf{\acs{ndcg}}} & \multicolumn{1}{c|}{\textbf{Recall}} & \multicolumn{1}{c|}{\textbf{Precision}} & \multicolumn{1}{c|}{\textbf{\acs{map}}} & \multicolumn{1}{c|}{\textbf{\acs{mrr}}} & \multicolumn{1}{c|}{\textbf{\acs{ndcg}}} & \multicolumn{1}{c|}{\textbf{Recall}} & \multicolumn{1}{c|}{\textbf{Precision}} & \multicolumn{1}{c|}{\textbf{\acs{map}}} & \multicolumn{1}{c|}{\textbf{\acs{mrr}}} \\
+        \hline
+
+        \multicolumn{1}{|c|}{\multirow{4}{*}{\rotatebox[origin=c]{90}{\textbf{General}}}} & \multirow{4}{*}{}
+        \textbf{Random} & 0.03 & 0.06 & 0.01 & 0.01 & 0.04 & = & = & = & = & = \\ \cline{2-12}
+        & \textbf{CosineSimilarity} & 0.14 & 0.28 & 0.05 & 0.06 & 0.12 & = & = & = & = & = \\ \cline{2-12}
+        & \textbf{Pop} & 0.31 & 0.42 & 0.07 & 0.20 & 0.39 & = & = & = & = & = \\ \cline{2-12}
+        & \textbf{ItemKNN~\cite{ITEMKNN}} & 0.44 & 0.46 & 0.08 & 0.33 & 0.64 & = & = & = & = & = \\ 
+        \hline
+
+        \multicolumn{1}{|c|}{\multirow{3}{*}{\rotatebox[origin=c]{90}{\textbf{Context}}}} & \multirow{3}{*}{}
+        \textbf{PNN~\cite{PNN}} & 0.56 & 0.68 & 0.12 & 0.42 & 0.67 & 0.58 & 0.73 & 0.13 & 0.44 & 0.67 \\ \cline{2-12}
+        & \textbf{xDeepFM~\cite{XDEEPFM}} & 0.57 & 0.67 & 0.12 & 0.43 & 0.68 & 0.60 & 0.76 & 0.13 & 0.44 & 0.67 \\ \cline{2-12}
+        & \textbf{DCN V2~\cite{DCNV2}} & 0.58 & 0.71 & 0.13 & 0.43 & 0.66 & 0.56 & 0.69 & 0.12 & 0.42 & 0.65 \\ 
+        \hline
+      \end{tabular}
+\end{table}
+
+The general recommenders, as expected, performed worse than the context-aware models. The \textbf{Random} model, unsurprisingly ineffective, achieved a Precision of 1\%, which makes sense given that the testing set contains 100 irrelevant items per relevant track, as explained for ``uni100''. \textbf{Pop} demonstrated good performance, benefiting from a reduced evaluation set that increased the likelihood of common items being included. \textbf{CosineSimilarity} also delivered decent results, validating the fact that listeners tend to gravitate towards similar tags. The collaborative filtering model, \textbf{ItemKNN}, proved effective in capturing item similarities from user-item interactions, which will always be better than relying only on content, unless the two collaborate in a hybrid model.
+
+In view of the context-aware models, it is worth noting that they are all \acl{dl} models (neural networks), allowing to infer functions that effectively adapt to all kinds of problems and data. Moreover, all three algorithms emphasize the importance of feature integration: PNN (Product-based Neural Network) focuses on learning a distributed representation of categorical features, xDeepFM (Deep \acl{fm}) addresses the combination of explicit and implicit feature interactions, and DCN V2 (improved Deep \& Cross Network) gives priority to learning efficient feature crosses, which are synthetic features from combining two or more individual features. In addition, they were designed to excel in sparse feature spaces, which matches with the scraped dataset.
+
+Concerning the scores obtained for the context-aware recommenders, both \textbf{PNN} and \textbf{xDeepFM} managed to enhance the recommendations, particularly for Recall, by 5\% and 9\%, respectively; whereas \textbf{DCN V2}'s lowered. This could derive from overfitting, as these models tend to prioritize categorical data when learning at first. Overall and based on these results, it can be confidently concluded that sentiment attributes do play a role in the representation of people's taste in music, successfully capturing emotional implications and preference diversity.

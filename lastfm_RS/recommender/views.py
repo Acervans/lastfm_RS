@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 
 from .forms import *
 from bs4 import BeautifulSoup
+from recbole.data.dataset import Interaction
 from backend.src.nrc_vad_analysis import FIELDNAMES, FIELDNAMES_LANG, analyze_string, analyze_text
 from backend.src.constants import GENIUS, PYLAST
 from backend.src.get_lastfm_data import get_user_data
@@ -24,13 +25,10 @@ SAVED_PATH = 'backend/research/recbole_research/saved'
 
 RECSYS_DATASET = None
 
-# [PATH, MODEL]
-RECSYS_MODELS = {
-    'random':  [f'{SAVED_PATH}/RandomRecommender.pth', None],
-    'cosine':  [f'{SAVED_PATH}/CosineSimilarityRecommender.pth', None],
-    'pop':     [f'{SAVED_PATH}/Pop.pth', None],
-    'itemknn': [f'{SAVED_PATH}/ItemKNNRecommender.pth', None]
-}
+# Loaded Models ID: [MODEL, DEVICE]
+RECSYS_MODELS = dict()
+
+TABLES_COUNT = get_tables_count()
 
 # GLOBAL STORAGE
 recs_context = dict()
@@ -45,9 +43,9 @@ def index(request):
     num_visits = request.session.get('num_visits', 1)
     request.session['num_visits'] = num_visits + 1
 
-    tables_count = get_tables_count()
-    tables_count['useralltracks'] = tables_count['usertoptracks'] + \
-        tables_count['userrecenttracks'] + tables_count['userlovedtracks']
+    if 'useralltracks' not in TABLES_COUNT:
+        TABLES_COUNT['useralltracks'] = TABLES_COUNT['usertoptracks'] + \
+            TABLES_COUNT['userrecenttracks'] + TABLES_COUNT['userlovedtracks']
 
     # Render the HTML template index.html with the data in the context variable.
     return render(
@@ -55,7 +53,7 @@ def index(request):
         'index.html',
         context={
             'num_visits': num_visits,
-            'stats': tables_count,
+            'stats': TABLES_COUNT,
         },
     )
 
@@ -209,6 +207,7 @@ def user_scraper(request):
         if form.is_valid():
             items = ['tracks', 'artists', 'albums', 'tags']
             username = form.cleaned_data.get('username')
+            anonymous = form.cleaned_data.get('anonymous')
             use_db = form.cleaned_data.get('use_database')
             do_items = [form.cleaned_data.get(f'include_{i}') for i in items]
 
@@ -225,6 +224,7 @@ def user_scraper(request):
                         'do_tags':  str(do_items[-1]).lower(),
                         'use_db':   use_db,
                         'username': username,
+                        'alias':    'Random User' if anonymous else username,
                         'user_url': PYLAST.get_user(username).get_url()
                     },
                 )
@@ -317,112 +317,119 @@ def recommendations(request):
             limit = rec_form.cleaned_data.get('limit')
             non_personalized = recsys in ('random', 'pop', 'search')
             predict_args = dict()
-            scraper_url = None
+            scraper_url = anon = None
 
-            if any(request.GET[field] for field in ('username', 'cosine-tags')) or non_personalized:
+            uid = get_user_id(username)
+            if not uid:
+                set_seed(None)
+                uid = np.random.randint(1, TABLES_COUNT['user_'] + 1)
+                if non_personalized:
+                    url_user = None
+                else:
+                    url_user = get_username(uid)
+                    username = 'Random User'
+                    anon = True
 
-                match recsys:
-                    case 'random':
-                        recsys_form = RandomRecommenderForm(
-                            request.GET, prefix='random')
-                        if recsys_form.is_valid():
-                            seed = recsys_form.cleaned_data.get('seed')
-                            seed = seed if seed is not None else int(
-                                np.random.randint(2**32 - 1))
-                            predict_args = {'generate_new': True}
+            model_path = f'{SAVED_PATH}/{recsys}.pth'
+            match recsys:
+                case 'random':
+                    recsys_form = RandomRecommenderForm(
+                        request.GET, prefix='random')
+                    if recsys_form.is_valid():
+                        seed = recsys_form.cleaned_data.get('seed')
+                        seed = seed if seed is not None else int(
+                            np.random.randint(2**32 - 1))
+                        predict_args = {'generate_new': True}
 
-                            if not RECSYS_MODELS[recsys][1]:
-                                RECSYS_MODELS[recsys][1] = load_model(RECSYS_MODELS[recsys][0], config={
-                                    'seed': seed,
-                                })
-                            else:
-                                set_seed(seed)
-
-                    case 'cosine':
-                        recsys_form = CosineRecommenderForm(
-                            request.GET, prefix='cosine')
-                        if recsys_form.is_valid():
-                            tags = recsys_form.cleaned_data.get('tags')
-                            binary = recsys_form.cleaned_data.get('binary')
-                            weighted = recsys_form.cleaned_data.get('weighted')
-                            topk = recsys_form.cleaned_data.get('topk')
-
-                            RECSYS_MODELS[recsys][1] = load_model(RECSYS_MODELS[recsys][0], config={
-                                'weighted_average': weighted,
-                                'knn_topk': topk if topk else None,
-                                'Vectorizer_Config': {
-                                    'binary': binary
-                                }
+                        if recsys not in RECSYS_MODELS:
+                            RECSYS_MODELS[recsys] = load_model(model_path, config={
+                                'seed': seed,
                             })
-
-                            if tags:
-                                recs = get_recommendations_by_tags(
-                                    tags.split(','), cutoff)
-
-                    case 'search':
-                        recsys_form = SearchForm(
-                            request.GET, prefix='search')
-                        if recsys_form.is_valid():
-                            by = ('Track', 'Artist', 'Album')
-                            track_query, artist_query, album_query = queries = [
-                                recsys_form.cleaned_data.get(f'query_{x.lower()}') for x in by]
-                            by_labels = [f"{x} Query \'{q}\'" for i,
-                                         x in enumerate(by) if (q := queries[i])]
-                            username = ' + '.join(by_labels)
-
-                            tracks = search_tracks(
-                                track_query, artist_query, album_query, min(cutoff, 2**63 - 1))
-                            recs = list(map(lambda t: (None, t), tracks))
-
-                    case _:
-                        if not RECSYS_MODELS[recsys][1]:
-                            RECSYS_MODELS[recsys][1] = load_model(
-                                RECSYS_MODELS[recsys][0])
-
-                if recs is None:
-                    uid, recs = get_recommendations_by_user(
-                        username=username,
-                        model=RECSYS_MODELS[recsys][1],
-                        predict_args=predict_args,
-                        cutoff=cutoff
-                    )
-
-                    if not uid:
-                        if non_personalized:
-                            url_user = None
                         else:
-                            username = 'Default User'
-                            url_user = get_username(1)
+                            set_seed(seed)
 
-                    if url_user:
-                        scraper_url = f"{reverse('user_scraper')}?username={quote(url_user)}" \
-                            "&use_database=on" \
-                            "&include_tracks=on" \
-                            "&include_artists=on" \
-                            "&include_albums=on" \
-                            "&include_tags=on"
+                case 'cosine':
+                    recsys_form = CosineRecommenderForm(
+                        request.GET, prefix='cosine')
+                    if recsys_form.is_valid():
+                        tags = recsys_form.cleaned_data.get('tags')
+                        binary = recsys_form.cleaned_data.get('binary')
+                        weighted = recsys_form.cleaned_data.get('weighted')
+                        topk = recsys_form.cleaned_data.get('topk')
 
-                if not limit:
-                    limit = cutoff
+                        RECSYS_MODELS[recsys] = load_model(model_path, config={
+                            'weighted_average': weighted,
+                            'knn_topk': topk if topk else None,
+                            'Vectorizer_Config': {
+                                'binary': binary
+                            }
+                        })
 
-                p = Paginator(recs, limit)
-                first_page = p.page(1)
+                        if tags:
+                            tags = tags.split(',')
+                            recs = get_recommendations_by_tags(
+                                tags, cutoff)
+                            username = ' + '.join(
+                                map(lambda x: f"'{x}'", tags))
+                            url_user = None
 
-                recs_context[session_key] = {
-                    'username': username or 'Anyone',
-                    'scraper_url': scraper_url,
-                    'model': dict(rec_form.fields['model'].choices)[recsys],
-                    'recommendations': get_recommendations_context(first_page.object_list),
-                    'is_paginated': limit and limit < cutoff,
-                    'paginator': p,
-                    'page_obj': first_page,
-                    'page_range': p.get_elided_page_range(1)
-                }
+                case 'search':
+                    recsys_form = SearchForm(
+                        request.GET, prefix='search')
+                    if recsys_form.is_valid():
+                        by = ('Track', 'Artist', 'Album')
+                        track_query, artist_query, album_query = queries = [
+                            recsys_form.cleaned_data.get(f'query_{x.lower()}') for x in by]
+                        by_labels = [f"{x} Query '{q}'" for i,
+                                     x in enumerate(by) if (q := queries[i])]
+                        username = ' + '.join(by_labels)
 
-                return render(request, 'lastfm_recommend.html', context=recs_context[session_key])
-            else:
-                rec_form.add_error(
-                    'username', 'Fill either username or tags (cosine)')
+                        tracks = search_tracks(
+                            track_query, artist_query, album_query, min(cutoff, 2**63 - 1))
+                        recs = list(map(lambda t: (None, t), tracks))
+
+                case _:
+                    if recsys not in RECSYS_MODELS:
+                        RECSYS_MODELS[recsys] = load_model(
+                            model_path, use_training=True)
+
+            if recs is None:
+                recs = get_recommendations_by_user(
+                    user_id=uid,
+                    model=RECSYS_MODELS[recsys][0],
+                    device=RECSYS_MODELS[recsys][1],
+                    predict_args=predict_args,
+                    cutoff=cutoff
+                )
+
+                if url_user:
+                    scraper_url = f"{reverse('user_scraper')}?username={quote(url_user)}" \
+                        "&use_database=on" \
+                        "&include_tracks=on" \
+                        "&include_artists=on" \
+                        "&include_albums=on" \
+                        "&include_tags=on"
+                    if anon:
+                        scraper_url += '&anonymous=on'
+
+            if not limit:
+                limit = cutoff
+
+            p = Paginator(recs, limit)
+            first_page = p.page(1)
+
+            recs_context[session_key] = {
+                'username': username,
+                'scraper_url': scraper_url,
+                'model': dict(rec_form.fields['model'].choices)[recsys],
+                'recommendations': get_recommendations_context(first_page.object_list),
+                'is_paginated': limit and limit < cutoff,
+                'paginator': p,
+                'page_obj': first_page,
+                'page_range': p.get_elided_page_range(1)
+            }
+
+            return render(request, 'lastfm_recommend.html', context=recs_context[session_key])
 
     random = RandomRecommenderForm(prefix="random")
     cosine = CosineRecommenderForm(prefix="cosine")
@@ -441,9 +448,14 @@ def recommendations(request):
 
 
 def set_seed(seed: int = 2020) -> None:
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
+    if seed:
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+    else:
+        np.random.seed()
+        torch.seed()
+        torch.cuda.seed()
 
 
 def get_recommendations_context(recommendations, start_rank=1):
@@ -487,25 +499,29 @@ def get_recommendations_context(recommendations, start_rank=1):
 def scores_to_recommendations(scores, cutoff):
     if isinstance(scores, torch.Tensor):
         scores = scores.cpu().numpy().flatten()
+    scores = scores[1:]
 
     item_ids = RECSYS_DATASET.id2token(
-        RECSYS_DATASET.iid_field, list(range(RECSYS_DATASET.item_num)))
+        RECSYS_DATASET.iid_field, list(range(1, RECSYS_DATASET.item_num)))
 
-    sorted_idx = np.argsort(-scores)
-    return list(zip(scores[sorted_idx], item_ids[sorted_idx]))[:cutoff]
+    sorted_idx = np.argsort(scores)[:-(cutoff + 1):-1]
+    return list(zip(scores[sorted_idx], item_ids[sorted_idx]))
 
 
-def get_recommendations_by_user(username, model, predict_args=dict(), cutoff=10):
-    original_id = get_user_id(username)
-    uid = original_id or "1"
+def get_recommendations_by_user(user_id, model, device, predict_args=dict(), cutoff=10):
+    uid_series = RECSYS_DATASET.token2id(
+        RECSYS_DATASET.uid_field, [str(user_id)])
 
-    uid_series = RECSYS_DATASET.token2id(RECSYS_DATASET.uid_field, [str(uid)])
+    model.eval()
+    uid_inter = {RECSYS_DATASET.uid_field: uid_series}
+    try:
+        scores = model.full_sort_predict(uid_inter, **predict_args)
+    except NotImplementedError:
+        scores = full_sort_scores(model, device, uid_inter)
 
-    scores = model.full_sort_predict(
-        {RECSYS_DATASET.uid_field: uid_series}, **predict_args)
     recs = scores_to_recommendations(scores, cutoff)
 
-    return original_id, recs
+    return recs
 
 
 def get_recommendations_by_tags(tags, cutoff):
@@ -524,21 +540,34 @@ def get_recommendations_by_tags(tags, cutoff):
     for i, tag_id in enumerate(tags_ids):
         grouped_tags += [tag_id] * (len(tags)-i)
 
-    scores = RECSYS_MODELS['cosine'][1].feature_cosine_scores([grouped_tags])
+    scores = RECSYS_MODELS['cosine'][0].feature_cosine_scores([grouped_tags])
 
     recs = scores_to_recommendations(scores, cutoff)
 
     return recs
 
 
+def full_sort_scores(model, device, uid_inter, batch_size=4096):
+    item_feats = RECSYS_DATASET.get_item_feature()
+    scores = list()
+    for i in range(0, RECSYS_DATASET.item_num, batch_size):
+        interaction = Interaction(uid_inter)
+        item_feat = item_feats[i:i + batch_size]
+        interaction = interaction.repeat_interleave(len(item_feat))
+        interaction.update(item_feat.repeat(1))
+        scores.append(model.predict(
+            interaction.to(device)).detach().cpu().numpy())
+    return np.concatenate(scores)
+
+
 def load_model(model, config=dict(), use_training=False):
     global RECSYS_DATASET
 
-    config['dataset_save_path'] = 'backend/research/recbole_research/saved/lastfm_recbole-dataset.pth'
+    config['dataset_save_path'] = f'{SAVED_PATH}/lastfm_recbole-dataset.pth'
     config['save_dataloaders'] = False
     config['load_col'] = {
         'inter': ['user_id', 'track_id', 'rating', 'timestamp'],
-        'item': ['track_id', 'artist_id', 'album_id', 'tags', 'vadst'],
+        'item': ['track_id', 'artist_id', 'album_id', 'tags', 'v', 'a', 'd', 'stsc'],
         'user': ['user_id']
     }
 
@@ -552,4 +581,4 @@ def load_model(model, config=dict(), use_training=False):
     if not RECSYS_DATASET:
         RECSYS_DATASET = dataset
 
-    return recommender
+    return recommender, config['device']

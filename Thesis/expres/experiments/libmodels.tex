@@ -1,0 +1,12 @@
+During the selection process, three main recommendation libraries were considered: Surprise~\cite{SURPRISE}, RecBole, and Cornac~\cite{CORNAC}, each presenting distinct advantages:
+\begin{compactitem}[\textbullet] 
+    \item \textbf{Surprise} stood out for its ease of use and dataset adaptability; however, its limited number of algorithms and lack of documentation for implementing models rendered it inappropriate for this project.
+    \item \textbf{RecBole} offered a wide array of algorithms, resourceful documentation and model customization, efficient \acs{gpu}-accelerated execution with PyTorch and TensorFlow, and data formatting standards. Its use of separate files for data loading, model training and evaluation, allowed for easy configuration.
+    \item \textbf{Cornac}, on the other hand, provided many algorithms, but fewer compared to RecBole, with straightforward dataset adaptation and model customization as well. Nonetheless, some models faced compatibility issues due to outdated TensorFlow versions.
+\end{compactitem}
+
+Ultimately, RecBole emerged as the decisive recommendation library. For model selection within RecBole, preliminary tests were executed by including a simpler set of features, the results of which will be detailed in the next section.
+
+Context-Aware Recommenders exhibited strong performance overall, and were the most fitting for the recommendation task at hand. From these, the three best models, \textbf{xDeepFM}, \textbf{PNN} and \textbf{DCN V2}, would be chosen for evaluation with sentiment features. Some General Recommenders experienced delays in data structures initialization and demanded excessive memory, but most proved effective as well. \textbf{Pop} (popularity-based recommendation) and \textbf{ItemKNN} (item-based collaborative filtering) were used as baseline models, while \textbf{CosineSimilarityRecommender} and \textbf{RandomRecommender} were implemented for additional testing.
+
+Sequential Recommenders were not used due to VRAM limitations and the fact that top tracks, the most frequent type, lacked timestamp information needed by them; and Knowledge-Based Recommenders were left out as well because of missing data required to generate the mandatory files. Unfortunately, \emph{HybridVADRecommmender} was not able to improve the scores of the inherited recommenders, as the Euclidean distances between sentiment attributes were probably of little use for such advanced algorithms; and had to be excluded.

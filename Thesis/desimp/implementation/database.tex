@@ -1,0 +1,39 @@
+As explained in Section~\ref{SS:DBM}, despite the added complexity when compared with Django's \acs{orm}, SQLAlchemy was the library of choice to perform the necessary data retrieval operations from Python, as its \acs{orm} offers more advanced and versatile querying functionality, in addition to higher performance when combining tables for filtered results. The database was laid out with bigER Modeling Tool~\cite{BIGER}, which provided a visual interface to draw precise Entity-Relationship diagrams, and offered automatic code generation to create the designed tables.
+
+The population of the database with the scraped data was implemented with SQLAlchemy as well, reading from raw files and generating insertion queries through the \acs{orm}, first for all the individual entities, and subsequently for every user-item and item-tag interaction. Since most of these interactions present similar relationships in the database, the code was written to avoid redundancy as much as possible. In order to ensure item uniqueness and standard encoding, each of the tracks, artists, albums and tags were filtered out to avoid repetitions or invalid characters.
+
+After data insertion, the resulting dataset can be summarized by the following record counts displayed in Table~\ref{TB:Stats}:
+
+\begin{table}[Database statistics]{TB:Stats}{Record count of database entities and relationships.}
+  \small
+    \begin{tabular}{l r}
+      \hline
+      \textbf{Record} & \textbf{Count} \\
+      \hline
+      \hline
+      Tracks & 815,631 \\
+      Tracks With Albums & 604,204 \\
+      Tracks With Tags & 363,140 \\
+      Tracks With Sentiment & 361,091 \\
+      \hline
+      Artists & 162,702 \\
+      Artists With Tags & 122,846 \\
+      Artists With Sentiment & 122,646 \\
+      \hline
+      Albums & 384,995 \\
+      Albums With Tags & 127,396 \\
+      Albums With Sentiment & 126,572 \\
+      \hline
+      Tags & 199,608 \\
+      Tags With Sentiment & 177,106 \\
+      Tag-Track Relationships & 2,512,453 \\
+      Tag-Artist Relationships & 980,305 \\
+      Tag-Album Relationships & 733,505 \\
+      \hline
+      Users & 52,829 \\
+      User-Track Interactions & 2,452,162 \\
+      User-Artist Interactions & 527,051 \\
+      User-Album Interactions & 526,855 \\
+      \hline
+    \end{tabular}
+\end{table}

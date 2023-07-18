@@ -1,0 +1,14 @@
+With the intention of evaluating sentiment applied to music recommendation, a suitable dataset is required, which must contain relevant data needed for recommendation models, such as user-item interactions and user or item features. Nevertheless, it must also include sentiment attributes to be able to evaluate the performance of sentiment-aware recommenders, for which a sentiment analyzer needs to be used.
+
+Therefore, it is paramount to define a proper design for the dataset collection, which consists of two modules: the data scraper responsible for obtaining said dataset, and the sentiment analyzer used to extract sentiment scores from textual content --- the detailed implementation of both being provided in later sections, taking into consideration the requirements from Section~\ref{SS:DATASET_REQ}:
+
+The \textbf{data scraper} is designed to acquire relevant information from Last.fm's \acs{api} and webpage, with the objective of obtaining a considerable dataset to test recommendation models on. This collection process was necessary since no other publicly available dataset included users, tracks, artists, albums and tags; all of which are required for data processing, sentiment analysis and recommendation. 
+
+The scraper needs to access the \acs{api} and obtain the data in a manner similar to web crawlers, in that the scraped items should give access to new items, valuable for the tasks at hand. The general procedure, as outlined in Figure~\ref{FIG:DC}, will consist of obtaining all the tracks, artists and albums along with their interactions, then getting their associated tags, and finally extracting sentiment attributes from textual content related to those tags. All of this data will be saved into files at first, and when the scraping is done, it will be inserted into an appropriate database.
+
+\begin{figure}[Dataset collection]{FIG:DC}{Dataset collection}\includesvg[inkscapelatex=false,width=0.45\textwidth]{DataCollect}
+\end{figure}
+
+The \textbf{sentiment analyzer} will provide an efficient way to extract \acs{vad} scores from any given English text. It was required to implement a new analyzer due to the lack of public libraries that focused on \acs{vad} scores, as the existing ones either were too simple or did not use the \acs{nrc}-\acs{vad} lexicon, which is currently the most complete and reliable lexicon for these specific scores. 
+
+The analyzer will be imported into the data scraper, providing functions that allow it to perform sentiment analysis in a transparent way. To demonstrate its capabilities, the web application will also include the analyzer as part of the tools used in the project. 

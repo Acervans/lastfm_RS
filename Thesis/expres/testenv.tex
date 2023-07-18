@@ -1,0 +1,21 @@
+All experiments were conducted on a personal computer, the specifications of which are defined in Table~\ref{TB:Testenv}. It provided an adequate environment for the project's needs by ensuring sufficient memory and processing power to run most of the algorithms efficiently, despite the size of the dataset. This advantage enabled the project to be executed without the additional complexities and costs associated with cloud-based solutions.
+
+\vspace{0.5em}
+
+\begin{table}[Testing environment specifications]{TB:Testenv}{Specifications of the environment used for experimentation.}
+  \small
+    \begin{tabular}{c c}
+      \hline
+      \textbf{Component} & \textbf{Specifications} \\
+      \hline
+      \hline
+      \acs{cpu} & AMD Ryzen 5 5600X \\
+      \acs{gpu} & NVIDIA RTX 3060 Ti 8 GB VRAM  \\
+      RAM & 32 GB \\
+      O.S. & Windows 11 \\
+      Python Environment & Python 3.9.16 (conda) \\
+      \hline
+  \end{tabular}
+\end{table}
+
+The dataset was designed to remain within the hardware constraints of the testing environment, although calculations were not thoroughly performed for all the models. Some of them demanded excessive resources (in the order of 400GB of RAM or more), and had to be excluded from testing. It is worth mentioning that the coding phase of the project was carried out in a different environment, with lower computational capacity and more limited memory. The testing phase was therefore parallelized with the development of the web application.

@@ -8,25 +8,22 @@
 % arara: clean: {files: [tfgtfmthesisuam.aux, tfgtfmthesisuam.idx, tfgtfmthesisuam.ilg, tfgtfmthesisuam.ind, tfgtfmthesisuam.bbl, tfgtfmthesisuam.bcf, tfgtfmthesisuam.blg, tfgtfmthesisuam.run.xml, tfgtfmthesisuam.fdb_latexmk, tfgtfmthesisuam.fls, tfgtfmthesisuam.loe, tfgtfmthesisuam.lof, tfgtfmthesisuam.lol, tfgtfmthesisuam.lot, tfgtfmthesisuam.ltb, tfgtfmthesisuam.out, tfgtfmthesisuam.toc, tfgtfmthesisuam.upa, tfgtfmthesisuam.upb, tfgtfmthesisuam.acn, tfgtfmthesisuam.acr, tfgtfmthesisuam.alg, tfgtfmthesisuam.glg, tfgtfmthesisuam.glo, tfgtfmthesisuam.gls, tfgtfmthesisuam.glsdefs, tfgtfmthesisuam.idx,  tfgtfmthesisuam.ilg, tfgtfmthesisuam.xdy, tfgtfmthesisuam.loa, tfgtfmthesisuam.gnuploterrors , tfgtfmthesisuam.mw, tfgtfmthesisuam.fdb_latexmk ]}
 
 
-\documentclass[english,epsbased,copyright,final,printable,covers,extendedindex,firstnumbered,tfg,gnuplot]{tfgtfmthesisuam}
+\documentclass[english,epsbased,copyright,final,printable,covers,extendedindex,firstnumbered,tfg,gnuplot,loc,loe,lof,lot]{tfgtfmthesisuam}
 
-\advisor{Alejandro Bellogín}
-\levelin{Ingeniería Informática}
+\advisor{Alejandro Bellogín Kouki}
+\levelin{Computer Science and Engineering}
 \title{Application of sentiment analysis on music recommendation}
-\subtitle{Sentiment features efficiency in a hybrid music recommender}
+\subtitle{}
 \author{Javier Wang Zhou}
 \privateaddress{C\textbackslash\ Francisco Tomás y Valiente Nº 11}
-\copyrightdate{3 de Noviembre de 2017}
+\copyrightdate{18 de Julio de 2023}
 
-\dedication{A mi mujer y a mis hijos}
-\famouscite{Lo peor es cuando has terminado un capítulo\\y la máquina de escribir no aplaude. \\[0.1em] \begin{flushright}Orson Welles\end{flushright}}
-\prefacefile{inicio/prefacio}
+\dedication{To my dear mother}
+\famouscite{We are not thinking machines that feel; rather, we are feeling machines that think. \\[0.1em] \begin{flushright}Antonio Damasio\end{flushright}}
+% \prefacefile{inicio/prefacio}
 \ackfile{inicio/agradecimientos}
 \resumenfile{inicio/resumen}
 \abstractfile{inicio/abstract}
-
-\keywords{Algunas}
-\palabrasclave{Otras}
 
 \coverdata
 {
@@ -37,77 +34,76 @@
 
 \bibliographyconfig{tfgtfmthesisuam}
 
+\usepackage{hyperref}
+\usepackage{svg}
+\usepackage{paralist}
+\usepackage{multicol}
+\usepackage{multirow}
+
+\setlength{\plitemsep}{0.5em}
+
+\svgpath{{img/}}
 \datadir{data}
 \graphicsdir{img}
 \logosdir{img}
 \codesdir{codes}
 
-
-% hola
-% lo de la estructura, suele ser relativamente estándar, lo mejor es mirar otros tfgs:
-% https://abellogin.github.io/teaching.html
-% por ejemplo el de Eric de hace unos años podría ser un buen punto de partida, aunque depende del tema del TFG
-% puedes empezar con esto y cuando tengas una propuesta me escribes y lo reviso
-% a partir de ahí, es centrarte en escribir las secciones que veas más claras, me avisas cuando están, yo te doy feedback y así vamos iterando
-% lo más rollo siempre es el capítulo 2, el del estado del arte
-% ya luego, el capítulo de desarrollo y diseño, como es expllicar lo que has hecho, cuesta menos y vas más rápido
-% lo que hay que tener en cuenta en la parte de diseño es que se intenta demostrar que eres ingeniero, es decir, que sabes usar diagramas y eso que te enseñan en INGS
-% ya luego va el capítulo de pruebas, donde habrá que explicar todo lo que me has enseñado hoy (o casi todo)
-% ahí veremos cómo formatear los resultados, en qué orden presentarlo, y ver si tenemos explicación para lo que pasa
-% y tampoco mucho más: como tú has dicho, abstract, intro y conclusiones se suelen dejar para el final, pero por supuesto si algún día estás inspirado, puedes escribir por ahí alguna idea
-
-% pero si de aquí a lunes-martes-miércoles tienes la estructura, ya irías bien, porque eso te permite ir avanzando en paralelo (experimentos y escritura)
-
-% sí, eso es: a nivel 1 o 2, es decir: nombre de sección y, cuando lo tengas claro, de subsección
-% ya que los capítulos más o menos vienen definidos por la normativa
-
-% si, en mayo es mejor asegurar que apruebas las asignaturas
-% pero todo lo que adelantes, pues mejor, claro, pero la prioridad debe ser que apruebes, ya que si suspendes y entregas el tfg, no te dejan defender
-
+\input{acronyms}
 
 \begin{document}
 
-\chapter{State of the art\label{CAP:STATE_OF_THE_ART}}{sota/sota}
-  \section{Recommender systems\label{SEC:RECSYS}}{sota/recsys/recsys}
-    \subsection{Model classification\label{SS:MODELCLASS}}{sota/recsys/modelclass}
-    \subsection{Context-based recommendation\label{SS:CONTEXTREC}}{sota/recsys/contextrec}
-    \subsection{Music recommendation\label{SS:MUSICREC}}{sota/recsys/musicrec}
-    \subsection{Evaluation\label{SS:EVALUATION}}{sota/recsys/evaluation}
-  \section{Natural Language Processing\label{SEC:NLP}}{sota/nlp/nlp}
-    \subsection{Sentiment Analysis\label{SS:SENTANALYSIS}}{sota/nlp/sentanalysis}
-    \subsection{Word Embeddings\label{SS:WORDEMB}}{sota/nlp/wordemb}
-  \section{Web applications\label{SEC:WEBAPP}}{sota/webapp/webapp}
-    \subsection{MVT Architecture\label{SS:MVT}}{sota/webapp/mvt}
-    \subsection{Django Framework\label{SS:DJANGO}}{sota/webapp/django}
-  \section{Database management\label{SEC:DBM}}{sota/dbm/dbm}
-    \subsection{RDBMS: PostgreSQL\label{SS:POSTGRESQL}}{sota/dbm/postgresql}
-    \subsection{SQLAlchemy Toolkit\label{SS:SQLALCHEMY}}{sota/dbm/sqlalchemy}
+  \chapter{Introduction\label{CAP:INTRODUCTION}}{intro/intro}
+    \section{Motivation\label{SEC:MOTIVATION}}{intro/motivation}
+    \section{Goals\label{SEC:GOALS}}{intro/goals}
+    \section{Work structure\label{SEC:WORK_STRUCT}}{intro/work_struct}
+  \chapter{State of the Art\label{CAP:STATE_OF_THE_ART}}{sota/sota}
+    \section{Recommender systems\label{SEC:RECSYS}}{sota/recsys/recsys}
+      \subsection{Model classification\label{SS:MODELCLASS}}{sota/recsys/modelclass}
+      \subsection{Context-aware recommendation\label{SS:CONTEXTREC}}{sota/recsys/contextrec}
+      \subsection{Music recommendation\label{SS:MUSICREC}}{sota/recsys/musicrec}
+      \subsection{Evaluation\label{SS:EVALUATION}}{sota/recsys/evaluation}
+    \section{Natural Language Processing\label{SEC:NLP}}{sota/nlp/nlp}
+      \subsection{Text Processing\label{SS:TEXTPROC}}{sota/nlp/textproc}
+      \subsection{Sentiment Analysis\label{SS:SENTANALYSIS}}{sota/nlp/sentanalysis}
+      \subsection{Word Embeddings\label{SS:WORDEMB}}{sota/nlp/wordemb}
+    \section{Web applications\label{SEC:WEBAPP}}{sota/webapp/webapp}
+      \subsection{Django Framework\label{SS:DJANGO}}{sota/webapp/django}
+      \subsection{Database Management\label{SS:DBM}}{sota/webapp/dbm}
 
-\chapter{Design and implementation\label{CAP:DESIMP}}{desimp/desimp}
-  \section{Web application\label{SEC:WEBAPP_DESIMP}}{desimp/webapp/webapp}
-    \subsection{Requirements\label{SS:WEBAPP_REQ}}{desimp/webapp/requirements}
-    \subsection{Design\label{SS:WEBAPP_DES}}{desimp/webapp/design}
-    \subsection{Implementation\label{SS:WEBAPP_IMP}}{desimp/webapp/implementation}
-  \section{Database\label{SEC:DATABASE_DESIMP}}{desimp/database/database}
-    \subsection{Requirements\label{SS:DATABASE_REQ}}{desimp/database/requirements}
-    \subsection{Design\label{SS:DATABASE_DES}}{desimp/database/design}
-    \subsection{Implementation\label{SS:DATABASE_IMP}}{desimp/database/implementation}
-  \section{Dataset\label{SEC:DATASET_DESIMP}}{desimp/dataset/dataset}
-    \subsection{Requirements\label{SS:DATASET_REQ}}{desimp/dataset/requirements}
-    \subsection{Design\label{SS:DATASET_DES}}{desimp/dataset/design}
-    \subsection{Implementation\label{SS:DATASET_IMP}}{desimp/dataset/implementation}
+  \chapter{Design and Implementation\label{CAP:DESIMP}}{desimp/desimp}
+    \section{Project structure\label{SEC:PSTRUCT}}{desimp/pstruct}
+    \section{Requirements analysis\label{SEC:REQUIREMENTS}}{desimp/requirements/requirements}
+      \subsection{Web application\label{SS:WEBAPP_REQ}}{desimp/requirements/webapp}
+      \subsection{Dataset\label{SS:DATASET_REQ}}{desimp/requirements/dataset}
+      \subsection{Database\label{SS:DATABASE_REQ}}{desimp/requirements/database}
+    \section{Design\label{SEC:DESIGN}}{desimp/design/design}
+      \subsection{Web application\label{SS:WEBAPP_DES}}{desimp/design/webapp}
+      \subsection{Dataset\label{SS:DATASET_DES}}{desimp/design/dataset}
+      \newpage
+      \subsection{Database\label{SS:DATABASE_DES}}{desimp/design/database}
+    \section{Implementation\label{SEC:IMPLEMENTATION}}{desimp/implementation/implementation}
+      \subsection{Web application\label{SS:WEBAPP_IMP}}{desimp/implementation/webapp}
+      \subsection{Dataset\label{SS:DATASET_IMP}}{desimp/implementation/dataset}
+      \subsection{Database\label{SS:DATABASE_IMP}}{desimp/implementation/database}
 
-\chapter{Tests and results\label{CAP:TESTRES}}{testres/testres}
-  \section{Testing environment\label{SEC:TESTENV}}{testres/testenv}
-  \section{Experiments\label{SEC:EXPERIMENTS}}{testres/experiments/experiments}
-    \subsection{Data used in experiments\label{SS:DATAEXP}}{testres/experiments/dataused}
-    \subsection{Testing libraries and model selection\label{SS:LIBMODELS}}{testres/experiments/libmodels}
-    \subsection{Feature selection\label{SS:FEATSELECT}}{testres/experiments/featselect}
-    \subsection{Integration of sentiment attributes\label{SS:SENTINTEG}}{testres/experiments/sentinteg}
-    \subsection{Summary and performance analysis\label{SS:SUMANALYSIS}}{testres/experiments/sumanalysis}
+  \chapter{Experiments and Results\label{CAP:EXPRES}}{expres/expres}
+    \section{Testing environment\label{SEC:TESTENV}}{expres/testenv}
+    \section{Data analysis\label{SEC:DATANAL}}{expres/datanal}
+    \section{Experiments\label{SEC:EXPERIMENTS}}{expres/experiments/experiments}
+      \subsection{Data used in experiments\label{SS:DATAUSED}}{expres/experiments/dataused}
+      \subsection{Recommendation libraries and model selection\label{SS:LIBMODELS}}{expres/experiments/libmodels}
+    \section{Results\label{SEC:RESULTS}}{expres/results/results}
+      \subsection{Performance analysis\label{SS:PANALYSIS}}{expres/results/panalysis}
 
-\chapter{Conclusions and future work\label{CAP:CONFUTURE}}
-  \section{Conclusions\label{SEC:CONCLUSIONS}}{confuture/conclusions}
-  \section{Future Work\label{SEC:FUTUREWORK}}{confuture/futurework}
+  \chapter{Conclusions and Future work\label{CAP:CONFUTURE}}
+    \section{Conclusions\label{SEC:CONCLUSIONS}}{confuture/conclusions}
+    \newpage
+    \section{Future work\label{SEC:FUTUREWORK}}{confuture/futurework}
+
+  \appendix
+  \chapter{Web Application\label{AP:WEBAPP}}{appendix/webapp}
+  \chapter{External Libraries\label{AP:EXTLIB}}{appendix/extlib}
+  \chapter{Data Preprocessing\label{AP:DATAPROC}}{appendix/dataproc}
+  \chapter{Model Implementations\label{AP:MODELS}}{appendix/models}
 
 \end{document}

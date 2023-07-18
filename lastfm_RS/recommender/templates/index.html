@@ -1,19 +1,19 @@
 {% extends "base_generic.html" %}
 {% block content %}
-    <h1>LastFM Recommender System</h1>
+    <h1>LastMood</h1>
     <br />
     <p>
-        Welcome to <em>LastFM RecSys</em>, a webpage to showcase the sentiment-aware hybrid recommender system developed as the Bachelor's Degree Final Project (TFG) of Javier Wang Zhou.
+        Welcome to <em>LastMood</em>, a webpage to showcase sentiment-aware recommendation systems developed as a project for Javier Wang's Bachelor Thesis (TFG).
     </p>
     <p>
-        The webpage, developed with Python using Django as backend, has the following apps and tools:
+        The webpage, built on the Python-based framework Django, has the following apps and tools:
     </p>
     <ul id="index-tools">
         <li>
-            <a href="{% url 'lastfm_preview' %}">LastFM Previewer</a>, a tool to preview Last.FM tracks with YouTube and Spotify, as well as to scrape lyrics from Genius
+            <a href="{% url 'lastfm_preview' %}">Track Previewer</a>, a tool to preview Last.FM tracks with YouTube and Spotify, as well as to scrape lyrics from Genius
         </li>
         <li>
-            <a href="{% url 'vad_analysis' %}">Text VAD Analyzer</a>, a text analyzer that extracts a given input's sentiment attributes (VAD, Sentiment Score)
+            <a href="{% url 'vad_analysis' %}">Text VAD Analyzer</a>, a text analyzer that extracts a given input's sentiment attributes (VAD, Sentiment Ratio)
         </li>
         <li>
             <a href="{% url 'user_scraper' %}">User Scraper</a>, a utility to scrape data from a Last.FM user, as an example of the web-scraper developed to generate the dataset
@@ -33,7 +33,7 @@
              height=""/>
     </div>
     <br/>
-    <p>Entity-Relationship diagram of the LastFM database model:</p>
+    <p>Entity-Relationship diagram of the Last.FM database model:</p>
     <div class="zoom-container">
         <label>
             <input type="checkbox">
@@ -88,6 +88,37 @@
         </ul>
     </div>
     <hr />
+    <h2>NRC-VAD Lexicon</h2>
+    <p>The NRC Valence, Arousal, and Dominance (VAD) Lexicon includes a list of more than 20,000 English words and their valence, arousal, and dominance scores. For a given word and a dimension (V/A/D), the scores range from 0 (lowest V/A/D) to 1 (highest V/A/D). The lexicon with its fine-grained real-valued scores was created by manual annotation using <a href="https://saifmohammad.com/WebPages/BestWorst.html" target="_blank">Best--Worst Scaling</a>.</p>
+    <br />
+    <div class="tableauPlaceholder"
+         id="viz1687885788898">
+        <noscript><a href="https://saifmohammad.com/">
+            <img alt="Dashboard 1 "
+                 height="auto"
+                 width="auto"
+                 src="https://public.tableau.com/static/images/Th/TheNRCValenceArousalandDominanceLexiconViz/Dashboard1/1_rss.png"/>
+        </a></noscript>
+        <object class="tableauViz">
+        <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+        <param name="embed_code_version" value="3" />
+        <param name="site_root" value="" />
+        <param name="name"
+               value="TheNRCValenceArousalandDominanceLexiconViz/Dashboard1" />
+        <param name="tabs" value="no" />
+        <param name="toolbar" value="yes" />
+        <param name="static_image"
+               value="https://public.tableau.com/static/images/Th/TheNRCValenceArousalandDominanceLexiconViz/Dashboard1/1.png" />
+        <param name="animate_transition" value="yes" />
+        <param name="display_static_image" value="yes" />
+        <param name="display_spinner" value="yes" />
+        <param name="display_overlay" value="yes" />
+        <param name="display_count" value="yes" />
+        <param name="filter" value="publish=yes" />
+        </object>
+    </div>
+    <br />
+    <hr />
     <h2>WordClouds</h2>
     <p>WordCloud representing tag frequency in the Last.FM database, where the most common tags appear the largest:</p>
     <div class="zoom-container">
@@ -100,7 +131,7 @@
         </label>
     </div>
     <br />
-    <p>WordClouds generated from the Valence, Arousal, Dominance & Sentiment Score attributes in the Last.FM database:</p>
+    <p>WordClouds generated from the Valence, Arousal, Dominance & Sentiment Ratio attributes in the Last.FM database:</p>
     <div class="container vadst-wc-container">
         <div class="row">
             <div class="col">
@@ -127,14 +158,16 @@
                 <figcaption>Dominance</figcaption>
             </div>
             <div class="col">
-                <img src="{% static 'img/SentimentScore-WordCloud.png' %}"
+                <img src="{% static 'img/SentimentRatio-WordCloud.png' %}"
                      height=""
                      width="100%"
-                     alt="SentimentScore WordCloud"/>
-                <figcaption>Sentiment Score</figcaption>
+                     alt="SentimentRatio WordCloud"/>
+                <figcaption>Sentiment Ratio</figcaption>
             </div>
         </div>
     </div>
     <br />
     <p>You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.</p>
+    {% load static %}
+    <script type="text/javascript" src="{% static 'js/index_script.js' %}"></script>
 {% endblock content %}

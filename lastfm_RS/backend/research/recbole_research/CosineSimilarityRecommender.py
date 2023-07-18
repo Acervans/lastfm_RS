@@ -9,6 +9,7 @@ import numpy as np
 import torch
 
 class CosineSimilarityRecommender(GeneralRecommender):
+    """ Recommendations based on features' (tags) cosine similarities """
     input_type = InputType.PAIRWISE
     type = ModelType.TRADITIONAL
 
@@ -57,7 +58,7 @@ class CosineSimilarityRecommender(GeneralRecommender):
         # Item id to idx mapping
         self.item_to_idx = pd.Series(range(len(item_feats[self.ITEM_ID])), index=item_feats[self.ITEM_ID])
 
-        # Item sequential token embedding
+        # Vectorized item-tags matrix
         self.vec_matrix = normalize(self.vectorizer.fit_transform(self.vec_feat))
 
     def forward(self, user, item):

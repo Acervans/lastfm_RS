@@ -1,0 +1,25 @@
+Word embeddings are a representation of words in a continuous vector space, where words with similar meanings are placed closer together. Word embedding models, such as Word2Vec~\cite{WORD2VEC} and GloVe~\cite{GLOVE}, learn these vector representations by considering the context in which words appear in large amounts of text data. These representations capture semantic relationships between words and enable various downstream \acs{nlp} tasks to benefit from this contextual understanding.
+
+Word embeddings have proven to be effective in a wide range of \acs{nlp} applications, including sentiment analysis, named entity recognition, machine translation, and document classification. They enable machines to capture the meaning and context of words, enhancing their ability to understand and generate human language.
+
+The \acs{nrc}-\acs{vad} lexicon, used in this project, is a collection of over 20,000 words to which fine-grained \acs{vad} scores were manually assigned, in the form of emotion-aware word embeddings. Table~\ref{TB:VADExample} shows the highest and lowest scored words for each dimension, fitting the descriptions from Section~\ref{SS:SENTANALYSIS} with fair reliability~\cite{BOOK:NRC}.
+\vspace{0.4em}
+\begin{table}[NRC-VAD lexicon example entries]{TB:VADExample}{\acs{nrc}-\acs{vad} lexicon entries showcasing words with the highest and lowest scores for each of the three dimensions.}
+    \renewcommand{\arraystretch}{0.91}
+    \resizebox{0.54\textwidth}{!}{%
+    \begin{tabular}{l l c l c}
+      \hline
+      \textbf{Dimension} & \textbf{Word} & \textbf{Score ↑} & \textbf{Word} & \textbf{Score ↓} \\
+      \hline
+      valence & \emph{love} & 1.000 & \emph{toxic} & 0.008 \\
+       & \emph{happy} & 1.000 & \emph{nightmare} & 0.005 \\
+       & \emph{happily} & 1.000 & \emph{shit} & 0.000 \\
+      arousal & \emph{abduction} & 0.990 & \emph{mellow} & 0.069 \\
+       & \emph{exorcism} & 0.980 & \emph{siesta} & 0.046 \\
+       & \emph{homicide} & 0.973 & \emph{napping} & 0.046 \\
+      dominance & \emph{powerful} & 0.991 & \emph{empty} & 0.081 \\
+       & \emph{leadership} & 0.983 & \emph{frail} & 0.069 \\
+       & \emph{success} & 0.981 & \emph{weak} & 0.045 \\
+      \hline
+    \end{tabular}}
+\end{table}

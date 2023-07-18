@@ -1,0 +1,24 @@
+Text processing involves analyzing and manipulating textual data to extract valuable information. It includes tasks like tokenization, part-of-speech tagging, dependency parsing and lemmatization [\ref{FIG:TEXTPROC}], which enable the extraction of insights and facilitate various applications such as sentiment analysis and information retrieval. Popular libraries have been developed that provide extensive functionalities for these tasks, such as spaCy~\cite{SPACY} and \ac{nltk}~\cite{NLTK}, both used in this project.
+
+\begin{figure}[Text processing techniques]{FIG:TEXTPROC}{Text processing techniques}
+    \vspace{0.4em}
+    \begin{subfigure}[SBFIG:Tokenization]{Tokenization}{\includesvg[inkscapelatex=false,width=0.3\textwidth]{Tokenization.svg}}
+    \end{subfigure}
+    \hspace{2em}
+    \begin{subfigure}[SBFIG:POSTagging]{\href{https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html}{Part-of-speech tagging}}{\includesvg[inkscapelatex=false,width=0.3\textwidth]{POS.svg}}
+    \end{subfigure}
+
+    \vspace{1em}
+    \begin{subfigure}[SBFIG:DependencyParse]{\href{https://universaldependencies.org/en/dep/}{Dependency parsing}}{\includesvg[inkscapelatex=false,width=0.3\textwidth]{DepParse.svg}}
+    \end{subfigure}
+    \hspace{2em}
+    \begin{subfigure}[SBFIG:Lemmatization]{Lemmatization}{\includesvg[inkscapelatex=false,width=0.22\textwidth]{Lemma.svg}}
+    \end{subfigure}
+\end{figure}
+
+\begin{compactenum}[a)]
+    \item \textbf{Tokenization} is the process of splitting text into smaller units called tokens, which can be individual words, phrases, or even characters --- fundamental for subsequent analysis.
+    \item \textbf{\acl{pos} tagging}, or \acs{pos} tagging, is the process of assigning grammatical tags to words in a text, indicating their syntactic category and role in a sentence. It helps in understanding the grammatical structure and meaning of sentences.
+    \item \textbf{Dependency parsing} analyzes the grammatical structure of a sentence by identifying the relationships between words and representing them as a hierarchical structure or dependency tree. It helps to uncover the syntactic dependencies between words and is typically useful for sentence segmentation and token dependency labelling.
+    \item \textbf{Lemmatization} is the process of reducing words to their base or canonical form, known as a lemma, by considering their context and morphological features. It allows for better text analysis by treating different inflected forms of a word as a single normalized entity.
+\end{compactenum}

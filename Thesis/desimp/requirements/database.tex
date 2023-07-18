@@ -1,0 +1,12 @@
+\subsubsection{Functional requirements}
+
+\begin{functionalmod}[DB]
+    \item The database will store a table for each main entity of the dataset: users, tracks, artists, albums and tags; with their respective identifiers and names.
+    \item The database will store multiple tracks, top artists and top albums associated with one or more users, establishing many-to-many relationships stored in independent tables.
+    \begin{functionalmod}[DB]
+        \item Each track must have an associated artist, corresponding to a one-to-many relationship between artists and tracks.
+        \item Each track could belong to an album, establishing a one-to-many relationship between albums and tracks. 
+        \item Each album must have an artist, establishing a one-to-many relationship between artists and albums.
+    \end{functionalmod}
+    \item The database will store tags associated with tracks, artists and albums, requiring separate tables and appropriate references to store these many-to-many relationships.
+\end{functionalmod}

@@ -1,9 +1,9 @@
 var isToggled = true;
+var nav = document.querySelector("#sidebar");
 
 /* Toggle sidebar */
 function toggleNav() {
-    let nav = document.querySelector("#sidebar"),
-        content = document.querySelector(".col-sm-10"),
+    let content = document.querySelector(".col-sm-10"),
         btn = document.querySelector(".sidebar-btn"),
         row = document.querySelector("#sidebar-btn-row"),
         navW = nav.clientWidth;
@@ -11,6 +11,7 @@ function toggleNav() {
     if (isToggled) {
         btn.style.transform = "rotate(180deg)";
         nav.style.marginLeft = `-${navW + 2}px`;
+        nav.style.flexBasis = "0%";
         content.style.flexBasis = "100%";
         row.style.maxHeight = "100vh";
         isToggled = false;
@@ -18,6 +19,7 @@ function toggleNav() {
     else if (!isToggled) {
         btn.style.transform = "";
         nav.style.marginLeft = 0;
+        nav.style.flexBasis = "12%";
         content.style.flexBasis = "88%";
         row.style.maxHeight = 0;
         isToggled = true;
@@ -65,8 +67,10 @@ function setContentHeight() {
         hrH   = getAbsoluteHeight(document.getElementById('content-separator')),
         sbH   = getAbsoluteHeight(document.getElementById('sidebar-btn-row')),
         winH  = window.innerHeight;
-
-    document.getElementById('main').style.maxHeight = (winH - hrH - sbH - logoH - 2).toString() + 'px';
+    
+    const maxH = (winH - hrH - sbH - logoH - 2);
+    document.querySelector('#main').style.maxHeight = `${maxH}px`;
+    nav.querySelector('#sidebar-navs').style.maxHeight = `${maxH - 32}px`;
 }
 
 function openLoader(txt=undefined) {
@@ -99,3 +103,7 @@ document.querySelector("#sidebar").addEventListener('webkitTransitionEnd', setCo
 
 window.addEventListener('load'  , setContentHeight);
 window.addEventListener('resize', setContentHeight);
+window.addEventListener('resize', () => {
+    if (isToggled && nav.offsetWidth < 40)
+        toggleNav();
+});

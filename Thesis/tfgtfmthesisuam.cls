@@ -1788,11 +1788,11 @@
       \leftmargin=8\myex
       \labelsep=1\myex \labelwidth=3\myex
       \usecounter{\@enumctr}
-      \renewcommand*{\labelenumi}{\textbf{RF-\theenumi.--}}
+      \renewcommand*{\labelenumi}{\textbf{FR-\theenumi.--}}
       \renewcommand*{\theenumii}{\arabic{enumii}}
-      \renewcommand*{\labelenumii}{\textbf{RF-\theenumi.\theenumii.--}}
+      \renewcommand*{\labelenumii}{\textbf{FR-\theenumi.\theenumii.--}}
       \renewcommand*{\theenumiii}{\arabic{enumiii}}
-      \renewcommand*{\labelenumiii}{\textbf{RF-\theenumi.\theenumii.\theenumiii.--}}
+      \renewcommand*{\labelenumiii}{\textbf{FR-\theenumi.\theenumii.\theenumiii.--}}
     }
   \fi
 }
@@ -1824,17 +1824,87 @@
       \leftmargin=8\myex
       \labelsep=1\myex \labelwidth=3\myex
       \usecounter{\@enumctr}
-      \renewcommand*{\labelenumi}{\textbf{RNF-\theenumi.--}}
+      \renewcommand*{\labelenumi}{\textbf{NFR-\theenumi.--}}
       \renewcommand*{\theenumii}{\arabic{enumii}}
-      \renewcommand*{\labelenumii}{\textbf{RNF-\theenumi.\theenumii.--}}
+      \renewcommand*{\labelenumii}{\textbf{NFR-\theenumi.\theenumii.--}}
       \renewcommand*{\theenumiii}{\arabic{enumiii}}
-      \renewcommand*{\labelenumiii}{\textbf{RNF-\theenumi.\theenumii.\theenumiii.--}}
+      \renewcommand*{\labelenumiii}{\textbf{NFR-\theenumi.\theenumii.\theenumiii.--}}
     }
   \fi
 }
 {
   \endlist
   \typeout{Ending nonfunctional}
+  \egroup
+}
+
+\newenvironment{functionalmod}[1][]
+{
+	\bgroup
+	\renewcommand\baselinestretch{1.3}
+  \typeout{Begining enumeration}
+  \ifnum
+    \@enumdepth >3 \@toodeep
+  \else
+    \advance\@enumdepth \@ne
+    \def\@enumctr{enum\romannumeral\the\@enumdepth}
+    \list{\csname label\@enumctr\endcsname}
+    {
+			\small
+      \partopsep=0\myem \topsep=\@listinterlined \itemsep=\@listinterlined \parsep=\@listinterlined
+      \advance\topsep by .3\myem
+      \advance\itemsep by .15\myem
+      \itemindent=0\myem
+      \rightmargin=5\myex
+      \leftmargin=8\myex
+      \labelsep=1\myex \labelwidth=3\myex
+      \usecounter{\@enumctr}
+      \renewcommand*{\labelenumi}{\textbf{FR-#1-\theenumi.--}}
+      \renewcommand*{\theenumii}{\arabic{enumii}}
+      \renewcommand*{\labelenumii}{\textbf{FR-#1-\theenumi.\theenumii.--}}
+      \renewcommand*{\theenumiii}{\arabic{enumiii}}
+      \renewcommand*{\labelenumiii}{\textbf{FR-#1-\theenumi.\theenumii.\theenumiii.--}}
+    }
+  \fi
+}
+{
+                \endlist
+        \typeout{Ending enumeration}
+        \egroup
+}
+
+\newenvironment{nonfunctionalmod}[1][]
+{
+	\bgroup
+	\renewcommand\baselinestretch{1.3}
+  \typeout{Begining nonfunctional module}
+  \ifnum
+    \@enumdepth >3 \@toodeep
+  \else
+    \advance\@enumdepth \@ne
+    \def\@enumctr{enum\romannumeral\the\@enumdepth}
+    \list{\csname label\@enumctr\endcsname}
+    {
+			\small
+      \partopsep=0\myem \topsep=\@listinterlined \itemsep=\@listinterlined \parsep=\@listinterlined
+      \advance\topsep by .3\myem
+      \advance\itemsep by .15\myem
+      \itemindent=0\myem
+      \rightmargin=5\myex
+      \leftmargin=8\myex
+      \labelsep=1\myex \labelwidth=3\myex
+      \usecounter{\@enumctr}
+      \renewcommand*{\labelenumi}{\textbf{NFR-#1-\theenumi.--}}
+      \renewcommand*{\theenumii}{\arabic{enumii}}
+      \renewcommand*{\labelenumii}{\textbf{NFR-#1-\theenumi.\theenumii.--}}
+      \renewcommand*{\theenumiii}{\arabic{enumiii}}
+      \renewcommand*{\labelenumiii}{\textbf{NFR-#1-\theenumi.\theenumii.\theenumiii.--}}
+    }
+  \fi
+}
+{
+  \endlist
+  \typeout{Ending nonfunctional module}
   \egroup
 }
 

@@ -1,0 +1,5 @@
+This section studies the results obtained from testing several recommendation models with different combinations of features, starting with an intuitive approach towards sentiment-aware recommendations, then explaining the preliminary results without sentiment features, and concluding with the best combination of this last section, together with \acs{vad} and/or sentiment ratio.
+
+\subsubsection{Intuition}
+
+Sentiment attributes can be easily incorporated into context-aware recommenders, as additional numerical embeddings. As they are relatively independent from each other, there is potential for algorithms, such as \acl{fm}, to infer latent factors from them and uncover additional similarities between tracks, thus enhancing the recommendations. Be that as it may, the true value of these sentiment attributes can only be assessed if they improve the model, even when tags are already included as features. This criterion will demonstrate their independence from tags and their ability to convey additional latent factors or relevant information for the recommendation process.

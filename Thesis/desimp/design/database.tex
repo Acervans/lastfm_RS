@@ -1,0 +1,8 @@
+The Entity-Relationship diagram portrayed in Figure~\ref{FIG:ERD} represents the database into which Last.fm's scraped data was inserted, designed to access the data in a standard and efficient manner. It is comprised of the five main entities (User, Artist, Track, Album, Tag) and all the interactions amongst them.
+
+\begin{figure}[Entity-Relationship diagram]{FIG:ERD}{Entity-Relationship diagram of the Last.fm scraped database, where PK, FK and UQ mean primary key, foreign key \& unique, respectively.}\includesvg[inkscapelatex=false,width=1\textwidth]{LastfmERD}
+\end{figure}
+
+Following the diagram, all entities have tags (and thereby \acs{vad} scores) except users, since the \acs{api} could not scrape personal tags from users other than oneself. These tags are user-based, meaning they are assigned by Last.fm users, with the assignment frequency determining their rank of representation.
+
+Furthermore, all users have top items with which they interacted the most: artists, albums and tracks; along with loved and recent tracks. Loved tracks are those personally tagged by the user as one of their favorites, marked by the \emph{love\_at} timestamp, whereas recent tracks are the latest tracks the user has listened to up to the date of scraping, marked by the \emph{listen\_at} timestamp.

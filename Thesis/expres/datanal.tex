@@ -1,0 +1,25 @@
+The music tags collected for the project amounted to nearly 200,000, and their assignment frequency follows a power-law pattern. In particular, this corresponds to Zipf's law\footnote[1]{\emph{Zipf's law}, accessed 2023{-}07{-}16. \url{https://en.wikipedia.org/wiki/Zipf's_law}}, a frequent occurence in text corpus and natural language scenarios, which states that in a given dataset, the frequency of any word or item is inversely proportional to its rank. This means that a few popular tags, like \emph{rock} or \emph{pop}, are assigned to a large number of items, while the majority of tags are much rarer, being associated with only one item, as represented in Figure~\ref{FIG:POWERLAW}. This distribution introduces sparsity in tag frequency, which might adversely impact the recommendation process.
+
+\begin{figure}[Zipf's law in Last.fm's tags]{FIG:POWERLAW}{Zipf's law in Last.fm's tags}\includesvg[inkscapelatex=false,width=0.9\textwidth]{powerLaw}
+\end{figure}
+
+From these tags, \acs{vad} scores, along with an additional sentiment ratio, were extracted for approximately 89\% of the tags. Delving into these scores, the correlation heatmap in Figure~\ref{FIG:HEATMAP} indicates that none of them are negatively correlated. Valence and arousal, being uncorrelated, emerge as promising candidates for embedding into the recommendation models. However, valence and dominance exhibit a higher correlation, suggesting that positive tags (e.g., \emph{happy}, \emph{excited}) tend to be more dominant, and negative tags (e.g., \emph{sad}, \emph{anxious}) are less dominant, with the opposite being less common. Similarly, arousal and dominance also display a high correlation, though still fairly independent.
+
+The sentiment ratio, being dependent on sentiment labels derived from valence, shows a high correlation with valence and dominance, though it is essentially independent of arousal --- making it worth considering for inclusion in the models. Therefore, in one combination or another, all of these scores could represent diverse sentiments, which might prove useful for the models as a separate space for searching similarities.
+
+\begin{figure}[Correlation heatmap of sentiment attributes]{FIG:HEATMAP}{Correlation heatmap of \acs{vad} \& sentiment ratio}\includesvg[inkscapelatex=false,width=0.455\textwidth]{heatMap}
+\end{figure}
+
+On another note, it might be interesting to analyze the distribution of values for these sentiment attributes. The univariate histograms in Subfigure~\ref{SBFIG:SDist} reveal that most scores fall within the range of $(0.4 - 0.8)$ although they should vary between $0$ and $1$ (or $-1$ and $1$ for sentiment ratio). This narrow clustering of values could potentially hinder recommendation systems, and therefore normalization should be performed to achieve a consistent scale and range, making the features comparable for models to identify patterns in. After normalization between $0$ and $1$ (Figure~\ref{SBFIG:SDistNorm}), the values were standardized and expanded, now centered between $0.2$ and $0.8$; except sentiment ratio, which tended towards the right, indicating that most tags had a higher frequency of positive words associated with them.
+
+\begin{figure}[Univariate histograms of sentiment attributes]{FIG:DISTRIBUTIONS}{Univariate histograms of \acs{vad} and sentiment ratio extracted from tags, representing original and normalized values.}
+    \begin{subfigure}[SBFIG:SDist]{Original values}{\includesvg[inkscapelatex=false,width=0.46\textwidth]{Sentiment}}
+    \end{subfigure}
+    \begin{subfigure}[SBFIG:SDistNorm]{Normalized values}{\includesvg[inkscapelatex=false, width=0.46\textwidth]{SentimentNorm}}
+    \end{subfigure}
+\end{figure}
+
+Bivariate histograms of the values, as presented in Figure~\ref{FIG:BIVARIATE}, further corroborate the correlations previously discussed. The valence-arousal plane exhibits a roughly uniform distribution with a V-shaped pattern, whereas the valence-dominance plane demonstrates a similar distribution but revealing a linear tendency, once again affirming their high correlation. Similarly, the arousal-dominance plane displays a uniform, somewhat more vertical distribution than valence-dominance. The colored spots correspond to the densest areas of values, aligning with the trends observed in the univariate distributions.
+
+\begin{figure}[Bivariate histograms of valence, arousal and dominance]{FIG:BIVARIATE}{Bivariate \acs{vad} histograms, each illustrating a sentiment plane.}\includesvg[inkscapelatex=false, width=1\textwidth]{BivariateDist}
+\end{figure}

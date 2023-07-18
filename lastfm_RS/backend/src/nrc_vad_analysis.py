@@ -49,7 +49,7 @@ Span.set_extension(
 with open(nrc, encoding="utf-8-sig") as csvfile:
     reader = list(csv.DictReader(csvfile))
 
-FIELDNAMES = ['Sentence ID', 'Sentence', 'Valence', 'Sentiment Label', 'Sentiment Score', 'Arousal', 'Dominance',
+FIELDNAMES = ['Sentence ID', 'Sentence', 'Valence', 'Sentiment Label', 'Sentiment Ratio', 'Arousal', 'Dominance',
               '# Words Found', 'Found Words', 'All Words']
 
 FIELDNAMES_LANG = FIELDNAMES + ['Language', 'Language Score']
@@ -281,9 +281,9 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
         # Set sentiment label
         vad = VAD(sentiment, arousal, dominance)
         if detailed:
-            # Sentiment score
-            stsc = (pos_words - neg_words) / max(1, pos_words + neg_words)
-            vad = deque([text, sentiment, vad.label, stsc, arousal, dominance, ("%d out of %d" % (
+            # Sentiment ratio score
+            sratio = (pos_words - neg_words) / max(1, pos_words + neg_words)
+            vad = deque([text, sentiment, vad.label, sratio, arousal, dominance, ("%d out of %d" % (
                 num_found, len(all_words))), found_words, all_words])
 
     # Language detection attributes

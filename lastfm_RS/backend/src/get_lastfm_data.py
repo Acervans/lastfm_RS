@@ -478,7 +478,7 @@ if __name__ == "__main__":
 
     if sys.argv[1] in ('-v', '-a'):
 
-        # Get VAD + StSc for each unique tag
+        # Get VAD + StR for each unique tag
         tag_vads = dict()
 
         # English Wikipedia
@@ -504,13 +504,13 @@ if __name__ == "__main__":
                         if page:
                             # Get Wikipedia summary for tag
                             text = page.summary
-                            # Analyze summary and extract VAD and StSc
+                            # Analyze summary and extract VAD and StR
                             vad = analyze_string(text, detailed=True)
 
                             if 'N/A' not in vad:
-                                vadsc = vad[1], vad[4], vad[5], vad[3]
-                                # Assign VAD and StSc to current tag
-                                tag_vads[tag] = vadsc
+                                vadsr = vad[1], vad[4], vad[5], vad[3]
+                                # Assign VAD and StR to current tag
+                                tag_vads[tag] = vadsr
 
                         print_load_percentage(i+1, total_tags)
                         break

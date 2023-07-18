@@ -42,6 +42,6 @@ eval_args:
   # mode: uni100
   mode: full
 
-metrics: [Recall, MRR, NDCG, Hit, Precision]
+metrics: [Recall, MRR, NDCG, MAP, Precision]
 topk: 20
 valid_metric: NDCG@20

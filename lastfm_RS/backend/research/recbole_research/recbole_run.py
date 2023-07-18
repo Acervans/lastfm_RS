@@ -1,12 +1,6 @@
-
-# @Time   : 2020/7/20
-# @Author : Shanlei Mu
-# @Email  : slmu@ruc.edu.cn
-
-# UPDATE
-# @Time   : 2022/7/8, 2020/10/3, 2020/10/1
-# @Author : Zhen Tian, Yupeng Hou, Zihan Lin
-# @Email  : chenyuwuxinn@gmail.com, houyupeng@ruc.edu.cn, zhlin@ruc.edu.cn
+# Recbole utilities adapted from recbole.quick_start to this project
+# @Time   : 2023/07/12
+# @Author : Javier Wang Zhou
 
 import argparse
 import importlib

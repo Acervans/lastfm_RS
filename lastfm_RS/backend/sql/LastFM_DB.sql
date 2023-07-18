@@ -84,13 +84,6 @@ CREATE TABLE IF NOT EXISTS UserTopArtists (
   PRIMARY KEY (user_id, artist_id)
 );
 
-CREATE TABLE IF NOT EXISTS UserTopTags (
-  user_id integer NOT NULL,
-  tag_id integer NOT NULL,
-  rank integer NOT NULL,
-  PRIMARY KEY (user_id, tag_id)
-);
-
 CREATE TABLE IF NOT EXISTS UserTopTracks (
   user_id integer NOT NULL,
   track_id integer NOT NULL,
@@ -118,13 +111,6 @@ ADD
   CONSTRAINT FK_User_TO_UserTopAlbums FOREIGN KEY (user_id) REFERENCES User_ (id),
 ADD
   CONSTRAINT FK_Album_TO_UserTopAlbums FOREIGN KEY (album_id) REFERENCES Album (id);
-
-ALTER TABLE
-  UserTopTags
-ADD
-  CONSTRAINT FK_User_TO_UserTopTags FOREIGN KEY (user_id) REFERENCES User_ (id),
-ADD
-  CONSTRAINT FK_Tag_TO_UserTopTags FOREIGN KEY (tag_id) REFERENCES Tag (id);
 
 ALTER TABLE
   UserRecentTracks

@@ -1,0 +1,36 @@
+\subsubsection{Functional requirements}
+\newcounter{DSF}
+\begin{functionalmod}[DS]
+    \item The dataset will be static, meaning that no new data will be added at any point, as it should be stable to provide consistent results for evaluation purposes.
+    \item The dataset must include data from a minimum of 50,000 users to ensure a substantial user base, necessary for a reasonable evaluation of the recommendation models.
+    \begin{functionalmod}[DS]
+        \item Each user will have associated recent, top and loved tracks, as well as top artists and top albums, to capture diverse preferences and generate more extensive user profiles.
+    \end{functionalmod}
+    \item The dataset will include tags associated with each track to perform sentiment analysis on.
+    \item The dataset will include additional information about tracks, namely artists and albums, to enable a fair comparison between the embedding of sentiment attributes and other track features.
+    \begin{functionalmod}[DS]
+        \item Artists and albums will include their own associated tags to expand on tag data, contributing to track tagging and reduction of data sparsity.
+    \end{functionalmod}
+    \setcounter{DSF}{\value{enumi}}
+\end{functionalmod}
+\subparagraph{Sentiment analyzer}
+\begin{functionalmod}[DS]
+    \setcounter{enumi}{\value{DSF}}
+    \item The sentiment analyzer will generate sentiment attributes, specifically valence, arousal, dominance, and sentiment ratio or proportion of positive to negative words, for any given English text.
+    \item The sentiment analyzer must load all necessary information into memory during initialization, which should occur only once upon module importation, to optimize subsequent analysis.
+    \item The sentiment analyzer must support two modes of text processing: whole text and sentence-segmented; allowing analysis at both document and sentence levels.
+    \item The sentiment analyzer must allow the final sentiment attributes to be obtained from the mean or the median of the individual scores.
+\end{functionalmod}
+
+\subsubsection{Non-functional requirements}
+
+\newcounter{DSNF}
+\begin{nonfunctionalmod}[DS]
+    \item The dataset acquirement should be reasonable in both time and size, taking into account \acs{api} rate limits, computer constraints and time dedication.
+    \setcounter{DSNF}{\value{enumi}}
+\end{nonfunctionalmod}
+\subparagraph{Sentiment analyzer}
+\begin{nonfunctionalmod}[DS]
+    \setcounter{enumi}{\value{DSNF}}
+    \item The sentiment analyzer should use optimized, state-of-the-art libraries for text processing, so its usage is viable for real world applications.
+\end{nonfunctionalmod}

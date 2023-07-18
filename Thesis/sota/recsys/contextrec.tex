@@ -1,0 +1,18 @@
+Context-aware recommender systems have garnered significant attention in recent years for their ability to take into account the specific context in which users interact while generating recommendations. Said context is comprised of contextual factors, which can be fully observable (explicit information), unobservable (the model extracts the latent variables implicitly) or partially observable.
+
+\subsubsection{Feature engineering}
+
+Observable factors might be obtained and processed through feature engineering, which plays a crucial role in context-aware recommendation. In particular, it involves selecting or creating relevant data that captures users' and items' characteristics or context through domain knowledge. These features may be tested and evaluated of their relevance and impact on the model's performance, some enhancing its accuracy, and some being more redundant.
+
+\subsubsection{Popular applications}
+
+Typically, this type of recommenders are not exclusively dependent on context, but instead incorporate methods to embed contextual information into the final model, some popular examples being:
+
+\begin{compactitem}[\textbullet]
+    \item \textbf{Collaborative Filtering with Context}: By incorporating contextual information into the recommendation process, these systems extend traditional collaborative filtering and combine user-item preferences with contextual features to improve the model~\cite[Classical Approaches]{CHAPTER:RS-HANDBOOK-CONTEXT}.
+    \item \textbf{Matrix Factorization with Side Information}: Matrix factorization models are enhanced to incorporate contextual factors as additional input features. By jointly factorizing the user-item matrix and the context (or content) matrix, these models capture the influence of context on user preferences and generate contextually relevant recommendations. One popular application of this are \ac{fm}~\cite[Classical Approaches, Tensor Factorization]{CHAPTER:RS-HANDBOOK-CONTEXT}.
+    \item \textbf{Contextual Bandits}: Contextual bandit algorithms select items to recommend based on contextual information and observed user feedback. These algorithms aim to strike a balance between exploration and exploitation, considering the context to optimize recommendation choices over time~\cite[Reinforcement Learning]{CHAPTER:RS-HANDBOOK-CONTEXT}.
+    \item \textbf{Deep Learning with Context}: \ac{dl} models, such as neural networks, can effectively learn complex patterns in contextual data. By integrating contextual information into the architecture, \acs{dl} models capture the nuances of the user's preferences in different contexts~\cite[Deep Learning]{CHAPTER:RS-HANDBOOK-CONTEXT}.
+\end{compactitem}
+
+As it can be deduced, these type of recommenders perform best when hybridized with techniques that work on other aspects of the process or the data, in order to provide users with truly useful recommendations.

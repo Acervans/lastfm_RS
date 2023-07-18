@@ -1,16 +1,22 @@
 #!/bin/bash
 
+# NOTE: To setup the database:
+# 1. Install PostgreSQL:
+# 2. Move to lastfm_RS and execute: make reset_db
+# 3. Execute Python script: lastfm_RS/backend/src/insert_lastfm_data.py
+
+# Conda environment name
+ENV_NAME='lastfm_venv'
+
 # Spacy model for pos tagging, sentence parsing and tokenization
 # Recommended: en_core_web_sm, en_core_web_lg
 SPACY_MODEL='en_core_web_lg'
 
-# Setup current environment with modules and libraries
-# App modules
-pip3 install autopep8 django django-admin dj_database_url psycopg2-binary bs4 nltk spacy spacy_fastlang pylast lyricsgenius \
-             whitenoise djLint sqlalchemy wikipedia pyngrok django-bootstrap5
-# Additional modules
-pip3 install gunicorn zipp urllib3 typing-extensions toml text-unidecode static3 sqlparse six pytz PyJWT pyflakes pycparser \
-             pycodestyle Pillow image flake8 Faker django-debug-toolbar django-crispy-forms django-allauth dj-static coverage
+# Setup conda environment with modules and libraries
+eval "$(conda shell.bash hook)"
+conda env create environment.yml -n $ENV_NAME
+conda activate $ENV_NAME
+
 # Use Python to download libraries + Insert required code to lyricsgenius.genius
 python3 -c "
 import nltk
@@ -50,3 +56,5 @@ if not already_ins:
     with open(lyricsgenius.genius.__file__, 'w') as f:
         f.writelines(code)
 "
+
+printf "\nAll done! Activate the environment with: conda activate $ENV_NAME\n"

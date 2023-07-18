@@ -1,0 +1,43 @@
+\subsubsection{Data scraping from Last.fm\label{SSS:DATASET_DS}}
+
+The implementation of the data scraper involves the use of several libraries such as pylast, a Python wrapper for Last.fm's \acs{api}~\cite{PYLAST}, BeautifulSoup for parsing \acs{html} content from the webpage, and JSON for serializing the raw data. All \acs{api} accesses by any module of the project were done through pylast, as it provides useful classes and methods to acquire mostly all the needed data.
+
+One crucial aspect of the implementation is the management of network and data exceptions. To handle potential failures, the scraper incorporates a retry mechanism where, in case of an exception, the program retries the operation a certain number of times before moving on. Considering the substantial duration of the entire scraping process, this approach ensures that the scraper can recover from transient network issues or other exceptions and continue without being entirely hindered by individual failures.
+
+\begin{figure}[Steps of data scraping]{FIG:DATASCRAPER}{Steps of data scraping}\includesvg[inkscapelatex=false,width=0.56\textwidth]{DataScraper}
+\end{figure}
+
+The scraping is performed in various steps, which can be executed separately but depend on the data from previous ones, as represented in Figure~\ref{FIG:DATASCRAPER}:
+
+\begin{compactenum}[\bfseries 1.]
+
+    \item First of all, the data scraper retrieves the top 50 chart tags using the \acs{api}, representing the most listened tags at the time. For each tag, the scraper obtains the top unique artists associated with them, navigates to the artists' webpages on Last.fm and collects the top unique listeners, considering a maximum of 30 for each artist. These listeners need to be stored as they will represent users in the database, forming the basis for the recommendation models.
+    \item Next, the scraper utilizes the \acs{api} to gather data from the top listeners, acquiring their top 20 tracks, recent tracks, and loved tracks, each with the corresponding timestamp, artist and album information. Additionally, it collects the top 10 artists and albums (with their respective artists) for each listener. All of this information is then stored as potential user-item interactions and features for the recommendation models.
+    \item The scraper continues by fetching the top 10 tags assigned by users to each unique track, artist, and album; before storing both the unique tags and all the item-tag assignments, which will be used in the following step.
+    \item Lastly, to complement the items with sentiment attributes, the scraper retrieves definition summaries for each unique tag using a Python implementation for Wikipedia's \acs{api}~\cite{WIKIPEDIA}, and then employs the developed sentiment analyzer over the texts to extract \acs{vad} and sentiment scores. For each unique track, artist, and album, weighted averages of the sentiment attributes are calculated based on the associated tags. The importance of each tag is determined by its rank, with the higher-ranking tags carrying much more weight as they are the most representative.
+
+\end{compactenum}
+
+The data in raw files bears little use, so it must be inserted into a suitable database, as designed in Section~\ref{SS:DATABASE_DES}. Also, a clear flaw in the process is the text used for sentiment analysis, as definitions are typically objective, and may not be sufficiently representative of the tags. However, it was the only source of reliable, standardized text that could still produce substantial and useful attributes.
+
+
+\subsubsection{Sentiment analyzer\label{SSS:DATASET_SA}}
+
+The sentiment analyzer makes use of a custom spaCy \acs{nlp} pipeline (see \hyperref[FIG:SPACY]{Appendix B}) that takes care of all the text processing via pipes, which are essentially trained models that focus on specific steps and techniques. In this case, the pipeline was optimized to disable unnecessary pipes and use only the minimal and fastest versions for each step. The analyzer also leverages \acs{nltk}'s WordNet, a corpus reader that includes synsets or synonym sets, which allow to search for words of similar meaning based on their lemma and \acs{pos} tag.
+
+Considering the diagram in Figure~\ref{FIG:ANALYZER}, we can divide the analysis in the following steps:
+
+\begin{compactenum}[\bfseries 1.]
+    \item Upon execution, the analyzer initializes the necessary resources, including loading the \acs{nrc}-\acs{vad} lexicon and configuring the spaCy \acs{nlp} model and pipeline. When a piece of text needs to be analyzed, the \acs{nlp} pipeline parses and divides it into tokens, from which the \acs{pos} tags and lemmas are obtained. 
+
+    \item Afterwards, sentiment analysis is performed by iterating through the tokens, filtering out non-alphabetic and stop words, searching for the lemmas in the \acs{nrc}-\acs{vad} lexicon and extracting sentiment values. To increase analysis coverage, the analyzer incorporates synonym search functionality. When a word is not found in the lexicon, the analyzer makes use of synsets to retrieve words related to the original lemma, effectively expanding the search scope and providing a broader analysis of sentiment nuances.
+
+    \item When a token is found, the analyzer includes procedures to handle sentiment modifiers, such as negation and degree adverbs. It detects and considers the positioning of such modifiers in the analyzed text, enabling adjustments to sentiment scores based on the \acs{pos} tags and whether they are negating, increasing or decreasing. After applying the score modifications, the final valence is used to assign a sentiment label: positive, negative or neutral.
+
+    \item Finally, after processing all tokens in the text, the analyzer then generates the final \acs{vad} scores by computing either the mean or median, as well as an additional sentiment ratio by dividing the difference between positively and negatively labeled words, by the total number of tokens found in the sentence or overall text.
+\end{compactenum}
+
+\begin{figure}[Sentiment analyzer]{FIG:ANALYZER}{Sentiment analyzer structure}\hspace*{1.4em}\includesvg[inkscapelatex=false,width=0.95\textwidth]{Analyzer}
+\end{figure}
+
+This sentiment analyzer was inspired from a simpler version implemented with \acs{nltk} and StanfordNLP, a different natural language processing package; which made use of a lexicon smaller than \acs{nrc}-\acs{vad}~\cite{SENTIMENTANALYSIS}. The inclusion of sentiment modifiers was also based on VADER, a sentiment analysis tool that offers accurate computation of valence in the context of social media~\cite{VADER}.

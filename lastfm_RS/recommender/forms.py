@@ -7,6 +7,7 @@ from backend.src.constants import TRACK_LIMIT, ARTIST_LIMIT, ALBUM_LIMIT, TAG_LI
 
 MAX_LENGTH = 1000
 
+
 class RegisterForm(UserCreationForm):
     class Meta:
         model = User
@@ -47,17 +48,18 @@ class TagsInput(forms.Widget):
 class RecommendationsForm(forms.Form):
     model = forms.ChoiceField(label='Model Selection', choices=[
         ('random', 'Random'),
-        ('pop', 'Pop (item popularity)'),
-        ('cosine', 'Cosine Similarities (Tag-based)'),
+        ('pop', 'Pop'),
+        ('cosine', 'Cosine Similarities'),
         ('itemknn', 'ItemKNN'),
-        ('itemknnvad', 'ItemKNN (Sentiment)'),
         ('dcnv2', 'DCN V2'),
         ('pnn', 'PNN'),
+        ('xdeepfm', 'xDeepFM'),
         ('search', 'Search'),
     ], widget=forms.RadioSelect, initial='random')
     username = forms.CharField(
         label='Username', max_length=MAX_LENGTH, required=False)
     username.widget.attrs['list'] = 'usernames'
+    username.widget.attrs['placeholder'] = 'Random User'
     cutoff = forms.IntegerField(label='Cutoff', min_value=1, initial=10)
     limit = forms.IntegerField(
         label='Per Page', min_value=1, required=False, initial=10)
@@ -81,10 +83,11 @@ def create_input(placeholder, hidden=True):
     input_type = forms.HiddenInput if hidden else forms.TextInput
     return forms.CharField(
         label='Query', required=False, strip=False, widget=input_type(attrs={
-        'placeholder': placeholder,
-        'class': 'form-control',
-        'maxlength': MAX_LENGTH
-    }))
+            'placeholder': placeholder,
+            'class': 'form-control',
+            'maxlength': MAX_LENGTH
+        }))
+
 
 class SearchForm(forms.Form):
     by = forms.ChoiceField(label='Search by', choices=[
@@ -121,4 +124,8 @@ class UserScraperForm(forms.Form):
     tags_limit = forms.IntegerField(
         label='Tags limit', required=False, initial=TAG_LIMIT, min_value=1)
 
-    item_fields = [(f'{i}_limit', f'include_{i}') for i in ('tracks', 'artists', 'albums', 'tags')]
+    anonymous = forms.BooleanField(
+        required=False, initial=False, widget=forms.HiddenInput())
+
+    item_fields = [(f'{i}_limit', f'include_{i}')
+                   for i in ('tracks', 'artists', 'albums', 'tags')]

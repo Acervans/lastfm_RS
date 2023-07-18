@@ -64,7 +64,7 @@ form tr {
 #main {
     transition: 0.5s;
     max-width: none;
-    flex: 1 1 88%;
+    flex-basis: 88%;
     overflow: scroll;
 }
 
@@ -166,15 +166,19 @@ form tr {
 
 /* The sidebar menu */
 #sidebar {
-    padding-top: 32px;
     max-width: none;
     border-right: 1px #a5d1c3 solid;
-    font-size: min(16pt, 1.8vw);
+    font-size: calc(1rem + .3vw);
     z-index: 1;
     word-break: break-word;
-    overflow-x: hidden;
+    overflow: hidden;
     /* Disable horizontal scroll */
     flex: 1 1 12%;
+}
+
+#sidebar-navs {
+    margin-top: 32px;
+    overflow-y: auto;
 }
 
 /* The sidebar links */
@@ -399,4 +403,16 @@ input.form-control {
 
 textarea.form-control {
     width: fit-content;
+}
+
+.tableauPlaceholder {
+    position: relative;
+}
+
+.tableauPlaceholder img {
+    border: none;
+}
+
+.tableauViz {
+    display: none;
 }

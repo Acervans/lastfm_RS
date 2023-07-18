@@ -1,0 +1,66 @@
+The web application, named \emph{LastMood}, was built to showcase the tools used during data collection and the final recommendation models trained on said data, by providing a user-friendly interface. For this purpose, it plays the role of the central link that unifies every component, as a representative of the work done throughout the project.
+
+As it can be seen in Figure~\ref{FIG:WEBARCH}, the application consists of four tools: the Track Previewer, the Sentiment (\acs{vad}) Analyzer, the User Scraper and the Track Recommender. These will be explained with sequence diagrams, to visually depict the interactions between each component and the flow of actions taken by the system.
+
+\subsubsection{Track Previewer}
+
+The \textbf{Track Previewer} is designed to allow users to request a track by specifying the artist and title, and retrieve relevant information and previews from Last.fm\@. As noted on the sequence diagram in Figure~\ref{FIG:SDSCRAP}, the previewer makes use of both Last.fm's \acs{api} and webpage to gather the necessary data.
+
+\begin{compactenum}[\bfseries 1.]
+    \item First off, users provide the artist and title of the track they want to preview, which must exist in Last.fm\@. The Track Previewer then makes calls to Last.fm's \acs{api} to obtain the context of the track, including the artist and track \acs{url}\@.
+    \item Afterwards, the component accesses the track's webpage by sending a request to the \acs{url}, and scrapes the \acs{html} content to search for the containers that hold the Youtube and Spotify previews from Last.fm\@. Upon finding them, the scraper aims at the preview identifiers, such as the Youtube video ID or Spotify track ID\@.
+    \item Finally, the template for the previewer inserts the extracted previews into the webpage, as media embeds. Upon any error, such as non-existent tracks or previews missing from the webpage, the template dynamically reflects the error as feedback to the user.
+\end{compactenum}
+
+The main use of this tool is for the track recommender to include usable previews in the recommendations, enabling easier interaction and comparison of tracks listened by the users in the database.
+
+\begin{figure}[Sequence diagram: Track Previewer]{FIG:SDPREV}{Sequence diagram: Track Previewer}\includesvg[inkscapelatex=false,width=0.58\textwidth]{SDPreviewer}
+\end{figure}
+
+\subsubsection{\acs{vad} Analyzer}
+
+As observed in Figure~\ref{FIG:SDVAD}, the \textbf{\ac{vad} Analyzer} requests an input text and two options: the computation mode for the \acs{vad} scores by mean or median of the text, and the analysis method for the text, as a whole or divided by sentences. The analysis results are presented in a table format, where each row represents either the entire text or individual sentences. The columns in the table include the text itself, along with valence, arousal, and dominance scores. Additionally, each row includes a sentiment label (positive, negative, or neutral), the \hyperref[EQ:StRatio]{sentiment ratio}, the number of words analyzed, and a list of the words as lemmas. The analyzer was used during the dataset collection to generate sentiment attributes, and its functionality details are explained in Subsection~\ref{SSS:DATASET_SA}.
+
+\begin{figure}[Sequence diagram: VAD Analyzer]{FIG:SDVAD}{Sequence diagram: \acs{vad} Analyzer}\includesvg[inkscapelatex=false,width=0.44\textwidth]{SDAnalyzer}
+\end{figure}
+
+\subsubsection{User Scraper}
+
+The \textbf{User Scraper} tool in the web application allows users to input a username and select options, such as whether to retrieve data from the database or Last.fm's \acs{api}, or enabling scraping and setting result limits for tracks, artists, albums, and tags, as represented in Figure~\ref{FIG:SDSCRAP}.
+
+For tracks, the scraper can obtain three types: top, loved and recent tracks; each including its title, artist and album. Recent tracks also have a ``listened at'' column, which captures the timestamp of when the user listened to the track, while loved tracks have a ``loved at'' column indicating the moment when the track was liked. Artists are stored with their names, and albums are associated with their titles and corresponding artists. At the end of the scraping process, and if the tag option is enabled, tags are extracted using the previous items and appended to their information.
+
+All scraped items are organized into tables for easy visualization, in addition to a pie chart representing the frequency of each tag across all items, allowing to identify the most common tags listened by the user. This tool showcases part of the functionality developed for the dataset scraper, responsible for the acquirement of the dataset used to obtain sentiment attributes and train the recommendation models, and the implementation of which is explained in Subsection~\ref{SSS:DATASET_DS}.
+
+\begin{figure}[Sequence diagram: User Scraper]{FIG:SDSCRAP}{Sequence diagram: User Scraper}\includesvg[inkscapelatex=false,width=0.66\textwidth]{SDScraper}
+\end{figure}
+
+On another front, the track recommender generates links towards this tool, gathering data from selected users and providing an interface to compare recommendation results with a user's preferences and listen history.
+
+\subsubsection{Track Recommender}
+
+The \textbf{Track Recommender} offers users the ability to generate recommendations from one of the best recommender models, which were trained and evaluated with different metrics and features (see Chapter~\ref{CAP:EXPRES}). As outlined in Figure~\ref{FIG:SDREC}, users can input a username from a list of available usernames in the database, or leave it blank to select one at random. They can also specify a cutoff for the top results to display, and set a limit for the number of results per page, providing pagination functionality. Some recommenders may have additional parameters which would be shown when the model is selected.
+
+After requesting the recommendations, the system loads the trained model, which then returns the predicted tracks and scores for the chosen user. Then, the relevant context for each track is obtained from the database and finally returned as a catalogue, where each track is displayed in a card format. The cards contain information such as the track title, artist, album, rank, and associated tags. Users can have access to the track's preview page, or to a modal that shows additional details, including the tags of the track, artist, and album, as well as their \acs{vad} and sentiment score. The result page also includes a link leading to the user scraper page for the chosen user, as a way of viewing their listen profile.
+
+\begin{figure}[Sequence diagram: Recommendations]{FIG:SDREC}{Sequence diagram: Recommendations}\includesvg[inkscapelatex=false,width=0.67\textwidth]{SDRecommender}
+\end{figure}
+
+\subsubsection{Recommendation models}
+
+The web application utilizes RecBole~\cite{RECBOLE}, a comprehensive and efficient recommendation library that provides several modern recommendation models, as well as a framework to work with these models. The decision to use RecBole over other libraries is detailed in Section~\ref{SS:LIBMODELS}.
+
+RecBole offers various utilities for training and evaluation, including implemented metrics, options for data loading, processing and sampling, and automatic parameter tuning tools. The library allows for easy customization through provided interfaces and supports configuration through files and parameters (see \hyperref[FIG:RBFRAMEWORK]{Appendix B} for an overview of the framework).
+
+In terms of model design, RecBole includes an \emph{AbstractRecommender} class, which serves as the base for four types of recommenders, namely \emph{GeneralRecommender} (general algorithms), \emph{SequentialRecommender} (next-item prediction), \emph{KnowledgeRecommender} (knowledge-based), and \emph{ContextRecommender} (context-aware), each being abstract classes themselves, as depicted in the class diagram of Figure~\ref{FIG:RBCLASS}. RecBole offers several models for each recommender type, which need to define methods for calculating training loss and predicting user-item interactions.
+
+Three more models were designed as a means to generate additional feedback for this project (see \hyperref[AP:MODELS]{Appendix D} for implementations):
+
+\begin{compactitem}[\textbullet]
+    \item \textbf{RandomRecommender}, a general recommender which generates random scores for each track, and may be used as a baseline model.
+    \item \textbf{CosineSimilarityRecommender}, another general recommender which leverages the tags associated with tracks to compute similarities using \acs{tf}-\acs{idf} vectorization. Recommendations are therefore based on tag similarity, and additional parameters can be adjusted to assign weight to tag ranking.
+    \item \textbf{HybridVADRecommender}, a \emph{ContextRecommender} that inherits from other context-aware models. It calculates scores by averaging the scores generated by the inherited model, and the Euclidean distance between the \acs{vad} values of tracks. The closer the tracks align with a user's average \acs{vad}, the higher the score.
+\end{compactitem}
+
+\begin{figure}[Class diagram: Recommendation models]{FIG:RBCLASS}{Class diagram: Recommendation models}\includesvg[inkscapelatex=false,width=0.61\textwidth]{RBClass}
+\end{figure}

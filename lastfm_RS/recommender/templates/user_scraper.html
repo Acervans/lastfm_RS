@@ -1,16 +1,16 @@
 {% extends "base_generic.html" %}
 {% block title %}
-    Data Scraped from {{ username }}
+    Data Scraped from {{ alias }}
 {% endblock title %}
 {% block scripts %}
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock scripts %}
 {% block content %}
     <h2>
-        Last.FM Data from <a href="{{ user_url }}" target="_blank">{{ username }}</a>
+        Last.FM Data from <a href="{{ user_url }}" target="_blank">{{ alias }}</a>
     </h2>
     <div id="scrape-tracks">
-        <h4>{{ username }}'s Tracks</h4>
+        <h4>{{ alias }}'s Tracks</h4>
         <table class="table table-light table-striped table-bordered top-tracks-table">
             <caption class="caption-top">Top Tracks</caption>
             <thead class="table-dark">
@@ -57,7 +57,7 @@
         </table>
     </div>
     <div id="scrape-artists">
-        <h4>{{ username }}'s Top Artists</h4>
+        <h4>{{ alias }}'s Top Artists</h4>
         <table class="table table-light table-striped table-bordered top-artists-table">
             <thead class="table-dark">
                 <tr>
@@ -71,7 +71,7 @@
         </table>
     </div>
     <div id="scrape-albums">
-        <h4>{{ username }}'s Top Albums</h4>
+        <h4>{{ alias }}'s Top Albums</h4>
         <table class="table table-light table-striped table-bordered top-albums-table">
             <thead class="table-dark">
                 <tr>
@@ -87,7 +87,7 @@
     </div>
     {% if do_tags == "true" %}
         <div id="scrape-tags">
-            <h4>{{ username }}'s Tags</h4>
+            <h4>{{ alias }}'s Tags</h4>
             <canvas id="tags-piechart"></canvas>
         </div>
     {% endif %}

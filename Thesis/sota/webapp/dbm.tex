@@ -1,0 +1,15 @@
+Efficient database management is a critical aspect of web application development, and Django excels in this area. It offers seamless integration with various databases, including PostgreSQL, a powerful open-source relational database management system. 
+
+Relational databases are known for their reliability, robustness, data integrity and \ac{sql}, and are inherently supported by Django as its primary way of persisting the data and relationships between tables.
+
+Django's built-in \acs{orm} layer simplifies database interactions by allowing developers to work with databases using models defined in Python, which serve as blueprints for creating database tables and managing data. Nevertheless, when the amount of data is too large and querying speed is paramount, Django's \acs{orm} might be outperformed by other libraries such as SQLAlchemy.
+
+\subsubsection{SQLAlchemy Toolkit}
+
+SQLAlchemy is a popular Python library for advanced database operations, which offers a higher level of abstraction and flexibility when working with database systems, including PostgreSQL, which was used in this project.\@ It provides a powerful toolkit for creating complex queries, performing data manipulations and optimizing database interactions~\cite{SQLALCHEMY}. While not an integral part of Django, SQLAlchemy can be seamlessly embedded into Django projects, to provide a more versatile, efficient and scalable database management when needed.
+
+In addition, this toolkit includes its own \acs{orm}, which abstracts away the complexities of raw \acs{sql} queries and allows developers to focus on application logic and development speed. Being built in Python, SQLAlchemy provides additional flexibility and capabilities for customizing and parameterizing queries.
+
+\PythonCode[COD:SQLAlchemy]{SQLAlchemy example}{Example usage of SQLAlchemy's \acs{orm} interacting with an existing database. Function \emph{get\_user\_id} filters a user by the given username, returning their ID.}{python/sqlalchemy.py}{3}{16}{3}
+
+For many projects, Django's \acs{orm} provides ample functionality, eliminating the need for an additional library like SQLAlchemy. The choice between Django's \acs{orm} and SQLAlchemy ultimately depends on the database requirements and complexity of the project, which is accounted for in this case.
