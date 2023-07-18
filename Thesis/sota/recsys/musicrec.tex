@@ -5,13 +5,13 @@ Music recommendation is a specialized domain of recommender systems that focuses
 Two popular techniques applied to music recommender systems are collaborative filtering and content-based filtering:
 
 \begin{compactitem}[\textbullet]
-\item \textbf{Collaborative Filtering}: This technique analyzes user behavior and preferences to identify similarities between users or items. It recommends music that is popular among users with similar tastes, enabling the discovery of new songs or artists based on collective preferences~\cite[Chapter 3.1]{CHAPTER:RS-HANDBOOK-MUSIC}.
+\item \textbf{Collaborative Filtering}: This technique analyzes user behavior and preferences to identify similarities between users or items. It recommends music that is popular among users with similar tastes, enabling the discovery of new songs or artists according to collective preferences~\cite[Chapter 3.1]{CHAPTER:RS-HANDBOOK-MUSIC}.
 
-\item \textbf{Content-Based Filtering}: To find similar songs, this technique utilizes user-specific features, such as listening history, favorite genres or preferred artists; music-specific features, such as genre, tempo, acoustic properties or lyrics; and contextual features, such as time of day, location or mood. It tailors recommendations based on the attributes of the music that the user has enjoyed, providing songs that align with their individual tastes~\cite[Chapter 3.2]{CHAPTER:RS-HANDBOOK-MUSIC}.
+\item \textbf{Content-Based Filtering}: To find similar songs, this technique utilizes user-specific features, such as listening history, favorite genres or preferred artists; music-specific features, such as genre, tempo, acoustic properties or lyrics; and contextual features, such as time of day, location or mood. It tailors recommendations characterized by the attributes of the music that the user has enjoyed, providing songs that align with their individual tastes~\cite[Chapter 3.2]{CHAPTER:RS-HANDBOOK-MUSIC}.
 
 \end{compactitem}
 
-Both techniques are often based on similarities between users or items and common interactions or characteristics, which can be obtained from metrics such as Euclidean distance or cosine similarity. In the context of recommendation, cosine similarity is a popular choice for content-based systems, as the content usually consists of tokens or pieces of text (e.g., summaries, comments, tags). First, however, these texts need to be vectorized, using methods like \acs{tf}-\acs{idf} or count vectorization.
+Both techniques are often centered around similarities between users or items and common interactions or characteristics, which can be obtained from metrics such as Euclidean distance or cosine similarity. In the context of recommendation, cosine similarity is a popular choice for content-based systems, as the content usually consists of tokens or pieces of text (e.g., summaries, comments, tags). First, however, these texts need to be vectorized, using methods like \acs{tf}-\acs{idf} or count vectorization.
 
 \subsubsection{Cosine similarity}
 
@@ -24,7 +24,7 @@ Where $A$ and $B$ are vectors, with $|A|$ being the vector magnitude of $A$.
 
 \subsubsection{\acs{tf}-\acs{idf}}
 
-\acl{tf}-\acl{idf} (\acs{tf}-\acs{idf}) [\ref{EQ:TF-IDF}] is a text vectorization technique that assigns weights to words in a document based on their importance in the document and the corpus as a whole. It calculates a score by multiplying the \ac{tf}, which measures how frequently a term appears in a document, with the \ac{idf}, which measures the rarity of a term across the entire corpus. By highlighting terms that are both frequent within a specific document and relatively rare in the overall corpus, it allows for the identification of more important and discriminative terms.
+\acl{tf}-\acl{idf} (\acs{tf}-\acs{idf}) [\ref{EQ:TF-IDF}] is a text vectorization technique that assigns weights to words in a document, based on their importance in both the document and the corpus as a whole. It calculates a score by multiplying the \ac{tf}, which measures how frequently a term appears in a document, with the \ac{idf}, which measures the rarity of a term across the entire corpus. By highlighting terms that are both frequent within a specific document and relatively rare in the overall corpus, it allows for the identification of more important and discriminative terms.
 
 \begin{subequations}
     \begin{equation}[EQ:TF]{Term Frequency (TF)}

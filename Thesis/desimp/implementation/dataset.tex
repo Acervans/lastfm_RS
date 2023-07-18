@@ -23,7 +23,7 @@ The data in raw files bears little use, so it must be inserted into a suitable d
 
 \subsubsection{Sentiment analyzer\label{SSS:DATASET_SA}}
 
-The sentiment analyzer makes use of a custom spaCy \acs{nlp} pipeline (see \hyperref[FIG:SPACY]{Appendix B}) that takes care of all the text processing via pipes, which are essentially trained models that focus on specific steps and techniques. In this case, the pipeline was optimized to disable unnecessary pipes and use only the minimal and fastest versions for each step. The analyzer also leverages \acs{nltk}'s WordNet, a corpus reader that includes synsets or synonym sets, which allow to search for words of similar meaning based on their lemma and \acs{pos} tag.
+The sentiment analyzer makes use of a custom spaCy \acs{nlp} pipeline (see \hyperref[FIG:SPACY]{Appendix B}) that takes care of all the text processing via pipes, which are essentially trained models that focus on specific steps and techniques. In this case, the pipeline was optimized to disable unnecessary pipes and use only the minimal and fastest versions for each step. The analyzer also leverages \acs{nltk}'s WordNet, a corpus reader that includes synsets or synonym sets, which allow to search for words of similar meaning derived from their lemma and \acs{pos} tag.
 
 Considering the diagram in Figure~\ref{FIG:ANALYZER}, we can divide the analysis in the following steps:
 
@@ -32,7 +32,7 @@ Considering the diagram in Figure~\ref{FIG:ANALYZER}, we can divide the analysis
 
     \item Afterwards, sentiment analysis is performed by iterating through the tokens, filtering out non-alphabetic and stop words, searching for the lemmas in the \acs{nrc}-\acs{vad} lexicon and extracting sentiment values. To increase analysis coverage, the analyzer incorporates synonym search functionality. When a word is not found in the lexicon, the analyzer makes use of synsets to retrieve words related to the original lemma, effectively expanding the search scope and providing a broader analysis of sentiment nuances.
 
-    \item When a token is found, the analyzer includes procedures to handle sentiment modifiers, such as negation and degree adverbs. It detects and considers the positioning of such modifiers in the analyzed text, enabling adjustments to sentiment scores based on the \acs{pos} tags and whether they are negating, increasing or decreasing. After applying the score modifications, the final valence is used to assign a sentiment label: positive, negative or neutral.
+    \item When a token is found, the analyzer includes procedures to handle sentiment modifiers, such as negation and degree adverbs. It detects and considers the positioning of such modifiers in the analyzed text, enabling adjustments to sentiment scores depending on the \acs{pos} tags and whether they are negating, increasing or decreasing. After applying the score modifications, the final valence is used to assign a sentiment label: positive, negative or neutral.
 
     \item Finally, after processing all tokens in the text, the analyzer then generates the final \acs{vad} scores by computing either the mean or median, as well as an additional sentiment ratio by dividing the difference between positively and negatively labeled words, by the total number of tokens found in the sentence or overall text.
 \end{compactenum}
@@ -40,4 +40,4 @@ Considering the diagram in Figure~\ref{FIG:ANALYZER}, we can divide the analysis
 \begin{figure}[Sentiment analyzer]{FIG:ANALYZER}{Sentiment analyzer structure}\hspace*{1.4em}\includesvg[inkscapelatex=false,width=0.95\textwidth]{Analyzer}
 \end{figure}
 
-This sentiment analyzer was inspired from a simpler version implemented with \acs{nltk} and StanfordNLP, a different natural language processing package; which made use of a lexicon smaller than \acs{nrc}-\acs{vad}~\cite{SENTIMENTANALYSIS}. The inclusion of sentiment modifiers was also based on VADER, a sentiment analysis tool that offers accurate computation of valence in the context of social media~\cite{VADER}.
+This sentiment analyzer was inspired from a simpler version implemented with \acs{nltk} and StanfordNLP, a different natural language processing package; which made use of a lexicon smaller than \acs{nrc}-\acs{vad}~\cite{SENTIMENTANALYSIS}. The inclusion of sentiment modifiers was also incluenced by VADER, a sentiment analysis tool that offers accurate computation of valence in the context of social media~\cite{VADER}.

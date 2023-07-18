@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # NOTE: To setup the database:
-# 1. Install PostgreSQL:
-# 2. Move to lastfm_RS and execute: make reset_db
-# 3. Execute Python script: lastfm_RS/backend/src/insert_lastfm_data.py
+# 1. Install PostgreSQL
+# 2. Move to lastfm_RS and execute: make restore_db
+# Done! The database will be created and populated
 
 # Conda environment name
 ENV_NAME='lastfm_venv'

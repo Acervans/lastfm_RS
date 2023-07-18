@@ -1,8 +1,10 @@
 lastfm_RS/backend/research/recbole_research/log*/
 lastfm_RS/backend/research/recbole_research/saved/*
-lastfm_RS/backend/sql/LastFM_DB_BACKUP.sql
+!lastfm_RS/backend/research/recbole_research/saved/random.pth
+!lastfm_RS/backend/research/recbole_research/saved/cosine.pth
 lastfm_RS/backend/data/lastfm_data/*
 lastfm_RS/backend/data/recsys_data/lastfm_recbole/*
+lastfm_RS/lastfm_db.dump
 
 .vscode/
 
