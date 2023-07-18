@@ -3,6 +3,7 @@ lastfm_RS/backend/research/recbole_research/saved/*
 !lastfm_RS/backend/research/recbole_research/saved/random.pth
 !lastfm_RS/backend/research/recbole_research/saved/pop.pth
 !lastfm_RS/backend/research/recbole_research/saved/cosine.pth
+!lastfm_RS/backend/research/recbole_research/saved/lastfm_recbole-dataset.zip
 lastfm_RS/backend/data/lastfm_data/*
 lastfm_RS/backend/data/recsys_data/lastfm_recbole/*
 lastfm_RS/lastfm_db.dump

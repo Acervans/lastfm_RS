@@ -4,7 +4,7 @@ export PGPASSWORD := alumnodb
 export PGCLIENTENCODING := UTF8
 export PGHOST := localhost
 export DJANGOPORT = 8001
-export RS_DATA := backend/data/recsys_data
+export RS_DATA := backend/research/recbole_research/saved/
 
 PSQL = psql
 CMD = python3 manage.py
@@ -60,4 +60,4 @@ connect_db:
 	$(PSQL) -U $(PGUSER) -d $(PGDATABASE)
 
 recsys_data:
-	unzip $(RS_DATA)/lastfm_recbole.zip -d $(RS_DATA)
+	unzip $(RS_DATA)/lastfm_recbole-dataset.zip -d $(RS_DATA)
