@@ -312,6 +312,7 @@ def recommendations(request):
         rec_form = RecommendationsForm(request.GET)
         if rec_form.is_valid():
             recsys = rec_form.cleaned_data.get('model')
+            model_name = dict(rec_form.fields['model'].choices)[recsys]
             username = url_user = rec_form.cleaned_data.get('username')
             cutoff = rec_form.cleaned_data.get('cutoff')
             limit = rec_form.cleaned_data.get('limit')
@@ -331,105 +332,109 @@ def recommendations(request):
                     anon = True
 
             model_path = f'{SAVED_PATH}/{recsys}.pth'
-            match recsys:
-                case 'random':
-                    recsys_form = RandomRecommenderForm(
-                        request.GET, prefix='random')
-                    if recsys_form.is_valid():
-                        seed = recsys_form.cleaned_data.get('seed')
-                        seed = seed if seed is not None else int(
-                            np.random.randint(2**32 - 1))
-                        predict_args = {'generate_new': True}
+            try:
+                match recsys:
+                    case 'random':
+                        recsys_form = RandomRecommenderForm(
+                            request.GET, prefix='random')
+                        if recsys_form.is_valid():
+                            seed = recsys_form.cleaned_data.get('seed')
+                            seed = seed if seed is not None else int(
+                                np.random.randint(2**32 - 1))
+                            predict_args = {'generate_new': True}
 
-                        if recsys not in RECSYS_MODELS:
+                            if recsys not in RECSYS_MODELS:
+                                RECSYS_MODELS[recsys] = load_model(model_path, config={
+                                    'seed': seed,
+                                })
+                            else:
+                                set_seed(seed)
+
+                    case 'cosine':
+                        recsys_form = CosineRecommenderForm(
+                            request.GET, prefix='cosine')
+                        if recsys_form.is_valid():
+                            tags = recsys_form.cleaned_data.get('tags')
+                            binary = recsys_form.cleaned_data.get('binary')
+                            weighted = recsys_form.cleaned_data.get('weighted')
+                            topk = recsys_form.cleaned_data.get('topk')
+
                             RECSYS_MODELS[recsys] = load_model(model_path, config={
-                                'seed': seed,
+                                'weighted_average': weighted,
+                                'knn_topk': topk if topk else None,
+                                'Vectorizer_Config': {
+                                    'binary': binary
+                                }
                             })
-                        else:
-                            set_seed(seed)
 
-                case 'cosine':
-                    recsys_form = CosineRecommenderForm(
-                        request.GET, prefix='cosine')
-                    if recsys_form.is_valid():
-                        tags = recsys_form.cleaned_data.get('tags')
-                        binary = recsys_form.cleaned_data.get('binary')
-                        weighted = recsys_form.cleaned_data.get('weighted')
-                        topk = recsys_form.cleaned_data.get('topk')
+                            if tags:
+                                tags = tags.split(',')
+                                recs = get_recommendations_by_tags(
+                                    tags, cutoff)
+                                username = ' + '.join(
+                                    map(lambda x: f"'{x}'", tags))
+                                url_user = None
 
-                        RECSYS_MODELS[recsys] = load_model(model_path, config={
-                            'weighted_average': weighted,
-                            'knn_topk': topk if topk else None,
-                            'Vectorizer_Config': {
-                                'binary': binary
-                            }
-                        })
+                    case 'search':
+                        recsys_form = SearchForm(
+                            request.GET, prefix='search')
+                        if recsys_form.is_valid():
+                            by = ('Track', 'Artist', 'Album')
+                            track_query, artist_query, album_query = queries = [
+                                recsys_form.cleaned_data.get(f'query_{x.lower()}') for x in by]
+                            by_labels = [f"{x} Query '{q}'" for i,
+                                        x in enumerate(by) if (q := queries[i])]
+                            username = ' + '.join(by_labels)
 
-                        if tags:
-                            tags = tags.split(',')
-                            recs = get_recommendations_by_tags(
-                                tags, cutoff)
-                            username = ' + '.join(
-                                map(lambda x: f"'{x}'", tags))
-                            url_user = None
+                            tracks = search_tracks(
+                                track_query, artist_query, album_query, min(cutoff, 2**63 - 1))
+                            recs = list(map(lambda t: (None, t), tracks))
 
-                case 'search':
-                    recsys_form = SearchForm(
-                        request.GET, prefix='search')
-                    if recsys_form.is_valid():
-                        by = ('Track', 'Artist', 'Album')
-                        track_query, artist_query, album_query = queries = [
-                            recsys_form.cleaned_data.get(f'query_{x.lower()}') for x in by]
-                        by_labels = [f"{x} Query '{q}'" for i,
-                                     x in enumerate(by) if (q := queries[i])]
-                        username = ' + '.join(by_labels)
+                    case _:
+                        if recsys not in RECSYS_MODELS:
+                            RECSYS_MODELS[recsys] = load_model(
+                                model_path, use_training=True)
 
-                        tracks = search_tracks(
-                            track_query, artist_query, album_query, min(cutoff, 2**63 - 1))
-                        recs = list(map(lambda t: (None, t), tracks))
+                if recs is None:
+                    recs = get_recommendations_by_user(
+                        user_id=uid,
+                        model=RECSYS_MODELS[recsys][0],
+                        device=RECSYS_MODELS[recsys][1],
+                        predict_args=predict_args,
+                        cutoff=cutoff
+                    )
 
-                case _:
-                    if recsys not in RECSYS_MODELS:
-                        RECSYS_MODELS[recsys] = load_model(
-                            model_path, use_training=True)
+                    if url_user:
+                        scraper_url = f"{reverse('user_scraper')}?username={quote(url_user)}" \
+                            "&use_database=on" \
+                            "&include_tracks=on" \
+                            "&include_artists=on" \
+                            "&include_albums=on" \
+                            "&include_tags=on"
+                        if anon:
+                            scraper_url += '&anonymous=on'
 
-            if recs is None:
-                recs = get_recommendations_by_user(
-                    user_id=uid,
-                    model=RECSYS_MODELS[recsys][0],
-                    device=RECSYS_MODELS[recsys][1],
-                    predict_args=predict_args,
-                    cutoff=cutoff
-                )
+                if not limit:
+                    limit = cutoff
 
-                if url_user:
-                    scraper_url = f"{reverse('user_scraper')}?username={quote(url_user)}" \
-                        "&use_database=on" \
-                        "&include_tracks=on" \
-                        "&include_artists=on" \
-                        "&include_albums=on" \
-                        "&include_tags=on"
-                    if anon:
-                        scraper_url += '&anonymous=on'
+                p = Paginator(recs, limit)
+                first_page = p.page(1)
 
-            if not limit:
-                limit = cutoff
+                recs_context[session_key] = {
+                    'username': username,
+                    'scraper_url': scraper_url,
+                    'model': model_name,
+                    'recommendations': get_recommendations_context(first_page.object_list),
+                    'is_paginated': limit and limit < cutoff,
+                    'paginator': p,
+                    'page_obj': first_page,
+                    'page_range': p.get_elided_page_range(1)
+                }
 
-            p = Paginator(recs, limit)
-            first_page = p.page(1)
+                return render(request, 'lastfm_recommend.html', context=recs_context[session_key])
 
-            recs_context[session_key] = {
-                'username': username,
-                'scraper_url': scraper_url,
-                'model': dict(rec_form.fields['model'].choices)[recsys],
-                'recommendations': get_recommendations_context(first_page.object_list),
-                'is_paginated': limit and limit < cutoff,
-                'paginator': p,
-                'page_obj': first_page,
-                'page_range': p.get_elided_page_range(1)
-            }
-
-            return render(request, 'lastfm_recommend.html', context=recs_context[session_key])
+            except FileNotFoundError:
+                rec_form.add_error('model', f'{model_name} is unavailable')
 
     random = RandomRecommenderForm(prefix="random")
     cosine = CosineRecommenderForm(prefix="cosine")
