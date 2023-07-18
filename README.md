@@ -11,7 +11,7 @@ It consists of various recommendation techniques (collaborative filtering and co
   - Go to `/lastfm_RS` and run `make restore_db`. This creates _lastfm\_db_'s tables and loads all the necessary data.
 - To start the application on localhost, go to `/lastfm_RS` and run `python3 manage.py runserver`. It will be hosted at http://localhost:8000.
 
-**Note**: Only available recommenders are _Cosine Similarities_ and _Random_, due to size constraints.
+**Note**: Only available recommenders are _Random_, _Pop_ and _Cosine Similarities_, due to size constraints.
 
 ## References
 
