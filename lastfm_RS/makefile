@@ -50,8 +50,7 @@ dump_db:
 	pg_dump -h localhost -p 5432 -U $(PGUSER) $(PGDATABASE) --no-owner --no-acl -f $(PGDATABASE).dump
 
 # restore from backup
-restore_db:
-	make clear_db
+restore_db: clear_db
 	unzip $(PGDATABASE).zip
 	$(PSQL) -U $(PGUSER) $(PGDATABASE) < $(PGDATABASE).dump
 	rm $(PGDATABASE).dump
