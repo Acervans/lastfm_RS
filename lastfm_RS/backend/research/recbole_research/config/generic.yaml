@@ -6,13 +6,13 @@ dataset: lastfm_recbole
 load_col:
   inter: [user_id, track_id, rating, timestamp]
   # item: [track_id] # NO ADDITIONAL DATA
-  # item: [track_id, vadst] # VADST
+  # item: [track_id, v, a, d, stsc] # VADST
   # item: [track_id, tags] # TAG SEQS
   # item: [track_id, artist_id] # ARTIST, No sparsity since all tracks must have an artist
   # item: [track_id, artist_id, tags] # ARTIST + TAG_SEQS
   # item: [track_id, artist_id, album_id] # ARTIST + ALBUM, Only albums would not improve because of lack of data and sparsity
   # item: [track_id, artist_id, album_id, tags] # ARTIST + ALBUM + TAG_SEQS
-  item: [track_id, artist_id, album_id, tags, v, a, d, stsc] # ARTIST + ALBUM + TAG_SEQS + VADST
+  item: [track_id, artist_id, tags, v, a, d, stsc] # ARTIST + TAG_SEQS + VADST
   user: [user_id]
 
 numerical_features: [v, a, d, stsc]
@@ -25,7 +25,7 @@ normalize_all: True
 epochs: 300
 train_batch_size: 4096
 eval_batch_size: 4096
-stopping_step: 5
+stopping_step: 10
 
 train_neg_sample_args: 
   distribution: uniform

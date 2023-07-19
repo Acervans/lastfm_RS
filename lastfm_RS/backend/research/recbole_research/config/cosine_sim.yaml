@@ -17,7 +17,7 @@ knn_topk: ~
 # Dataset config
 load_col:
   inter: [user_id, track_id, rating, timestamp]
-  item: [track_id, artist_id, album_id, tags, v, a, d, stsc] # ARTIST + ALBUM + TAG_SEQS + VADST
+  item: [track_id, artist_id, tags, v, a, d, stsc] # ARTIST + TAG_SEQS + VADST
   # item: [track_id, tags] # Include tags
   user: [user_id]
 
