@@ -11,7 +11,7 @@ Two popular techniques applied to music recommender systems are collaborative fi
 
 \end{compactitem}
 
-Both techniques are often centered around similarities between users or items and common interactions or characteristics, which can be obtained from metrics such as Euclidean distance or cosine similarity. In the context of recommendation, cosine similarity is a popular choice for content-based systems, as the content usually consists of tokens or pieces of text (e.g., summaries, comments, tags). First, however, these texts need to be vectorized, using methods like \acs{tf}-\acs{idf} or count vectorization.
+Both techniques are often centered around similarities between users or items and common interactions or characteristics, which can be obtained from metrics such as Euclidean distance or cosine similarity. In the context of recommendation, cosine similarity is a popular choice for content-based systems, as the content usually consists of tokens or pieces of text (e.g., summaries, comments, tags). First, however, these texts need to be vectorized, using methods like counting the number of occurrences for each word, or \acs{tf}-\acs{idf} vectorization.
 
 \subsubsection{Cosine similarity}
 
@@ -29,7 +29,7 @@ Where $A$ and $B$ are vectors, with $|A|$ being the vector magnitude of $A$.
 \begin{subequations}
     \begin{equation}[EQ:TF]{Term Frequency (TF)}
         tf(t, d) = \begin{cases}
-            1 + \log{freq(t, d)}, & \text{if} freq(t, d) > 0 \\
+            1 + \log{freq(t, d)}, & \text{if }freq(t, d) > 0 \\
             0, & \text{otherwise}
         \end{cases}
     \end{equation}\\
@@ -40,7 +40,7 @@ Where $A$ and $B$ are vectors, with $|A|$ being the vector magnitude of $A$.
         tf{\text{-}}idf(t, d) = tf(t, d) \cdot idf(t)
     \end{equation}
 \end{subequations}\\
-Where $|\mathcal{D}|$ denotes the total number of documents in the corpus, and $|\mathcal{D}_t|$ the number of documents containing the term $t$.
+Where $|\mathcal{D}|$ denotes the total number of documents in the corpus, and $|\mathcal{D}_t|$ those containing the term $t$.
 
 \subsubsection{Music datasets and \acs{api}s}
 
