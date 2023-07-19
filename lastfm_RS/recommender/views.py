@@ -572,7 +572,7 @@ def load_model(model, config=dict(), use_training=False):
     config['save_dataloaders'] = False
     config['load_col'] = {
         'inter': ['user_id', 'track_id', 'rating', 'timestamp'],
-        'item': ['track_id', 'artist_id', 'album_id', 'tags', 'v', 'a', 'd', 'stsc'],
+        'item': ['track_id', 'artist_id', 'tags', 'v', 'a', 'd', 'stsc'],
         'user': ['user_id']
     }
 
