@@ -5,13 +5,13 @@ It consists of various recommendation techniques (collaborative filtering and co
 
 ## Setup
 
-- To set up the required environment modules and libraries, run `./setup.sh`.
-- To set up the database (~760 MB):
-  - Install PostgreSQL.
-  - Go to `/lastfm_RS` and run `make restore_db`. This creates _lastfm\_db_'s tables and loads all the necessary data.
-- To set up the data needed for recommendation (~500 MB):
-  -  Go to `/lastfm_RS` and run `make recsys_data`. This extracts the prepared dataset into `/lastfm_RS/backend/research/recbole_research/saved/`. Otherwise, the data needs to be preprocessed, which takes considerable time and memory.
-- To start the application on localhost, go to `/lastfm_RS` and run `python3 manage.py runserver`. It will be hosted at http://localhost:8000.
+1. To set up the required environment modules and libraries, run `./setup.sh`.
+2. To set up the database (~760 MB):
+    - Install PostgreSQL.
+    - Go to `/lastfm_RS` and run `make restore_db`. This creates _lastfm\_db_'s tables and loads all the necessary data.
+3. To set up the recommendation data (~500 MB):
+    -  Go to `/lastfm_RS` and run `make recsys_data`. This extracts the prepared dataset into `/lastfm_RS/backend/research/recbole_research/saved/`. Otherwise, the data needs to be preprocessed, which takes considerable time and memory.
+4. To start the application on localhost, go to `/lastfm_RS` and run `python3 manage.py runserver`. It will be hosted at http://localhost:8000.
 
 **Note**: The only available recommenders are _Random_, _Pop_ and _Cosine Similarities_, due to size constraints.
 
