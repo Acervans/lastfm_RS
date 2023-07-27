@@ -23,7 +23,8 @@ import torch
 RECSYS_DATA = 'backend/data/recsys_data'
 SAVED_PATH = 'backend/research/recbole_research/saved'
 
-RECSYS_DATASET = None
+DF_DATASET = None  # Features in DataFrames
+IA_DATASET = None  # Features in Interactions
 
 # Loaded Models ID: [MODEL, DEVICE]
 RECSYS_MODELS = dict()
@@ -143,7 +144,13 @@ def get_track_context(artist, title, do_lyrics):
 
         # get lyrics from Genius API
         if do_lyrics:
-            gsong = GENIUS.search_song(title, artist, get_full_info=False)
+            while True:
+                try:
+                    gsong = GENIUS.search_song(
+                        title, artist, get_full_info=False)
+                    break
+                except TypeError:
+                    continue
             if gsong:
                 lyrics = gsong.lyrics
 
@@ -382,8 +389,8 @@ def recommendations(request):
                             by = ('Track', 'Artist', 'Album')
                             track_query, artist_query, album_query = queries = [
                                 recsys_form.cleaned_data.get(f'query_{x.lower()}') for x in by]
-                            by_labels = [f"{x} Query '{q}'" for i,
-                                        x in enumerate(by) if (q := queries[i])]
+                            by_labels = [f"{x} Query '{q}'" for i, x in enumerate(
+                                by) if (q := queries[i])]
                             username = ' + '.join(by_labels)
 
                             tracks = search_tracks(
@@ -393,7 +400,7 @@ def recommendations(request):
                     case _:
                         if recsys not in RECSYS_MODELS:
                             RECSYS_MODELS[recsys] = load_model(
-                                model_path, use_training=True)
+                                model_path, recbole_model=True)
 
                 if recs is None:
                     recs = get_recommendations_by_user(
@@ -506,19 +513,19 @@ def scores_to_recommendations(scores, cutoff):
         scores = scores.cpu().numpy().flatten()
     scores = scores[1:]
 
-    item_ids = RECSYS_DATASET.id2token(
-        RECSYS_DATASET.iid_field, list(range(1, RECSYS_DATASET.item_num)))
+    item_ids = DF_DATASET.id2token(
+        DF_DATASET.iid_field, list(range(1, DF_DATASET.item_num)))
 
     sorted_idx = np.argsort(scores)[:-(cutoff + 1):-1]
     return list(zip(scores[sorted_idx], item_ids[sorted_idx]))
 
 
 def get_recommendations_by_user(user_id, model, device, predict_args=dict(), cutoff=10):
-    uid_series = RECSYS_DATASET.token2id(
-        RECSYS_DATASET.uid_field, [str(user_id)])
+    uid_series = DF_DATASET.token2id(
+        DF_DATASET.uid_field, [str(user_id)])
 
     model.eval()
-    uid_inter = {RECSYS_DATASET.uid_field: uid_series}
+    uid_inter = {DF_DATASET.uid_field: uid_series}
     try:
         scores = model.full_sort_predict(uid_inter, **predict_args)
     except NotImplementedError:
@@ -534,7 +541,7 @@ def get_recommendations_by_tags(tags, cutoff):
         # Strip spaces and hyphens
         tag = tag.replace(' ', '').replace('-', '')
         try:
-            return RECSYS_DATASET.token2id("tags", tag)
+            return DF_DATASET.token2id("tags", tag)
         except ValueError:
             return -1
 
@@ -553,9 +560,9 @@ def get_recommendations_by_tags(tags, cutoff):
 
 
 def full_sort_scores(model, device, uid_inter, batch_size=4096):
-    item_feats = RECSYS_DATASET.get_item_feature()
+    item_feats = IA_DATASET.get_item_feature()
     scores = list()
-    for i in range(0, RECSYS_DATASET.item_num, batch_size):
+    for i in range(0, IA_DATASET.item_num, batch_size):
         interaction = Interaction(uid_inter)
         item_feat = item_feats[i:i + batch_size]
         interaction = interaction.repeat_interleave(len(item_feat))
@@ -565,8 +572,16 @@ def full_sort_scores(model, device, uid_inter, batch_size=4096):
     return np.concatenate(scores)
 
 
-def load_model(model, config=dict(), use_training=False):
-    global RECSYS_DATASET
+def load_model(model, config=dict(), recbole_model=False):
+    global DF_DATASET
+
+    def _interaction_dataset():
+        global IA_DATASET
+
+        if not IA_DATASET and DF_DATASET:
+            IA_DATASET = DF_DATASET.copy(DF_DATASET.inter_feat)
+            IA_DATASET.build()
+        return IA_DATASET
 
     config['dataset_save_path'] = f'{SAVED_PATH}/lastfm_recbole-dataset.pth'
     config['save_dataloaders'] = False
@@ -576,14 +591,14 @@ def load_model(model, config=dict(), use_training=False):
         'user': ['user_id']
     }
 
-    config, recommender, dataset, _, _, _ = load_data_and_model(
+    preload_dataset = _interaction_dataset() if recbole_model else DF_DATASET
+    config, recommender, DF_DATASET, _, _, _ = load_data_and_model(
         load_model=model,
-        preload_dataset=RECSYS_DATASET,
+        preload_dataset=preload_dataset,
         update_config=config,
-        use_training=use_training
     )
 
-    if not RECSYS_DATASET:
-        RECSYS_DATASET = dataset
+    if not preload_dataset:
+        _interaction_dataset()
 
     return recommender, config['device']
