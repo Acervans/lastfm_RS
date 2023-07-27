@@ -11,7 +11,7 @@ The tools and recommendation models are showcased in **LastMood**, a web applica
     - Install [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) for environment management.
     - Run `./setup.sh`.
 3. To set up the database (~760 MB):
-    - Install [PostgreSQL](https://www.postgresql.org/download/).
+    - Install [PostgreSQL](https://www.postgresql.org/download/) for database management.
     - Go to `/lastfm_RS` and run `make restore_db`. This creates _lastfm\_db_'s tables and loads all the necessary data.
 4. To set up the recommendation data (~500 MB):
     -  Go to `/lastfm_RS` and run `make recsys_data`. This extracts the prepared dataset into `/lastfm_RS/backend/research/recbole_research/saved/`. Otherwise, the data needs to be preprocessed, which takes considerable time and memory.
