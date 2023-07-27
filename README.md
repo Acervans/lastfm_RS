@@ -12,12 +12,14 @@ The tools and recommendation models are showcased in **LastMood**, a web applica
     - Run `./setup.sh`.
 3. To set up the database (~760 MB):
     - Install [PostgreSQL](https://www.postgresql.org/download/) for database management.
+    - Execute `sudo -u postgres psql -c "CREATE USER alumnodb WITH PASSWORD 'alumnodb' createdb"`.
+        - This creates user _alumnodb_ with database creation permissions.
     - Go to `/lastfm_RS` and run `make restore_db`.
         - This creates _lastfm\_db_'s tables and loads all the necessary data.
 4. To set up the recommendation data (~500 MB):
-    -  Go to `/lastfm_RS` and run `make recsys_data`.
-        -  This extracts the prepared dataset into `/lastfm_RS/backend/research/recbole_research/saved/`.
-        -  Otherwise, the data needs to be preprocessed, which takes considerable time and memory.
+    - Go to `/lastfm_RS` and run `make recsys_data`.
+        - This extracts the prepared dataset into `/lastfm_RS/backend/research/recbole_research/saved/`.
+        - Otherwise, the data needs to be preprocessed, which takes considerable time and memory.
 5. To start the web application on localhost, go to `/lastfm_RS` and run `python3 manage.py runserver`. It will be hosted at http://localhost:8000.
 
 **Note**: The only available recommenders are _Random_, _Pop_ and _Cosine Similarities_, due to size constraints.
