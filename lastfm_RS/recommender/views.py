@@ -38,7 +38,7 @@ inters = None
 
 
 def index(request):
-    """View function for home page of site."""
+    """View function for home page of site"""
 
     # Number of visits to this view, as counted in the session variable.
     num_visits = request.session.get('num_visits', 1)
@@ -60,7 +60,7 @@ def index(request):
 
 
 def register(request):
-    """View function for registration form."""
+    """View function for registration form"""
 
     if request.method == 'POST':
         # Registration form instance
@@ -84,6 +84,7 @@ def register(request):
 
 
 def lastfm_preview(request):
+    """View function for Last.fm Track Previewer"""
 
     if request.method == 'GET' and 'artist' in request.GET:
         form = PreviewTrackForm(request.GET)
@@ -104,7 +105,7 @@ def lastfm_preview(request):
 
 def get_track_context(artist, title, do_lyrics):
     """
-    Gets the information from a track required for the lastFM Previewer.
+    Gets the information from a track required for the Last.fm Previewer.
     :param artist: string with artist of the track
     :param title: string with title of the track
     :param do_lyrics: determines whether the lyrics should be searched using the Genius API
@@ -170,6 +171,8 @@ def get_track_context(artist, title, do_lyrics):
 
 
 def vad_analysis(request):
+    """View function for VAD Analyzer"""
+
     if request.method == 'POST':
         form = VADAnalysisForm(request.POST)
         if form.is_valid():
@@ -204,6 +207,8 @@ def vad_analysis(request):
 
 
 def user_scraper(request):
+    """View function for Last.fm User Scraper"""
+
     global user_data
 
     user_data[request.session._get_or_create_session_key()] = dict()
@@ -239,6 +244,8 @@ def user_scraper(request):
 
 
 def scrape_items(request, keys, include):
+    """Scrapes user items based on request and data keys (async)"""
+
     global user_data
 
     session_key = request.session._get_or_create_session_key()
@@ -296,6 +303,8 @@ def scrape_tags(request):
 
 
 def recommendations(request):
+    """View function for Track Recommender"""
+
     global recs_context
 
     rec_form = RecommendationsForm()
@@ -460,6 +469,8 @@ def recommendations(request):
 
 
 def set_seed(seed: int = 2020) -> None:
+    """Sets seed for modules RNG"""
+
     if seed:
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -471,6 +482,8 @@ def set_seed(seed: int = 2020) -> None:
 
 
 def get_recommendations_context(recommendations, start_rank=1):
+    """Obtains relevant context data for recommended tracks"""
+
     global inters
     rec_context = list()
 
@@ -509,6 +522,8 @@ def get_recommendations_context(recommendations, start_rank=1):
 
 
 def scores_to_recommendations(scores, cutoff):
+    """Assigns generated scores to their respective items"""
+
     if isinstance(scores, torch.Tensor):
         scores = scores.cpu().numpy().flatten()
     scores = scores[1:]
@@ -521,6 +536,8 @@ def scores_to_recommendations(scores, cutoff):
 
 
 def get_recommendations_by_user(user_id, model, device, predict_args=dict(), cutoff=10):
+    """Obtains recommendations for a given user ID using the selected model"""
+
     uid_series = DF_DATASET.token2id(
         DF_DATASET.uid_field, [str(user_id)])
 
@@ -537,6 +554,8 @@ def get_recommendations_by_user(user_id, model, device, predict_args=dict(), cut
 
 
 def get_recommendations_by_tags(tags, cutoff):
+    """Obtains recommendations based on similarities of chosen tags"""
+
     def process_tag(tag):
         # Strip spaces and hyphens
         tag = tag.replace(' ', '').replace('-', '')
@@ -560,6 +579,8 @@ def get_recommendations_by_tags(tags, cutoff):
 
 
 def full_sort_scores(model, device, uid_inter, batch_size=4096):
+    """Predicts scores of all items for a given user"""
+
     item_feats = IA_DATASET.get_item_feature()
     scores = list()
     for i in range(0, IA_DATASET.item_num, batch_size):
@@ -573,6 +594,8 @@ def full_sort_scores(model, device, uid_inter, batch_size=4096):
 
 
 def load_model(model, config=dict(), recbole_model=False):
+    """Loads model and required datasets lazily"""
+
     global DF_DATASET
 
     def _interaction_dataset():
@@ -580,6 +603,7 @@ def load_model(model, config=dict(), recbole_model=False):
 
         if not IA_DATASET and DF_DATASET:
             IA_DATASET = DF_DATASET.copy(DF_DATASET.inter_feat)
+            # Converts DataFrames into Interactions
             IA_DATASET.build()
         return IA_DATASET
 
