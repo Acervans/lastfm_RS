@@ -1,9 +1,19 @@
 #!/bin/bash
 
-# NOTE: To setup the database:
+##################################
+#### Database setup (~760 MB) ####
+##################################
 # 1. Install PostgreSQL
 # 2. Move to lastfm_RS and execute: make restore_db
 # Done! The database will be created and populated
+
+#############################################
+#### Recommendation data setup (~500 MB) ####
+#############################################
+# > Move to lastfm_RS and execute: make recsys_data
+# Done! This extracts the preprocessed dataset into lastfm_RS/backend/research/recbole_research/saved/
+# Otherwise, the data needs to be preprocessed, which takes considerable time and memory
+
 
 # Conda environment name
 ENV_NAME='lastfm_venv'
