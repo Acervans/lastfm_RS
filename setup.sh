@@ -24,7 +24,7 @@ SPACY_MODEL='en_core_web_lg'
 
 # Setup conda environment with modules and libraries
 eval "$(conda shell.bash hook)"
-conda env create environment.yml -n $ENV_NAME
+conda env create -f environment.yml -n $ENV_NAME
 conda activate $ENV_NAME
 
 # Use Python to download libraries + Insert required code to lyricsgenius.genius
