@@ -598,14 +598,16 @@ def load_model(model, config=dict(), recbole_model=False):
 
     global DF_DATASET
 
-    def _interaction_dataset():
+    def _lazy_dataset():
         global IA_DATASET
 
-        if not IA_DATASET and DF_DATASET:
-            IA_DATASET = DF_DATASET.copy(DF_DATASET.inter_feat)
-            # Converts DataFrames into Interactions
-            IA_DATASET.build()
-        return IA_DATASET
+        if recbole_model:
+            if not IA_DATASET and DF_DATASET:
+                IA_DATASET = DF_DATASET.copy(DF_DATASET.inter_feat)
+                # Converts DataFrames into Interactions
+                IA_DATASET.build()
+            return IA_DATASET
+        return DF_DATASET
 
     config['dataset_save_path'] = f'{SAVED_PATH}/lastfm_recbole-dataset.pth'
     config['save_dataloaders'] = False
@@ -615,7 +617,7 @@ def load_model(model, config=dict(), recbole_model=False):
         'user': ['user_id']
     }
 
-    preload_dataset = _interaction_dataset() if recbole_model else DF_DATASET
+    preload_dataset = _lazy_dataset()
     config, recommender, DF_DATASET, _, _, _ = load_data_and_model(
         load_model=model,
         preload_dataset=preload_dataset,
@@ -623,6 +625,6 @@ def load_model(model, config=dict(), recbole_model=False):
     )
 
     if not preload_dataset:
-        _interaction_dataset()
+        _lazy_dataset()
 
     return recommender, config['device']
