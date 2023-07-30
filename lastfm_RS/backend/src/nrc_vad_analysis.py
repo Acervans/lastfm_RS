@@ -17,9 +17,10 @@ Parameters:
 from nltk.corpus import wordnet as wn
 from dataclasses import dataclass, field
 from collections import deque
-from spacy.tokens import Span
+from spacy.tokens import Token, Span, Doc
 import spacy
 import spacy_fastlang
+import _csv
 import csv
 import sys
 import os
@@ -87,7 +88,7 @@ DECREASE = \
 INC_MUL = 1.25
 DEC_MUL = 0.75
 
-# Wordnet part-of-speech tags
+# WordNet part-of-speech tags
 POS_TAGS = ('N', 'V', 'R', 'J')
 
 # Accepted tags following a modifier
@@ -96,20 +97,20 @@ MODIF_POS_TAGS = POS_TAGS + tuple('D')
 
 @dataclass
 class VAD:
-    """
-    Class containing data for VAD values
-    """
-    valence: float
-    arousal: float
+    """ Class containing VAD data """
+
+    valence:   float
+    arousal:   float
     dominance: float
-    label: str = field(init=False)
+    label:     str = field(init=False)
 
     def __post_init__(self):
         # Set sentiment label
         self.label = self.sentiment_label(self.valence)
 
     @staticmethod
-    def sentiment_label(valence):
+    def sentiment_label(valence: float):
+        """ Assigns a valence-based sentiment label """
         if valence > .55:
             return 'positive'
         elif valence < .45:
@@ -124,15 +125,21 @@ class VAD:
         return iter([self.label, self.valence, self.arousal, self.dominance])
 
 
-def analyze_file(input_file, output_dir, mode, lang_check=False):
-    """
-    Performs sentiment analysis on the text file given as input using the NRC-VAD database.
-    Outputs results to a new CSV file in output_dir.
-    :param input_file: path of .txt file to analyze
-    :param output_dir: path of directory to create new output file
-    :param mode: determines how sentiment values for a sentence are computed (median or mean)
-    :param lang_check: whether to include language information in the analysis
-    :return:
+def analyze_file(input_file: str,
+                 output_dir: str,
+                 mode:       str,
+                 lang_check: bool = False) -> None:
+    """ Performs sentiment analysis on the text file given as input using the NRC-VAD lexicon.
+    Outputs results to a new CSV file in `output_dir`.
+
+    Args:
+        input_file (str): Path of text file to analyze
+        output_dir (str): Path of directory to create new output file
+        mode (str): Determines how sentiment values for a sentence are computed (median or mean)
+        lang_check (bool): Whether to include language information in the analysis
+
+    Returns:
+        None
     """
     output_file = os.path.join(output_dir, "Output NRC-VAD Sentiment " +
                                os.path.splitext(os.path.basename(input_file))[0] + ".csv")
@@ -157,19 +164,24 @@ def analyze_file(input_file, output_dir, mode, lang_check=False):
         analyze_text(fulltext, mode, True, lang_check, writer)
 
 
-def analyze_text(fulltext, mode='mean', detailed=False, lang_check=False, writer=None):
-    """
-    Performs sentiment analysis on the sentences of a text using the NRC-VAD database.
-    :param fulltext: string of the text to split into sentences and analyze
-    :param mode: determines how sentiment values for a sentence are computed (median or mean)
-    :param detailed: determines whether the detailed values of the analysis should be returned
-    :param lang_check: whether to include language information in the detailed analysis
-    :param writer: csv.writer of csv file to which analysis results will be stored
-    :return either:
-        - list of objects with VAD values of the analyzed text
-        - list of lists of values that map to fieldnames, but without an index
-    """
+def analyze_text(fulltext:   str,
+                 mode:       str = 'mean',
+                 detailed:   bool = False,
+                 lang_check: bool = False,
+                 writer:     '_csv._writer' = None) -> list[VAD | list]:
+    """ Performs sentiment analysis on the sentences of a text using the NRC-VAD lexicon.
 
+    Args:
+        fulltext (str): Text to split into sentences and analyze
+        mode (str): Determines how sentiment values for a sentence are computed (median or mean)
+        detailed (bool): Determines whether the detailed values of the analysis should be returned
+        lang_check (bool): Whether to include language information in the detailed analysis
+        writer (_csv._writer): Writer of CSV file in which analysis results will be stored
+
+    Returns:
+        list[VAD | list]: `VAD` objects with values from the analyzed text;
+            or lists of values that map to fieldnames, but without an index
+    """
     # Split into sentences
     sentences = nlp(fulltext).sents
     vad = []  # List of vad analysis values
@@ -190,33 +202,42 @@ def analyze_text(fulltext, mode='mean', detailed=False, lang_check=False, writer
     return vad
 
 
-def analyze_string(string, mode='mean', detailed=False, lang_check=False):
-    """
-    Performs sentiment analysis on a string using the NRC-VAD database.
-    :param string: string to be analyzed
-    :param mode: determines how sentiment values are computed (median or mean)
-    :param detailed: determines whether the detailed values of the analysis should be returned
-    :param lang_check: whether to include language information in the detailed analysis
-    :return either:
-        - VAD object containing the VAD values of the string; or None if no words were analyzed
-        - list of values that map to fieldnames, but without an index
+def analyze_string(string:     str,
+                   mode:       str = 'mean',
+                   detailed:   bool = False,
+                   lang_check: bool = False) -> VAD | list:
+    """ Performs sentiment analysis on a string using the NRC-VAD lexicon.
+
+    Args:
+        string (str): String to be analyzed
+        mode (str): Determines how sentiment values are computed (median or mean)
+        detailed (bool): Determines whether the detailed values of the analysis should be returned
+        lang_check (bool): Whether to include language information in the detailed analysis
+
+    Returns:
+        VAD | list: `VAD` object containing the VAD values of the string, None if no words were analyzed;
+            or list of values that map to fieldnames, but without an index
     """
     return analyze_parsed_string(nlp(string), mode, detailed, lang_check)
 
 
-def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=False):
-    """
-    Performs sentiment analysis on a Doc/Span object from a parsed string using
-    the NRC-VAD database.
-    :param parsed_str: Doc/Span object from a string parsed with spaCy NLP
-    :param mode: determines how sentiment values are computed (median or mean)
-    :param detailed: determines whether the detailed values of the analysis should be returned
-    :param lang_check: whether to include language information in the detailed analysis
-    :return either:
-        - VAD object containing the VAD values of the string; or None if no words were analyzed
-        - list of values that map to fieldnames, but without an index
-    """
+def analyze_parsed_string(parsed_str: Doc | Span,
+                          mode:       str = 'mean',
+                          detailed:   bool = False,
+                          lang_check: bool = False) -> VAD | list:
+    """ Performs sentiment analysis on a `Doc`/`Span` object from a parsed string
+    using the NRC-VAD lexicon.
 
+    Args:
+        parsed_str (Doc | Span): Sequence of tokens from a string parsed with spaCy NLP
+        mode (str): Determines how sentiment values are computed (median or mean)
+        detailed (bool): Determines whether the detailed values of the analysis should be returned
+        lang_check (bool): Whether to include language information in the detailed analysis
+
+    Returns:
+        VAD | list: `VAD` object containing the VAD values of the string, None if no words were analyzed;
+            or list of values that map to fieldnames, but without an index
+    """
     all_words = []
     found_words = []
     v_list = []  # Holds valence scores
@@ -294,52 +315,58 @@ def analyze_parsed_string(parsed_str, mode='mean', detailed=False, lang_check=Fa
     return vad
 
 
-def search_and_evaluate(token, pos, current_index, words):
-    """
-    Search for the current word in NRC-VAD lexicon while
+def search_and_evaluate(token:         Token,
+                        pos:           str,
+                        current_index: int,
+                        words:         Doc | Span) -> tuple:
+    """ Searches for the current word in NRC-VAD lexicon while
     analyzing modifiers and obtaining its VAD values.
 
-    :param token: token containing current lemma
-    :param pos: unprocessed word's part-of-speech tag
-    :param current_index: index of current token/word
-    :param words: Doc/Span containing all words of the analysis
-    :return: 
-        tuple with token's lemma, prefixed string, VAD values and whether sentiment is positive; 
-        or tuple with token's lemma and None
-    """
+    Args:
+        token (Token): Token containing current lemma
+        pos (str): Unprocessed word's part-of-speech tag
+        current_index (int): Index of current token/word
+        words (Doc | Span): Sequence of tokens from current analysis
 
+    Returns: 
+        tuple: Token's lemma, prefixed string, VAD values and whether sentiment is positive; 
+            or token's lemma and None, if the search failed
+    """
     # -------------- AUXILIARY FUNCTIONS --------------
 
-    def _lemmatize_by_pos(token, pos):
-        """
-        Lemmatize word depending on tag in POS_TAGS 
-        and adapt tag to wordnet if necessary.
+    def _lemmatize_by_pos(token: Token, pos: str) -> tuple:
+        """ Lemmatizes word depending on tag in `POS_TAGS` 
+        and adapts tag to WordNet if necessary.
 
-        :param token: token containing lemma
-        :param pos: unprocessed word's part-of-speech tag
-        :return: tuple with lemma and wordnet pos tag
-        """
+        Args:
+            token (Token): Token containing lemma
+            pos (str): Unprocessed word's part-of-speech tag
 
+        Returns:
+            tuple: Lemma and WordNet's POS tag
+        """
         lemma = token.lower_
         if pos in POS_TAGS:
             if pos == 'N' or pos == 'V':
                 lemma = token.lemma_.lower()
 
-            # Adapt to wordnet ADJ pos
+            # Adapt to WordNet ADJ pos
             elif pos == 'J':
                 pos = 'A'
         else:
             pos = None
         return lemma, pos
 
-    def _check_modifiers(current_index, words):
-        """
-        Check for sentiment modifiers in three words before
+    def _check_modifiers(current_index: int, words: Doc | Span) -> tuple:
+        """ Checks for sentiment modifiers in three words before
         the current one. Skips non-alphanumerics and adverbs.
 
-        :param current_index: index of current token/word
-        :param words: Doc/Span containing all words of the analysis
-        :return: tuple with modifier flags (neg, first_neg and inc)
+        Args:
+            current_index (int): Index of current token/word
+            words (Doc | Span): Sequence of tokens from current analysis
+
+        Returns:
+            tuple: Modifier flags (`neg`, `first_neg` and `inc`)
         """
         neg = inc = None
         first_neg = False
@@ -380,17 +407,23 @@ def search_and_evaluate(token, pos, current_index, words):
 
         return neg, first_neg, inc
 
-    def _append_prefix_modifiers(orig_lemma, syn_lemma, neg, first_neg, inc):
-        """
-        Construct a string with the original lemma and an indication
+    def _append_prefix_modifiers(orig_lemma: str,
+                                 syn_lemma:  str | None,
+                                 neg:        bool,
+                                 first_neg:  bool,
+                                 inc:        bool) -> str:
+        """ Constructs a string with the original lemma and indicators
         of all modifiers, including synonym lemma, as prefixes.
 
-        :param orig_lemma: original lemma (not a synonym)
-        :param syn_lemma: synonym of original lemma if found, else None
-        :param neg: whether the sentiment was negated
-        :param first_neg: whether the negating word came first
-        :param inc: whether the sentiment was increased or decreased
-        :return: prefixed string
+        Args:
+            orig_lemma (str): Original lemma (not a synonym)
+            syn_lemma (str | None): Synonym of original lemma if found, else None
+            neg (bool): Whether the sentiment was negated
+            first_neg (bool): Whether the negating word came first
+            inc (bool): Whether the sentiment was increased or decreased
+
+        Returns:
+            str: Prefixed string
         """
         append_str = orig_lemma
         if inc is not None:
@@ -407,17 +440,23 @@ def search_and_evaluate(token, pos, current_index, words):
 
         return append_str
 
-    def _apply_modifiers(v, a, d, neg, inc):
-        """
-        Apply modifiers obtained in _check_modifiers()
+    def _apply_modifiers(v:   float,
+                         a:   float,
+                         d:   float,
+                         neg: bool,
+                         inc: bool) -> tuple:
+        """ Applies modifiers obtained in `_check_modifiers`
         to the original VAD values.
 
-        :param v: original valence
-        :param a: original arousal
-        :param d: original dominance
-        :param neg: whether the sentiment was negated
-        :param inc: whether the sentiment was increased or decreased
-        :return: tuple with modified VAD values and whether sentiment is positive
+        Args:
+            v (float): Original valence
+            a (float): Original arousal
+            d (float): Original dominance
+            neg (bool): Whether the sentiment was negated
+            inc (bool): Whether the sentiment was increased or decreased
+
+        Returns:
+            tuple: Modified VAD values and whether sentiment is positive
         """
         if neg:
             # Reverse polarity for this word
@@ -448,13 +487,15 @@ def search_and_evaluate(token, pos, current_index, words):
 
         return v, a, d, positive
 
-    def _get_synonyms(orig_lemma, wn_pos):
-        """
-        Obtain synonyms for a lemma keeping its POS.
+    def _get_synonyms(orig_lemma: str, wn_pos: str) -> list | None:
+        """ Obtains synonyms for a lemma keeping its part of speech.
 
-        :param orig_lemma: lemma to search synonyms for
-        :param wn_pos: word's Wordnet part-of-speech tag
-        :return: list of synonyms or None
+        Args:
+            orig_lemma (str): Lemma to search synonyms for
+            wn_pos (str): WordNet's POS tag for current word
+
+        Returns: 
+            list | None: Synonyms or None if not found
         """
         syns = dict()
 
@@ -530,16 +571,19 @@ def search_and_evaluate(token, pos, current_index, words):
     return orig_lemma, None
 
 
-def main(input_file, input_dir, output_dir, mode):
-    """
-    Runs analyzefile on the appropriate files, provided that the input paths are valid.
-    :param input_file:
-    :param input_dir:
-    :param output_dir:
-    :param mode:
-    :return:
-    """
+def main(input_file: str, input_dir: str, output_dir: str, mode: str) -> None:
+    """ Runs `analyze_file` on the appropriate files, saving analysis results
+    in the corresponding CSV files at `output_dir`.
 
+    Args:
+        input_file (str): File to be analyzed
+        input_dir (str): Directory that contains `input_file`
+        output_dir (str): Directory to store analysis results
+        mode (str): Sentiment computation mode (mean or median)
+
+    Returns:
+        None
+    """
     if len(output_dir) < 0 or not os.path.exists(output_dir):  # Empty output
         print('No output directory specified, or path does not exist')
         sys.exit(0)

@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate
 from django.urls import reverse
@@ -37,9 +37,15 @@ user_data = dict()
 inters = None
 
 
-def index(request):
-    """View function for home page of site"""
+def index(request: HttpRequest) -> HttpResponse:
+    """ View function for LastMood's home page
 
+    Args:
+        request (HttpRequest): User request object
+
+    Returns:
+        HttpResponse: Response to requested resources
+    """
     # Number of visits to this view, as counted in the session variable.
     num_visits = request.session.get('num_visits', 1)
     request.session['num_visits'] = num_visits + 1
@@ -59,9 +65,15 @@ def index(request):
     )
 
 
-def register(request):
-    """View function for registration form"""
+def register(request: HttpRequest) -> HttpResponse:
+    """ View function for user registration
 
+    Args:
+        request (HttpRequest): User request object
+
+    Returns:
+        HttpResponse: Response to requested resources
+    """
     if request.method == 'POST':
         # Registration form instance
         form = RegisterForm(request.POST)
@@ -83,9 +95,15 @@ def register(request):
     )
 
 
-def lastfm_preview(request):
-    """View function for Last.fm Track Previewer"""
+def lastfm_preview(request: HttpRequest) -> HttpResponse:
+    """ View function for the Last.fm Track Previewer
 
+    Args:
+        request (HttpRequest): User request object
+
+    Returns:
+        HttpResponse: Response to requested resources
+    """
     if request.method == 'GET' and 'artist' in request.GET:
         form = PreviewTrackForm(request.GET)
         if form.is_valid():
@@ -103,13 +121,16 @@ def lastfm_preview(request):
     return render(request, 'lastfm_preview_form.html', context={'form': form})
 
 
-def get_track_context(artist, title, do_lyrics):
-    """
-    Gets the information from a track required for the Last.fm Previewer.
-    :param artist: string with artist of the track
-    :param title: string with title of the track
-    :param do_lyrics: determines whether the lyrics should be searched using the Genius API
-    :return context: dict with context of the track
+def get_track_context(artist: str, title: str, do_lyrics: bool) -> dict:
+    """ Gets information from a track for the Track Previewer
+
+    Args:
+        artist (str): Artist of the track
+        title (str): Title of the track
+        do_lyrics (bool): Search track lyrics with the Genius API
+
+    Returns:
+        dict: Relevant context of the track
     """
     track = pylast.Track(artist, title, PYLAST)
 
@@ -131,7 +152,7 @@ def get_track_context(artist, title, do_lyrics):
             track_url).content, "lxml")
         plinks = soup.find('ul', {'class': 'play-this-track-playlinks'})
 
-        # get playlinks for youtube and spotify embeds
+        # Get playlinks for youtube and spotify embeds
         if plinks:
             yt_tag = plinks.find(
                 'a', {'class': 'play-this-track-playlink--youtube'})
@@ -143,7 +164,7 @@ def get_track_context(artist, title, do_lyrics):
             if sp_tag:
                 sp_id = sp_tag.get('href').rsplit('track/')[1]
 
-        # get lyrics from Genius API
+        # Get lyrics from Genius API
         if do_lyrics:
             while True:
                 try:
@@ -170,9 +191,15 @@ def get_track_context(artist, title, do_lyrics):
     return context
 
 
-def vad_analysis(request):
-    """View function for VAD Analyzer"""
+def vad_analysis(request: HttpRequest) -> HttpResponse:
+    """ View function for the VAD Analyzer
 
+    Args:
+        request (HttpRequest): User request object
+
+    Returns:
+        HttpResponse: Response to requested resources
+    """
     if request.method == 'POST':
         form = VADAnalysisForm(request.POST)
         if form.is_valid():
@@ -206,9 +233,15 @@ def vad_analysis(request):
     return render(request, 'vad_analysis_form.html', context={'form': form})
 
 
-def user_scraper(request):
-    """View function for Last.fm User Scraper"""
+def user_scraper(request: HttpRequest) -> HttpResponse:
+    """ View function for the Last.fm User Scraper
 
+    Args:
+        request (HttpRequest): User request object
+
+    Returns:
+        HttpResponse: Response to requested resources
+    """
     global user_data
 
     user_data[request.session._get_or_create_session_key()] = dict()
@@ -243,9 +276,19 @@ def user_scraper(request):
     return render(request, 'user_scraper_form.html', context={'form': form})
 
 
-def scrape_items(request, keys, include):
-    """Scrapes user items based on request and data keys (async)"""
+def scrape_items(request: HttpRequest,
+                 keys:    list[str],
+                 include: str) -> JsonResponse:
+    """ Scrapes user items based on request and data keys (asynchronous)
 
+    Args:
+        request (HttpRequest): User request object
+        keys (list[str]): Keys to access relevant scraped data
+        include (str): Item type to include in the scraping
+
+    Returns:
+        JsonResponse: Response with scraped data
+    """
     global user_data
 
     session_key = request.session._get_or_create_session_key()
@@ -270,7 +313,8 @@ def scrape_items(request, keys, include):
         return JsonResponse(data)
 
 
-def scrape_tracks(request):
+def scrape_tracks(request: HttpRequest) -> JsonResponse:
+    """ Scrapes recent, loved and top tracks from a user """
     return scrape_items(
         request,
         keys=['recent_tracks', 'loved_tracks', 'top_tracks'],
@@ -278,7 +322,8 @@ def scrape_tracks(request):
     )
 
 
-def scrape_artists(request):
+def scrape_artists(request: HttpRequest) -> JsonResponse:
+    """ Scrapes top artists from a user """
     return scrape_items(
         request,
         keys=['top_artists'],
@@ -286,7 +331,8 @@ def scrape_artists(request):
     )
 
 
-def scrape_albums(request):
+def scrape_albums(request: HttpRequest) -> JsonResponse:
+    """ Scrapes top albums from a user """
     return scrape_items(
         request,
         keys=['top_albums'],
@@ -294,7 +340,8 @@ def scrape_albums(request):
     )
 
 
-def scrape_tags(request):
+def scrape_tags(request: HttpRequest) -> JsonResponse:
+    """ Scrapes items' top tags from a user """
     return scrape_items(
         request,
         keys=['tags_count', 'item_tags'],
@@ -302,9 +349,15 @@ def scrape_tags(request):
     )
 
 
-def recommendations(request):
-    """View function for Track Recommender"""
+def recommendations(request: HttpRequest) -> HttpResponse:
+    """ View function for the Track Recommender
 
+    Args:
+        request (HttpRequest): User request object
+
+    Returns:
+        HttpResponse: Response to requested resources
+    """
     global recs_context
 
     rec_form = RecommendationsForm()
@@ -469,8 +522,14 @@ def recommendations(request):
 
 
 def set_seed(seed: int = 2020) -> None:
-    """Sets seed for modules RNG"""
+    """ Sets the RNG seed or randomizes it
 
+    Args:
+        seed (int): Seed value
+
+    Returns:
+        None
+    """
     if seed:
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -481,9 +540,16 @@ def set_seed(seed: int = 2020) -> None:
         torch.cuda.seed()
 
 
-def get_recommendations_context(recommendations, start_rank=1):
-    """Obtains relevant context data for recommended tracks"""
+def get_recommendations_context(recommendations: list[tuple], start_rank: int = 1) -> list[dict]:
+    """ Obtains relevant context data for recommended tracks
 
+    Args:
+        recommendations (list[tuple]): Recommendations (score, track_id)
+        start_rank (int): Starting rank for the list, used with pagination
+
+    Returns:
+        list[dict]: Relevant context for each recommendation
+    """
     global inters
     rec_context = list()
 
@@ -521,9 +587,16 @@ def get_recommendations_context(recommendations, start_rank=1):
     return rec_context
 
 
-def scores_to_recommendations(scores, cutoff):
-    """Assigns generated scores to their respective items"""
+def scores_to_recommendations(scores: torch.Tensor | np.ndarray, cutoff: int) -> list[tuple]:
+    """ Assigns respective tracks to the generated scores
 
+    Args:
+        scores (torch.Tensor | np.ndarray): Tracks' scores
+        cutoff (int): Number of tracks to recommend
+
+    Returns:
+        list[tuple]: Recommendations (score, track_id)
+    """
     if isinstance(scores, torch.Tensor):
         scores = scores.cpu().numpy().flatten()
     scores = scores[1:]
@@ -535,9 +608,23 @@ def scores_to_recommendations(scores, cutoff):
     return list(zip(scores[sorted_idx], item_ids[sorted_idx]))
 
 
-def get_recommendations_by_user(user_id, model, device, predict_args=dict(), cutoff=10):
-    """Obtains recommendations for a given user ID using the selected model"""
+def get_recommendations_by_user(user_id:      int,
+                                model:        torch.nn.Module,
+                                device:       torch.device,
+                                predict_args: dict = dict(),
+                                cutoff:       int = 10) -> list[tuple]:
+    """ Obtains recommendations for a given user using the selected model
 
+    Args:
+        user_id (int): ID of user to get recommendations for
+        model (torch.nn.Module): Recommendation model
+        device (torch.device): Device where the model is loaded
+        predict_args (dict): Additional recommendation arguments
+        cutoff (int): Number of tracks to recommend
+
+    Returns:
+        list[tuple]: Recommendations (score, track_id)
+    """
     uid_series = DF_DATASET.token2id(
         DF_DATASET.uid_field, [str(user_id)])
 
@@ -553,13 +640,22 @@ def get_recommendations_by_user(user_id, model, device, predict_args=dict(), cut
     return recs
 
 
-def get_recommendations_by_tags(tags, cutoff):
-    """Obtains recommendations based on similarities of chosen tags"""
+def get_recommendations_by_tags(tags: list[str], cutoff: int) -> list[tuple]:
+    """ Obtains recommendations based on similarities of chosen tags
 
-    def process_tag(tag):
+    Args:
+        tags (list[str]): Tags to obtain similar tracks from
+        cutoff (int): Number of tracks to recommend
+
+    Returns:
+        list[tuple]: Recommendations (score, track_id)
+    """
+    def process_tag(tag: str):
+        """ Preprocess tag and obtain token ID """
         # Strip spaces and hyphens
         tag = tag.replace(' ', '').replace('-', '')
         try:
+            # Internal token ID
             return DF_DATASET.token2id("tags", tag)
         except ValueError:
             return -1
@@ -578,9 +674,21 @@ def get_recommendations_by_tags(tags, cutoff):
     return recs
 
 
-def full_sort_scores(model, device, uid_inter, batch_size=4096):
-    """Predicts scores of all items for a given user"""
+def full_sort_scores(model:      torch.nn.Module,
+                     device:     torch.device,
+                     uid_inter:  dict,
+                     batch_size: int = 4096) -> np.ndarray:
+    """ Predicts scores of all tracks for a given user
 
+    Args:
+        model (torch.nn.Module): Recommendation model
+        device (torch.device): Device where the model is loaded
+        uid_inter (dict): Internal user ID mapping
+        batch_size (int): Number of items to process at once
+
+    Returns:
+        np.ndarray: Predicted track scores
+    """
     item_feats = IA_DATASET.get_item_feature()
     scores = list()
     for i in range(0, IA_DATASET.item_num, batch_size):
@@ -593,12 +701,23 @@ def full_sort_scores(model, device, uid_inter, batch_size=4096):
     return np.concatenate(scores)
 
 
-def load_model(model, config=dict(), recbole_model=False):
-    """Loads model and required datasets lazily"""
+def load_model(model:         str,
+               config:        dict = dict(),
+               recbole_model: bool = False) -> tuple[torch.nn.Module, torch.device]:
+    """ Loads the recommendation model (and required datasets) lazily
 
+    Args:
+        model (str): Path to pre-trained model
+        config (dict): Additional loading configurations
+        recbole_model (bool): Whether the model was implemented by RecBole
+
+    Returns:
+        tuple[torch.nn.Module, torch.device]: Model and device where it's loaded
+    """
     global DF_DATASET
 
     def _lazy_dataset():
+        """ Selects the recommendation dataset, loading it if needed """
         global IA_DATASET
 
         if recbole_model:
