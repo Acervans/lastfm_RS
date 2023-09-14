@@ -13,8 +13,8 @@ metadata = MetaData()
 metadata.reflect(bind=db)
 
 
-def table(name) -> Table:
-    return metadata.tables[name]
+def table(name) -> Table | None:
+    return metadata.tables.get(name)
 
 
 TAG = table('tag')
@@ -193,10 +193,10 @@ def user_top_albums(username):
         q = s.execute(stmt).all()
     return pd.DataFrame(q, columns=['album_id'])['album_id']
 
+
 #####################################
 ###### TRACK + TRACK-ITEM TAGS ######
 #####################################
-
 
 def get_track_own_tags():
     stmt = (select(TRACK.c.id, TAG.c.name, TRACK_TAGS.c.rank)
@@ -255,7 +255,10 @@ def get_tags_frequency():
     return pd.DataFrame(tags_freq, columns=['Tag', 'Frequency']).groupby('Tag').sum().sort_values('Frequency', ascending=False).reset_index()
 
 
-def get_tables_count() -> dict:
+def get_tables_count() -> dict | None:
+    if not all(TABLES):
+        return
+
     with session.begin() as s:
         tables_counts = [
             (table.name, s.execute(
@@ -265,10 +268,10 @@ def get_tables_count() -> dict:
 
     return dict(tables_counts)
 
+
 #########################
 ###### ITEM'S VADS ######
 #########################
-
 
 def split_vad_str(df):
     # Separate VAD & StR into different columns
@@ -321,6 +324,7 @@ def get_track_album_vads():
 
     return album_vads
 
+
 ###################################
 ########## GENERAL UTILS ##########
 ###################################
@@ -331,6 +335,7 @@ def get_username(id):
 
     with session.begin() as s:
         return s.execute(stmt).one()[0]
+
 
 def get_track_name(id):
     stmt = (select(TRACK.c.name, ARTIST.c.name)
