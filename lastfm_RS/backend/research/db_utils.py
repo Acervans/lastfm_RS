@@ -256,15 +256,15 @@ def get_tags_frequency():
 
 
 def get_tables_count() -> dict | None:
-    if not all(TABLES):
-        return
-
     with session.begin() as s:
-        tables_counts = [
-            (table.name, s.execute(
-                select([func.count()]).select_from(table)).first()[0])
-            for table in TABLES
-        ]
+        try:
+            tables_counts = [
+                (table.name, s.execute(
+                    select([func.count()]).select_from(table)).first()[0])
+                for table in TABLES
+            ]
+        except AttributeError:
+            return
 
     return dict(tables_counts)
 
