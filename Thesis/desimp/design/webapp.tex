@@ -4,7 +4,7 @@ As it can be seen in Figure~\ref{FIG:WEBARCH}, the application consists of four 
 
 \subsubsection{Track Previewer}
 
-The \textbf{Track Previewer} is designed to allow users to request a track by specifying the artist and title, and retrieve relevant information and previews from Last.fm\@. As noted on the sequence diagram in Figure~\ref{FIG:SDSCRAP}, the previewer makes use of both Last.fm's \acs{api} and webpage to gather the necessary data.
+The \textbf{Track Previewer} is designed to allow users to request a track by specifying the artist and title, and retrieve relevant information and previews from Last.fm\@. As noted on the sequence diagram in Figure~\ref{FIG:SDPREV}, the previewer makes use of both Last.fm's \acs{api} and webpage to gather the necessary data.
 
 \begin{compactenum}[\bfseries 1.]
     \item First off, users provide the artist and title of the track they want to preview, which must exist in Last.fm\@. The Track Previewer then makes calls to Last.fm's \acs{api} to obtain the context of the track, including the artist and track \acs{url}\@.
