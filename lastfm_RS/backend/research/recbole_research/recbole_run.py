@@ -1,5 +1,5 @@
 # Recbole utilities adapted from recbole.quick_start to this project
-# @Time   : 2023/07/12
+# @Time   : 2024/05/27
 # @Author : Javier Wang Zhou
 
 import argparse
@@ -69,10 +69,11 @@ def load_data_and_model(load_model, preload_dataset=None, update_config=None, us
     if isinstance(load_model, str):
         checkpoint = load(load_model)
 
-    config = checkpoint["config"]
+    config: Config = checkpoint["config"]
     if update_config:
         for key, value in update_config.items():
             config[key] = value
+    config.compatibility_settings()
 
     init_seed(config["seed"], config["reproducibility"])
     init_logger(config)
@@ -110,11 +111,12 @@ def load_data_and_model(load_model, preload_dataset=None, update_config=None, us
 def evaluate_saved_model(saved_model, update_config=None, evaluation_mode='full'):
     load_model = load(saved_model)
     eval_args = load_model["config"]["eval_args"]
+    eval_mode_dict = {'valid': evaluation_mode, 'test': evaluation_mode}
 
     if eval_args:
-        eval_args["mode"] = evaluation_mode
+        eval_args["mode"] = eval_mode_dict
     else:
-        config["eval_args"] = {"mode": evaluation_mode}
+        config["eval_args"] = {"mode": eval_mode_dict}
 
     config, model, _, _, _, test_data = load_data_and_model(load_model,
                                                             update_config=update_config,
