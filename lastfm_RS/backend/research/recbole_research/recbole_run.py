@@ -11,7 +11,7 @@ import sys
 from recbole.quick_start import run_recboles
 from recbole.utils.utils import get_model
 from logging import getLogger
-from torch import load
+from torch import load, cuda, device
 
 from recbole.config import Config
 from recbole.data import (
@@ -29,6 +29,8 @@ from recbole.utils import (
     get_flops,
 )
 
+# use CPU if CUDA unavailable
+load_device = device("cpu") if not cuda.is_available() else None
 
 def parse_model(model):
     try:
@@ -67,7 +69,7 @@ def load_data_and_model(load_model, preload_dataset=None, update_config=None, us
 
     checkpoint = load_model
     if isinstance(load_model, str):
-        checkpoint = load(load_model)
+        checkpoint = load(load_model, map_location=load_device)
 
     config: Config = checkpoint["config"]
     if update_config:
@@ -109,7 +111,7 @@ def load_data_and_model(load_model, preload_dataset=None, update_config=None, us
 
 
 def evaluate_saved_model(saved_model, update_config=None, evaluation_mode='full'):
-    load_model = load(saved_model)
+    load_model = load(saved_model, map_location=load_device)
     eval_args = load_model["config"]["eval_args"]
     eval_mode_dict = {'valid': evaluation_mode, 'test': evaluation_mode}
 
