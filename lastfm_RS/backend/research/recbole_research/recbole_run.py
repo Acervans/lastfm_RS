@@ -77,6 +77,9 @@ def load_data_and_model(load_model, preload_dataset=None, update_config=None, us
             config[key] = value
     config.compatibility_settings()
 
+    if config['data_path']:
+        config['data_path'] = config['data_path'].replace('\\', '/')
+
     if not cuda.is_available():
         config['device'] = 'cpu'
 
