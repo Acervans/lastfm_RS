@@ -1,5 +1,5 @@
 # Recbole utilities adapted from recbole.quick_start to this project
-# @Time   : 2024/05/27
+# @Time   : 2025/01/21
 # @Author : Javier Wang Zhou
 
 import argparse
@@ -75,7 +75,6 @@ def load_data_and_model(load_model, preload_dataset=None, update_config=None, us
     if update_config:
         for key, value in update_config.items():
             config[key] = value
-    config.compatibility_settings()
 
     if config['data_path']:
         config['data_path'] = config['data_path'].replace('\\', '/')
@@ -119,12 +118,11 @@ def load_data_and_model(load_model, preload_dataset=None, update_config=None, us
 def evaluate_saved_model(saved_model, update_config=None, evaluation_mode='full'):
     load_model = load(saved_model, map_location=load_device)
     eval_args = load_model["config"]["eval_args"]
-    eval_mode_dict = {'valid': evaluation_mode, 'test': evaluation_mode}
 
     if eval_args:
-        eval_args["mode"] = eval_mode_dict
+        eval_args["mode"] = evaluation_mode
     else:
-        config["eval_args"] = {"mode": eval_mode_dict}
+        config["eval_args"] = {"mode": evaluation_mode}
 
     config, model, _, _, _, test_data = load_data_and_model(load_model,
                                                             update_config=update_config,

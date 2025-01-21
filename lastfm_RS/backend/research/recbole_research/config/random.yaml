@@ -26,6 +26,7 @@ stopping_step: 2
 
 train_neg_sample_args: 
   distribution: uniform
+  sample_num: 1
 
 eval_args:
   split: {'RS': [0.8,0.1,0.1]}
